@@ -31,16 +31,17 @@ public final class GuionDocumentModel {
 }
 
 @Model
-public final class GuionElementModel {
+public final class GuionElementModel: GuionElementProtocol {
     public var elementText: String
     public var elementType: String
     public var isCentered: Bool
     public var isDualDialogue: Bool
     public var sceneNumber: String?
     public var sectionDepth: Int
-    public var summary: String?
-    public var sceneId: String? // UUID linking to GuionElement.sceneId for Scene Heading elements
+    public var sceneId: String?
 
+    // SwiftData-specific properties
+    public var summary: String?
     public var document: GuionDocumentModel?
 
     public init(elementText: String, elementType: String, isCentered: Bool = false, isDualDialogue: Bool = false, sceneNumber: String? = nil, sectionDepth: Int = 0, summary: String? = nil, sceneId: String? = nil) {
@@ -52,6 +53,20 @@ public final class GuionElementModel {
         self.sectionDepth = sectionDepth
         self.summary = summary
         self.sceneId = sceneId
+    }
+
+    /// Initialize from any GuionElementProtocol conforming type
+    public convenience init<T: GuionElementProtocol>(from element: T, summary: String? = nil) {
+        self.init(
+            elementText: element.elementText,
+            elementType: element.elementType,
+            isCentered: element.isCentered,
+            isDualDialogue: element.isDualDialogue,
+            sceneNumber: element.sceneNumber,
+            sectionDepth: element.sectionDepth,
+            summary: summary,
+            sceneId: element.sceneId
+        )
     }
 }
 

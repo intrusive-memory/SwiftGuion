@@ -26,18 +26,26 @@
 
 import Foundation
 
-public class GuionElement {
+/// Protocol defining the core properties of a screenplay element
+public protocol GuionElementProtocol {
+    var elementType: String { get set }
+    var elementText: String { get set }
+    var isCentered: Bool { get set }
+    var isDualDialogue: Bool { get set }
+    var sceneNumber: String? { get set }
+    var sectionDepth: Int { get set }
+    var sceneId: String? { get set }
+}
+
+/// Lightweight struct representing a screenplay element
+/// Used by parsers and FountainScript for in-memory representation
+public struct GuionElement: GuionElementProtocol {
     public var elementType: String
     public var elementText: String
     public var isCentered: Bool
-
-    // Type specific properties
-    public var sceneNumber: String?
     public var isDualDialogue: Bool
-    public var sectionDepth: UInt
-
-    // Unique identifier for scene elements (Scene Heading type)
-    // This UUID is used to correctly match scenes with duplicate headings
+    public var sceneNumber: String?
+    public var sectionDepth: Int
     public var sceneId: String?
 
     public init(elementType: String = "", elementText: String = "") {
@@ -50,14 +58,42 @@ public class GuionElement {
         self.sceneId = nil
     }
 
-    public convenience init(type: String, text: String) {
+    public init(type: String, text: String) {
         self.init(elementType: type, elementText: text)
+    }
+
+    /// Initialize from any GuionElementProtocol conforming type
+    public init<T: GuionElementProtocol>(from element: T) {
+        self.elementType = element.elementType
+        self.elementText = element.elementText
+        self.isCentered = element.isCentered
+        self.isDualDialogue = element.isDualDialogue
+        self.sceneNumber = element.sceneNumber
+        self.sectionDepth = element.sectionDepth
+        self.sceneId = element.sceneId
     }
 }
 
-extension GuionElement: @unchecked Sendable {}
+extension GuionElement: Sendable {}
 
 extension GuionElement: CustomStringConvertible {
+    public var description: String {
+        var typeOutput = elementType
+
+        if isCentered {
+            typeOutput += " (centered)"
+        } else if isDualDialogue {
+            typeOutput += " (dual dialogue)"
+        } else if sectionDepth > 0 {
+            typeOutput += " (\(sectionDepth))"
+        }
+
+        return "\(typeOutput): \(elementText)"
+    }
+}
+
+// MARK: - Protocol Extensions
+extension GuionElementProtocol {
     public var description: String {
         var typeOutput = elementType
 

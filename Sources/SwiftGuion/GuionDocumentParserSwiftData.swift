@@ -7,27 +7,7 @@ import Foundation
 #if canImport(SwiftData)
 import SwiftData
 
-public struct GuionElementSnapshot {
-    public let elementText: String
-    public let elementType: String
-    public let isCentered: Bool
-    public let isDualDialogue: Bool
-    public let sceneNumber: String?
-    public let sectionDepth: Int
-    public let summary: String?
-    public let sceneId: String?
-
-    public init(elementText: String, elementType: String, isCentered: Bool, isDualDialogue: Bool, sceneNumber: String?, sectionDepth: Int, summary: String? = nil, sceneId: String? = nil) {
-        self.elementText = elementText
-        self.elementType = elementType
-        self.isCentered = isCentered
-        self.isDualDialogue = isDualDialogue
-        self.sceneNumber = sceneNumber
-        self.sectionDepth = sectionDepth
-        self.summary = summary
-        self.sceneId = sceneId
-    }
-}
+// GuionElementSnapshot is now obsolete - use GuionElement directly with protocol-based conversion
 
 public struct GuionTitleEntrySnapshot {
     public let key: String
@@ -58,7 +38,7 @@ public class GuionDocumentParserSwiftData {
         }
 
         // Generate summaries for scene headings if requested
-        var elementSnapshots: [GuionElementSnapshot] = []
+        var elementsWithSummaries: [(element: GuionElement, summary: String?)] = []
 
         if generateSummaries {
             let outline = script.extractOutline()
@@ -75,29 +55,10 @@ public class GuionDocumentParserSwiftData {
                     }
                 }
 
-                elementSnapshots.append(GuionElementSnapshot(
-                    elementText: element.elementText,
-                    elementType: element.elementType,
-                    isCentered: element.isCentered,
-                    isDualDialogue: element.isDualDialogue,
-                    sceneNumber: element.sceneNumber,
-                    sectionDepth: Int(element.sectionDepth),
-                    summary: summary,
-                    sceneId: element.sceneId
-                ))
+                elementsWithSummaries.append((element, summary))
             }
         } else {
-            elementSnapshots = script.elements.map { element in
-                GuionElementSnapshot(
-                    elementText: element.elementText,
-                    elementType: element.elementType,
-                    isCentered: element.isCentered,
-                    isDualDialogue: element.isDualDialogue,
-                    sceneNumber: element.sceneNumber,
-                    sectionDepth: Int(element.sectionDepth),
-                    sceneId: element.sceneId
-                )
-            }
+            elementsWithSummaries = script.elements.map { ($0, nil) }
         }
 
         return buildModel(
@@ -105,7 +66,7 @@ public class GuionDocumentParserSwiftData {
             rawContent: script.stringFromDocument(),
             suppressSceneNumbers: script.suppressSceneNumbers,
             titlePageEntries: titlePageEntries,
-            elementSnapshots: elementSnapshots,
+            elementsWithSummaries: elementsWithSummaries,
             in: modelContext
         )
     }
@@ -138,6 +99,7 @@ public class GuionDocumentParserSwiftData {
             let parser = FDXDocumentParser()
             do {
                 let parsed = try parser.parse(data: data, filename: url.lastPathComponent)
+                let elements = parsed.elements.map { GuionElement(from: $0) }
                 return buildModel(
                     filename: parsed.filename,
                     rawContent: parsed.rawXML,
@@ -145,17 +107,7 @@ public class GuionDocumentParserSwiftData {
                     titlePageEntries: parsed.titlePageEntries.map { entry in
                         GuionTitleEntrySnapshot(key: entry.key, values: entry.values)
                     },
-                    elementSnapshots: parsed.elements.map { element in
-                        GuionElementSnapshot(
-                            elementText: element.elementText,
-                            elementType: element.elementType,
-                            isCentered: element.isCentered,
-                            isDualDialogue: element.isDualDialogue,
-                            sceneNumber: element.sceneNumber,
-                            sectionDepth: element.sectionDepth,
-                            sceneId: element.sceneId
-                        )
-                    },
+                    elementsWithSummaries: elements.map { ($0, nil) },
                     in: modelContext
                 )
             } catch {
@@ -182,19 +134,8 @@ public class GuionDocumentParserSwiftData {
         }
         script.titlePage = titlePageArray
 
-        // Convert elements
-        for elementModel in model.elements {
-            let element = GuionElement(
-                elementType: elementModel.elementType,
-                elementText: elementModel.elementText
-            )
-            element.isCentered = elementModel.isCentered
-            element.isDualDialogue = elementModel.isDualDialogue
-            element.sceneNumber = elementModel.sceneNumber
-            element.sectionDepth = UInt(elementModel.sectionDepth)
-            element.sceneId = elementModel.sceneId
-            script.elements.append(element)
-        }
+        // Convert elements using protocol-based conversion
+        script.elements = model.elements.map { GuionElement(from: $0) }
 
         return script
     }
@@ -211,7 +152,7 @@ public class GuionDocumentParserSwiftData {
         rawContent: String?,
         suppressSceneNumbers: Bool,
         titlePageEntries: [GuionTitleEntrySnapshot],
-        elementSnapshots: [GuionElementSnapshot],
+        elementsWithSummaries: [(element: GuionElement, summary: String?)],
         in modelContext: ModelContext
     ) -> GuionDocumentModel {
         let documentModel = GuionDocumentModel(
@@ -226,17 +167,9 @@ public class GuionDocumentParserSwiftData {
             documentModel.titlePage.append(titlePageEntry)
         }
 
-        for snapshot in elementSnapshots {
-            let elementModel = GuionElementModel(
-                elementText: snapshot.elementText,
-                elementType: snapshot.elementType,
-                isCentered: snapshot.isCentered,
-                isDualDialogue: snapshot.isDualDialogue,
-                sceneNumber: snapshot.sceneNumber,
-                sectionDepth: snapshot.sectionDepth,
-                summary: snapshot.summary,
-                sceneId: snapshot.sceneId
-            )
+        for (element, summary) in elementsWithSummaries {
+            // Use protocol-based conversion with summary
+            let elementModel = GuionElementModel(from: element, summary: summary)
             elementModel.document = documentModel
             documentModel.elements.append(elementModel)
         }

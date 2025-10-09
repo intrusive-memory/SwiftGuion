@@ -133,7 +133,7 @@ public class FountainParser {
         var elementsArray: [GuionElement] = []
 
         for i in 0..<elementText.count {
-            let element = GuionElement()
+            var element = GuionElement()
 
             // Convert < and > back to normal
             var cleanedText = elementText[i]
@@ -174,7 +174,7 @@ public class FountainParser {
             if element.elementType == "Section Heading" {
                 // Clean the section text, and get the section depth
                 if let depthChars = firstMatch(in: element.elementText, pattern: FountainRegexes.sectionHeaderPattern, captureGroup: 2) {
-                    element.sectionDepth = UInt(depthChars.count)
+                    element.sectionDepth = depthChars.count
                 }
                 if let sectionText = firstMatch(in: element.elementText, pattern: FountainRegexes.sectionHeaderPattern, captureGroup: 3) {
                     element.elementText = sectionText
@@ -192,13 +192,12 @@ public class FountainParser {
                 let dialogueBlockTypes: Set<String> = ["Dialogue", "Parenthetical"]
 
                 while j >= 0 {
-                    let previousElement = elementsArray[j]
-                    if previousElement.elementType == "Character" {
-                        previousElement.isDualDialogue = true
-                        previousElement.elementText = previousElement.elementText.replacingOccurrences(of: "^", with: "")
+                    if elementsArray[j].elementType == "Character" {
+                        elementsArray[j].isDualDialogue = true
+                        elementsArray[j].elementText = elementsArray[j].elementText.replacingOccurrences(of: "^", with: "")
                         break
                     }
-                    if !dialogueBlockTypes.contains(previousElement.elementType) {
+                    if !dialogueBlockTypes.contains(elementsArray[j].elementType) {
                         break
                     }
                     j -= 1

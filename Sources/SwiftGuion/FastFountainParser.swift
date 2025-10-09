@@ -157,9 +157,8 @@ public class FastFountainParser {
             if matches(string: line, pattern: "^\\s{2}$") && isInsideDialogueBlock {
                 newlinesBefore = 0
                 if let lastIndex = elements.indices.last {
-                    let previousElement = elements[lastIndex]
-                    if previousElement.elementType == "Dialogue" {
-                        previousElement.elementText = "\(previousElement.elementText)\n\(line)"
+                    if elements[lastIndex].elementType == "Dialogue" {
+                        elements[lastIndex].elementText = "\(elements[lastIndex].elementText)\n\(line)"
                     } else {
                         elements.append(GuionElement(type: "Dialogue", text: line))
                     }
@@ -255,8 +254,8 @@ public class FastFountainParser {
                     let text = String(line[markupRange.upperBound...])
 
                     if !text.isEmpty {
-                        let element = GuionElement(type: "Section Heading", text: text)
-                        element.sectionDepth = UInt(depth)
+                        var element = GuionElement(type: "Section Heading", text: text)
+                        element.sectionDepth = depth
                         elements.append(element)
                         continue
                     }
@@ -277,7 +276,7 @@ public class FastFountainParser {
                     text = String(line.dropFirst()).trimmingCharacters(in: .whitespaces)
                 }
 
-                let element = GuionElement(type: "Scene Heading", text: text)
+                var element = GuionElement(type: "Scene Heading", text: text)
                 element.sceneNumber = sceneNumber
                 element.sceneId = UUID().uuidString
                 elements.append(element)
@@ -297,7 +296,7 @@ public class FastFountainParser {
                     text = line
                 }
 
-                let element = GuionElement(type: "Scene Heading", text: text)
+                var element = GuionElement(type: "Scene Heading", text: text)
                 element.sceneNumber = sceneNumber
                 element.sceneId = UUID().uuidString
                 elements.append(element)
@@ -325,7 +324,7 @@ public class FastFountainParser {
                     var text = String(line.dropFirst()).trimmingCharacters(in: .whitespaces)
                     text = String(text.dropLast()).trimmingCharacters(in: .whitespaces)
 
-                    let element = GuionElement(type: "Action", text: text)
+                    var element = GuionElement(type: "Action", text: text)
                     element.isCentered = true
                     elements.append(element)
                     newlinesBefore = 0
@@ -346,18 +345,18 @@ public class FastFountainParser {
                     let nextLine = lines[nextIndex]
                     if !nextLine.isEmpty {
                         newlinesBefore = 0
-                        let element = GuionElement(type: "Character", text: line)
+                        var element = GuionElement(type: "Character", text: line)
 
                         if matches(string: line, pattern: "\\^\\s*$") {
                             element.isDualDialogue = true
                             element.elementText = element.elementText.replacingOccurrences(of: "\\s*\\^\\s*$", with: "", options: .regularExpression)
 
+                            // Mark previous character elements as dual dialogue
                             var foundPreviousCharacter = false
                             var idx = elements.count - 1
                             while idx >= 0 && !foundPreviousCharacter {
-                                let previousElement = elements[idx]
-                                if previousElement.elementType == "Character" {
-                                    previousElement.isDualDialogue = true
+                                if elements[idx].elementType == "Character" {
+                                    elements[idx].isDualDialogue = true
                                     foundPreviousCharacter = true
                                 }
                                 idx -= 1
@@ -378,9 +377,8 @@ public class FastFountainParser {
                     continue
                 } else {
                     if let lastIndex = elements.indices.last {
-                        let previousElement = elements[lastIndex]
-                        if previousElement.elementType == "Dialogue" {
-                            previousElement.elementText = "\(previousElement.elementText)\n\(line)"
+                        if elements[lastIndex].elementType == "Dialogue" {
+                            elements[lastIndex].elementText = "\(elements[lastIndex].elementText)\n\(line)"
                         } else {
                             elements.append(GuionElement(type: "Dialogue", text: line))
                         }
@@ -394,14 +392,13 @@ public class FastFountainParser {
             // Merge with previous action if no blank line
             if newlinesBefore == 0 && !elements.isEmpty {
                 let lastIndex = elements.count - 1
-                let previousElement = elements[lastIndex]
 
                 // Scene Heading must be surrounded by blank lines
-                if previousElement.elementType == "Scene Heading" {
-                    previousElement.elementType = "Action"
+                if elements[lastIndex].elementType == "Scene Heading" {
+                    elements[lastIndex].elementType = "Action"
                 }
 
-                previousElement.elementText = "\(previousElement.elementText)\n\(line)"
+                elements[lastIndex].elementText = "\(elements[lastIndex].elementText)\n\(line)"
                 newlinesBefore = 0
                 continue
             } else {

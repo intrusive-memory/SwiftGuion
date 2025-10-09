@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/stovak/SwiftFijos.git",
       "state" : {
-        "revision" : "c206956cb2fe59c77f2331792430b6ad28a72a0f",
-        "version" : "1.0.0"
+        "revision" : "cd3897d48eefddd27cd0fbedf066268fb59c3b38",
+        "version" : "1.0.1"
       }
     },
     {

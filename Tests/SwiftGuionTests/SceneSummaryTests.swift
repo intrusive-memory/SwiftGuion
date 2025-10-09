@@ -217,20 +217,14 @@ It's just me!
         #expect(element.elementType == "Scene Heading", "Element type should be Scene Heading")
     }
 
-    @Test("GuionElementSnapshot includes summary field")
-    func testGuionElementSnapshotSummaryField() async throws {
-        let snapshot = GuionElementSnapshot(
-            elementText: "INT. COFFEE SHOP - DAY",
-            elementType: "Scene Heading",
-            isCentered: false,
-            isDualDialogue: false,
-            sceneNumber: nil,
-            sectionDepth: 0,
-            summary: "Test summary"
-        )
+    @Test("Protocol-based conversion preserves summary")
+    func testProtocolBasedConversionSummary() async throws {
+        let element = GuionElement(elementType: "Scene Heading", elementText: "INT. COFFEE SHOP - DAY")
+        let model = GuionElementModel(from: element, summary: "Test summary")
 
-        #expect(snapshot.summary == "Test summary", "Summary should be set correctly")
-        #expect(snapshot.elementType == "Scene Heading", "Element type should be Scene Heading")
+        #expect(model.summary == "Test summary", "Summary should be set correctly")
+        #expect(model.elementType == "Scene Heading", "Element type should be Scene Heading")
+        #expect(model.elementText == "INT. COFFEE SHOP - DAY", "Element text should be preserved")
     }
     #endif
 }

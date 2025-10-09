@@ -8,14 +8,14 @@ import Foundation
 import FoundationXML
 #endif
 
-public struct FDXParsedElement {
-    public let elementText: String
-    public let elementType: String
-    public let isCentered: Bool
-    public let isDualDialogue: Bool
-    public let sceneNumber: String?
-    public let sectionDepth: Int
-    public let sceneId: String?
+public struct FDXParsedElement: GuionElementProtocol {
+    public var elementText: String
+    public var elementType: String
+    public var isCentered: Bool
+    public var isDualDialogue: Bool
+    public var sceneNumber: String?
+    public var sectionDepth: Int
+    public var sceneId: String?
 
     public init(elementText: String, elementType: String, isCentered: Bool, isDualDialogue: Bool, sceneNumber: String?, sectionDepth: Int, sceneId: String? = nil) {
         self.elementText = elementText

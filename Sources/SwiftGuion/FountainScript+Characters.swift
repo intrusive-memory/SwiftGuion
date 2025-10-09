@@ -110,9 +110,9 @@ extension FountainScript {
         return cleaned.uppercased()
     }
 
-    /// Find the most recent character that spoke before the given element
-    private func findMostRecentCharacter(before element: GuionElement) -> String? {
-        guard let currentIndex = elements.firstIndex(where: { $0 === element }) else {
+    /// Find the most recent character that spoke before the given index
+    private func findMostRecentCharacter(beforeIndex currentIndex: Int) -> String? {
+        guard currentIndex > 0 && currentIndex <= elements.count else {
             return nil
         }
 

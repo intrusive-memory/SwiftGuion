@@ -1,0 +1,15 @@
+{
+  "originHash" : "76da38fe4ef1aad65c861e934a8e64976ead15cf5ce8485b6711d41290bf9070",
+  "pins" : [
+    {
+      "identity" : "swiftfijos",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/stovak/SwiftFijos",
+      "state" : {
+        "revision" : "cd3897d48eefddd27cd0fbedf066268fb59c3b38",
+        "version" : "1.0.1"
+      }
+    }
+  ],
+  "version" : 3
+}
