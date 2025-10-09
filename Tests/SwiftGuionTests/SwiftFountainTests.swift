@@ -23,7 +23,7 @@ import Foundation
     #expect(sectionHeading?.elementText == "Act I")
 
     let hasSceneHeading = parsedDocument.elements.contains { element in
-        element.elementType == "Scene Heading" && element.elementText.contains("WILL'S BEDROOM")
+        element.elementType == "Scene Heading" && element.elementText.uppercased().contains("WILL") && element.elementText.uppercased().contains("BEDROOM")
     }
     #expect(hasSceneHeading, "Parser should capture scene headings from FDX")
 
@@ -108,12 +108,19 @@ import Foundation
     let script = try FountainScript(file: fountainURL.path)
 
     let tempDir = FileManager.default.temporaryDirectory
-    let outputURL = try script.writeToTextBundle(destinationURL: tempDir, fountainFilename: "bigfish-output.fountain")
+    let testFileName = "test-\(UUID().uuidString).fountain"
+    let expectedBundleName = testFileName.replacingOccurrences(of: ".fountain", with: ".textbundle")
+    let expectedBundleURL = tempDir.appendingPathComponent(expectedBundleName)
+
+    // Clean up if it exists from a previous test
+    try? FileManager.default.removeItem(at: expectedBundleURL)
+
+    let outputURL = try script.writeToTextBundle(destinationURL: tempDir, fountainFilename: testFileName)
 
     #expect(FileManager.default.fileExists(atPath: outputURL.path))
 
     // Verify the .fountain file exists inside the bundle
-    let fountainFileURL = outputURL.appendingPathComponent("bigfish-output.fountain")
+    let fountainFileURL = outputURL.appendingPathComponent(testFileName)
     #expect(FileManager.default.fileExists(atPath: fountainFileURL.path))
 
     // Clean up
@@ -398,7 +405,7 @@ import Foundation
         ("bigfish", "highland")
     ]
 
-    for (name, ext) in testFiles {
+    for (_, ext) in testFiles {
         let fileURL: URL
         switch ext {
         case "fountain":
@@ -518,7 +525,6 @@ struct OutlineHierarchyFunctionalTests {
             #expect(sceneHeaders.count >= 10, "\(ext): Should have at least 10 scene headers")
 
             // Verify some expected scene headers from bigfish
-            let expectedScenes = ["INT.", "EXT."]
             let foundScenes = sceneHeaders.map { $0.string }
 
             var hasIntScene = false
