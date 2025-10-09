@@ -1,0 +1,583 @@
+import Testing
+import Foundation
+@testable import SwiftGuion
+
+@Test func example() async throws {
+    // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+}
+
+@Test func testFDXParserExtractsGuionElements() async throws {
+    let fdxURL = try FixtureManager.getBigFishFDX()
+    let fountainURL = try FixtureManager.getBigFishFountain()
+
+    let data = try Data(contentsOf: fdxURL)
+    let parser = FDXDocumentParser()
+    let parsedDocument = try parser.parse(data: data, filename: fdxURL.lastPathComponent)
+
+    #expect(!parsedDocument.elements.isEmpty, "FDX parser should produce screenplay elements")
+    #expect(parsedDocument.elements.first?.elementType == "Action")
+    #expect(parsedDocument.elements.first?.elementText.hasPrefix("This is a Southern story") == true)
+
+    let sectionHeading = parsedDocument.elements.dropFirst().first
+    #expect(sectionHeading?.elementType == "Section Heading")
+    #expect(sectionHeading?.elementText == "Act I")
+
+    let hasSceneHeading = parsedDocument.elements.contains { element in
+        element.elementType == "Scene Heading" && element.elementText.contains("WILL'S BEDROOM")
+    }
+    #expect(hasSceneHeading, "Parser should capture scene headings from FDX")
+
+    let fountainScript = try FountainScript(file: fountainURL.path)
+    let fountainSceneHeading = fountainScript.elements.first { $0.elementType == "Scene Heading" }
+    let parsedSceneHeading = parsedDocument.elements.first { $0.elementType == "Scene Heading" }
+    #expect(fountainSceneHeading?.elementText == parsedSceneHeading?.elementText, "First scene heading should match Fountain version")
+
+    let titleContainsBigFish = parsedDocument.titlePageEntries.first?.values.contains { $0.contains("Big Fish") } ?? false
+    #expect(titleContainsBigFish, "Title page should capture screenplay title")
+
+    #expect(parsedDocument.rawXML.contains("<FinalDraft"), "Raw XML should include Final Draft root element")
+}
+
+@Test func testOverBlackSceneHeading() async throws {
+    // Test that scene headings are properly recognized
+    let fountainURL = try FixtureManager.getBigFishFountain()
+    let script = try FountainScript(file: fountainURL.path)
+
+    // Check that we have scene headings
+    let sceneHeadings = script.elements.filter { $0.elementType == "Scene Heading" }
+    #expect(!sceneHeadings.isEmpty, "Should have scene headings")
+}
+
+@Test func testGetContentURL() async throws {
+    let script = FountainScript()
+    let highlandURL = try FixtureManager.getBigFishHighland()
+
+    // Extract highland to temp directory
+    let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+    defer {
+        try? FileManager.default.removeItem(at: tempDir)
+    }
+
+    try FileManager.default.unzipItem(at: highlandURL, to: tempDir)
+    let contents = try FileManager.default.contentsOfDirectory(at: tempDir, includingPropertiesForKeys: nil)
+    guard let textBundleURL = contents.first(where: { $0.pathExtension == "textbundle" }) else {
+        throw NSError(domain: "TestError", code: 1, userInfo: [NSLocalizedDescriptionKey: "No textbundle found in highland file"])
+    }
+
+    let contentURL = try script.getContentURL(from: textBundleURL)
+    #expect(FileManager.default.fileExists(atPath: contentURL.path), "Content file should exist")
+
+    let content = try String(contentsOf: contentURL, encoding: .utf8)
+    #expect(!content.isEmpty, "Content should not be empty")
+}
+
+@Test func testGetContent() async throws {
+    let script = FountainScript()
+    let fountainURL = try FixtureManager.getBigFishFountain()
+
+    let content = try script.getContent(from: fountainURL)
+    #expect(!content.isEmpty, "Content should not be empty")
+    #expect(content.contains("FADE IN:") || content.contains("INT.") || content.contains("EXT."),
+            "Content should contain screenplay elements")
+}
+
+@Test func testLoadFromTextBundle() async throws {
+    let highlandURL = try FixtureManager.getBigFishHighland()
+
+    // Extract highland to temp directory to access the textbundle
+    let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+    defer {
+        try? FileManager.default.removeItem(at: tempDir)
+    }
+
+    try FileManager.default.unzipItem(at: highlandURL, to: tempDir)
+    let contents = try FileManager.default.contentsOfDirectory(at: tempDir, includingPropertiesForKeys: nil)
+    guard let testBundleURL = contents.first(where: { $0.pathExtension == "textbundle" }) else {
+        throw NSError(domain: "TestError", code: 1, userInfo: [NSLocalizedDescriptionKey: "No textbundle found in highland file"])
+    }
+
+    let script = try FountainScript(textBundleURL: testBundleURL)
+
+    #expect(!script.elements.isEmpty)
+}
+
+@Test func testWriteToTextBundle() async throws {
+    let fountainURL = try FixtureManager.getBigFishFountain()
+    let script = try FountainScript(file: fountainURL.path)
+
+    let tempDir = FileManager.default.temporaryDirectory
+    let outputURL = try script.writeToTextBundle(destinationURL: tempDir, fountainFilename: "bigfish-output.fountain")
+
+    #expect(FileManager.default.fileExists(atPath: outputURL.path))
+
+    // Verify the .fountain file exists inside the bundle
+    let fountainFileURL = outputURL.appendingPathComponent("bigfish-output.fountain")
+    #expect(FileManager.default.fileExists(atPath: fountainFileURL.path))
+
+    // Clean up
+    try? FileManager.default.removeItem(at: outputURL)
+}
+
+@Test func testExtractCharacters() async throws {
+    let fountainURL = try FixtureManager.getBigFishFountain()
+    let script = try FountainScript(file: fountainURL.path)
+
+    let characters = script.extractCharacters()
+
+    // Verify some known characters from Big Fish exist
+    #expect(characters["EDWARD"] != nil)
+    #expect(characters["WILL"] != nil)
+
+    // Verify structure is correct for all characters
+    for (name, info) in characters {
+        #expect(!name.isEmpty, "Character name should not be empty")
+        #expect(info.counts.lineCount > 0, "\(name) should have at least one line")
+        #expect(info.counts.wordCount > 0, "\(name) should have words")
+        #expect(info.gender.unspecified != nil, "\(name) should have gender field")
+    }
+}
+
+@Test func testWriteCharactersJSON() async throws {
+    let fountainURL = try FixtureManager.getBigFishFountain()
+    let script = try FountainScript(file: fountainURL.path)
+
+    let tempDir = FileManager.default.temporaryDirectory
+    let outputPath = tempDir.appendingPathComponent("bigfish-characters.json")
+
+    try script.writeCharactersJSON(to: outputPath)
+
+    #expect(FileManager.default.fileExists(atPath: outputPath.path))
+
+    // Verify the JSON can be read back
+    let data = try Data(contentsOf: outputPath)
+    let decoder = JSONDecoder()
+    let characters = try decoder.decode(CharacterList.self, from: data)
+
+    #expect(!characters.isEmpty, "Should have extracted characters")
+
+    // Verify the structure is correct by checking the decoded characters
+    #expect(characters.values.allSatisfy { $0.gender.unspecified != nil }, "All characters should have gender.unspecified")
+    #expect(characters.values.allSatisfy { !$0.scenes.isEmpty }, "All characters should have scenes")
+
+    // Clean up temp file
+    try? FileManager.default.removeItem(at: outputPath)
+}
+
+@Test func testExtractOutline() async throws {
+    let fountainURL = try FixtureManager.getBigFishFountain()
+    let script = try FountainScript(file: fountainURL.path)
+    script.filename = "bigfish.fountain"
+
+    let outline = script.extractOutline()
+
+    // Verify we have outline elements
+    #expect(!outline.isEmpty, "Outline should not be empty")
+
+    // Verify we have different types
+    let types = Set(outline.map { $0.type })
+    #expect(types.contains("sectionHeader"), "Should have section headers")
+    #expect(types.contains("sceneHeader"), "Should have scene headers")
+
+    // Verify structure
+    let sectionHeaders = outline.filter { $0.type == "sectionHeader" }
+    #expect(!sectionHeaders.isEmpty, "Should have section headers")
+
+    // Verify first element has expected properties
+    if let firstElement = outline.first {
+        #expect(firstElement.type == "sectionHeader", "First element should be section header")
+        #expect(firstElement.level >= 1, "First element should be level 1 or higher")
+    }
+
+    // Verify indexes are sequential
+    for (i, element) in outline.enumerated() {
+        #expect(element.index == i, "Index should match position in array")
+    }
+
+    // TEST API COMPATIBILITY: Verify all outline elements have elementType "outline"
+    for element in outline {
+        #expect(element.elementType == "outline", "All outline elements should have elementType 'outline' for API compatibility")
+    }
+}
+
+@Test func testWriteOutlineJSON() async throws {
+    let fountainURL = try FixtureManager.getBigFishFountain()
+    let script = try FountainScript(file: fountainURL.path)
+
+    let tempDir = FileManager.default.temporaryDirectory
+    let outputPath = tempDir.appendingPathComponent("bigfish-outline.json")
+
+    try script.writeOutlineJSON(to: outputPath)
+
+    #expect(FileManager.default.fileExists(atPath: outputPath.path))
+
+    // Verify the JSON can be read back
+    let data = try Data(contentsOf: outputPath)
+    let decoder = JSONDecoder()
+    let outline = try decoder.decode(OutlineList.self, from: data)
+
+    #expect(!outline.isEmpty, "Should have extracted outline elements")
+
+    // Verify structure
+    for element in outline {
+        #expect(!element.id.isEmpty, "Each element should have an ID")
+        #expect(element.range.count == 2, "Range should have 2 elements")
+        #expect(!element.type.isEmpty, "Each element should have a type")
+    }
+
+    // Clean up temp file
+    try? FileManager.default.removeItem(at: outputPath)
+}
+
+@Test func testWriteToTextBundleWithResources() async throws {
+    let fountainURL = try FixtureManager.getBigFishFountain()
+    let script = try FountainScript(file: fountainURL.path)
+
+    let tempDir = FileManager.default.temporaryDirectory
+    let outputURL = try script.writeToTextBundleWithResources(
+        destinationURL: tempDir,
+        name: "bigfish-output",
+        includeResources: true
+    )
+
+    // Verify the TextBundle was created
+    #expect(FileManager.default.fileExists(atPath: outputURL.path))
+
+    // Verify the .fountain file exists
+    let fountainFileURL = outputURL.appendingPathComponent("bigfish-output.fountain")
+    #expect(FileManager.default.fileExists(atPath: fountainFileURL.path))
+
+    // Verify resources directory exists
+    let resourcesDir = outputURL.appendingPathComponent("resources")
+    #expect(FileManager.default.fileExists(atPath: resourcesDir.path))
+
+    // Verify characters.json exists and is valid
+    let charactersURL = resourcesDir.appendingPathComponent("characters.json")
+    #expect(FileManager.default.fileExists(atPath: charactersURL.path))
+
+    let charactersData = try Data(contentsOf: charactersURL)
+    let characters = try JSONDecoder().decode(CharacterList.self, from: charactersData)
+    #expect(!characters.isEmpty, "Characters JSON should have content")
+
+    // Verify outline.json exists and is valid
+    let outlineURL = resourcesDir.appendingPathComponent("outline.json")
+    #expect(FileManager.default.fileExists(atPath: outlineURL.path))
+
+    let outlineData = try Data(contentsOf: outlineURL)
+    let outline = try JSONDecoder().decode(OutlineList.self, from: outlineData)
+    #expect(!outline.isEmpty, "Outline JSON should have content")
+
+    // Clean up
+    try? FileManager.default.removeItem(at: outputURL)
+}
+
+@Test func testLoadFromHighland() async throws {
+    let highlandURL = try FixtureManager.getBigFishHighland()
+
+    let script = try FountainScript(highlandURL: highlandURL)
+
+    #expect(!script.elements.isEmpty, "Highland file should contain elements")
+    // Highland files may use text.md instead of .fountain extension
+    #expect(script.filename != nil, "Should extract filename")
+}
+
+@Test func testWriteToHighland() async throws {
+    let fountainURL = try FixtureManager.getBigFishFountain()
+    let script = try FountainScript(file: fountainURL.path)
+
+    let tempDir = FileManager.default.temporaryDirectory
+    let highlandURL = try script.writeToHighland(
+        destinationURL: tempDir,
+        name: "bigfish-output",
+        includeResources: true
+    )
+
+    // Verify the Highland file was created
+    #expect(FileManager.default.fileExists(atPath: highlandURL.path))
+    #expect(highlandURL.pathExtension == "highland")
+
+    // Verify we can load it back
+    let loadedScript = try FountainScript(highlandURL: highlandURL)
+    #expect(!loadedScript.elements.isEmpty, "Loaded script should have elements")
+
+    // Clean up
+    try? FileManager.default.removeItem(at: highlandURL)
+}
+
+@Test func testHighlandRoundTrip() async throws {
+    let fountainURL = try FixtureManager.getBigFishFountain()
+    let originalScript = try FountainScript(file: fountainURL.path)
+
+    let tempDir = FileManager.default.temporaryDirectory
+
+    // Write to Highland with resources
+    let highlandURL = try originalScript.writeToHighland(
+        destinationURL: tempDir,
+        name: "roundtrip-bigfish",
+        includeResources: true
+    )
+
+    // Load it back
+    let loadedScript = try FountainScript(highlandURL: highlandURL)
+
+    // Verify the content is reasonable (element count may differ slightly due to formatting)
+    #expect(loadedScript.elements.count > 0, "Loaded script should have elements")
+    #expect(loadedScript.titlePage.count == originalScript.titlePage.count, "Title page should match")
+
+    // Verify resources can be extracted
+    let characters = loadedScript.extractCharacters()
+    #expect(!characters.isEmpty, "Should be able to extract characters from loaded script")
+
+    let outline = loadedScript.extractOutline()
+    #expect(!outline.isEmpty, "Should be able to extract outline from loaded script")
+
+    // Clean up
+    try? FileManager.default.removeItem(at: highlandURL)
+}
+
+// MARK: - Functional Tests
+
+@Test func testUnifiedGetContentUrl() async throws {
+    let script = FountainScript()
+
+    // Test 1: .fountain file - should return the URL as-is
+    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainContentUrl = try script.getContentUrl(from: fountainURL)
+    #expect(fountainContentUrl.path == fountainURL.path, ".fountain file should return same URL")
+
+    // Test 2: .highland file - should return URL to content file inside the textbundle
+    let highlandURL = try FixtureManager.getBigFishHighland()
+    let highlandContentUrl = try script.getContentUrl(from: highlandURL)
+    #expect(highlandContentUrl.pathExtension.lowercased() == "fountain" ||
+            highlandContentUrl.pathExtension.lowercased() == "md",
+            "Highland should return .fountain or .md file URL")
+}
+
+@Test func testUnifiedGetContent() async throws {
+    let script = FountainScript()
+
+    // Test 1: .fountain file - should return complete content
+    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainContent = try script.getContent(from: fountainURL)
+    #expect(!fountainContent.isEmpty, "Fountain content should not be empty")
+    #expect(fountainContent.contains("INT.") || fountainContent.contains("EXT."), "Should contain scene headings")
+
+    // Test 2: .highland file - should return complete content
+    let highlandURL = try FixtureManager.getBigFishHighland()
+    let highlandContent = try script.getContent(from: highlandURL)
+    #expect(!highlandContent.isEmpty, "Highland content should not be empty")
+}
+
+@Test func testGetGuionElements() async throws {
+    // Test 1: Script loaded from file should have elements
+    let fountainURL = try FixtureManager.getBigFishFountain()
+    let script = try FountainScript(file: fountainURL.path)
+
+    let elements = try script.getGuionElements()
+    #expect(!elements.isEmpty, "Should have screenplay elements")
+    #expect(elements.contains { $0.elementType == "Scene Heading" }, "Should have scene headings")
+
+    // Test 2: Empty script should throw error
+    let emptyScript = FountainScript()
+    do {
+        _ = try emptyScript.getGuionElements()
+        #expect(Bool(false), "Should throw error for empty script")
+    } catch FountainScriptError.noContentToParse {
+        // Expected error
+        #expect(Bool(true))
+    } catch {
+        throw error
+    }
+}
+
+@Test func testFirstDialogue() async throws {
+    // Test with Big Fish fixture files
+    let testFiles: [(String, String)] = [
+        ("bigfish", "fountain"),
+        ("bigfish", "highland")
+    ]
+
+    for (name, ext) in testFiles {
+        let fileURL: URL
+        switch ext {
+        case "fountain":
+            fileURL = try FixtureManager.getBigFishFountain()
+        case "highland":
+            fileURL = try FixtureManager.getBigFishHighland()
+        default:
+            continue
+        }
+
+        let script: FountainScript
+        switch ext {
+        case "fountain":
+            script = try FountainScript(file: fileURL.path)
+        case "highland":
+            script = try FountainScript(highlandURL: fileURL)
+        default:
+            continue
+        }
+
+        // Test EDWARD's first line (from the bigfish.fountain fixture)
+        let edwardFirstLine = script.firstDialogue(for: "EDWARD")
+        #expect(edwardFirstLine != nil, "\(ext): EDWARD should have dialogue")
+
+        // Test WILL's first line
+        let willFirstLine = script.firstDialogue(for: "WILL")
+        #expect(willFirstLine != nil, "\(ext): WILL should have dialogue")
+
+        // Test case insensitivity
+        let edwardLowerCase = script.firstDialogue(for: "edward")
+        #expect(edwardLowerCase == edwardFirstLine,
+                "\(ext): Should be case insensitive")
+
+        // Test non-existent character
+        let nonExistentCharacter = script.firstDialogue(for: "NONEXISTENT")
+        #expect(nonExistentCharacter == nil,
+                "\(ext): Should return nil for non-existent character")
+    }
+}
+
+@Suite("Outline Hierarchy Functional Tests")
+struct OutlineHierarchyFunctionalTests {
+
+    @Test("Functional test: Outline hierarchy across all fixture files")
+    func testOutlineHierarchyAcrossFixtureFiles() async throws {
+        let testFiles: [(name: String, ext: String)] = [
+            ("bigfish", "fountain"),
+            ("bigfish", "highland")
+        ]
+        
+        for (name, ext) in testFiles {
+            let fileURL: URL
+            switch ext {
+            case "fountain":
+                fileURL = try FixtureManager.getBigFishFountain()
+            case "highland":
+                fileURL = try FixtureManager.getBigFishHighland()
+            default:
+                continue
+            }
+
+            // Load script using appropriate method
+            let script: FountainScript
+            switch ext {
+            case "fountain":
+                script = try FountainScript(file: fileURL.path)
+            case "highland":
+                script = try FountainScript(highlandURL: fileURL)
+            default:
+                continue
+            }
+            script.filename = "\(name).fountain"
+            
+            // Extract outline and tree for hierarchical analysis
+            let outline = script.extractOutline()
+            let tree = script.extractOutlineTree()
+            
+            print("Testing \(name).\(ext) - Outline has \(outline.count) elements")
+            
+            // VERIFY OVERALL STRUCTURE
+            #expect(!outline.isEmpty, "\(ext): Should have outline elements")
+            #expect(tree.root != nil, "\(ext): Tree should have a root")
+            
+            // VERIFY LEVEL 1 (MAIN TITLE)
+            let level1Elements = outline.filter { $0.level == 1 }
+            #expect(level1Elements.count >= 1, "\(ext): Should have at least 1 level 1 element")
+
+            if let mainTitle = level1Elements.first {
+                #expect(mainTitle.parentId == nil, "\(ext): Main title should have no parent")
+            }
+
+            // VERIFY SECTIONS
+            let sectionHeaders = outline.filter { $0.type == "sectionHeader" }
+            let endMarkers = outline.filter { $0.isEndMarker }
+
+            #expect(!sectionHeaders.isEmpty, "\(ext): Should have section headers")
+            
+            // Verify sections have proper parent relationships
+            if let mainTitle = level1Elements.first {
+                for section in sectionHeaders where section.level >= 2 {
+                    if section.parentId != nil {
+                        #expect(section.parentId == mainTitle.id || outline.contains { $0.id == section.parentId },
+                                "\(ext): Section should have valid parent")
+                    }
+                }
+            }
+            
+            // Verify END markers if they exist
+            for endMarker in endMarkers {
+                #expect(endMarker.isEndMarker, "\(ext): END marker should be identified as end marker")
+                #expect(endMarker.childIds.isEmpty, "\(ext): END markers should not have children")
+            }
+
+            // VERIFY SCENE HEADERS
+            let sceneHeaders = outline.filter { $0.type == "sceneHeader" }
+
+            #expect(sceneHeaders.count >= 10, "\(ext): Should have at least 10 scene headers")
+
+            // Verify some expected scene headers from bigfish
+            let expectedScenes = ["INT.", "EXT."]
+            let foundScenes = sceneHeaders.map { $0.string }
+
+            var hasIntScene = false
+            var hasExtScene = false
+            for scene in foundScenes {
+                if scene.contains("INT.") { hasIntScene = true }
+                if scene.contains("EXT.") { hasExtScene = true }
+            }
+            #expect(hasIntScene, "\(ext): Should contain INT. scenes")
+            #expect(hasExtScene, "\(ext): Should contain EXT. scenes")
+            
+            // VERIFY TREE STRUCTURE
+            if let rootNode = tree.root {
+                if let mainTitle = level1Elements.first {
+                    #expect(rootNode.element.id == mainTitle.id, "\(ext): Tree root should be main title")
+                }
+                #expect(rootNode.parent == nil, "\(ext): Root should have no parent")
+                #expect(rootNode.depth == 0, "\(ext): Root depth should be 0")
+                #expect(rootNode.hasChildren, "\(ext): Root should have children")
+
+                // Verify tree structure matches outline relationships
+                let treeNodeCount = tree.allNodes.count
+                let nonEndMarkerElements = outline.filter { !$0.isEndMarker && $0.level != -1 } // Exclude END markers and blank
+                #expect(treeNodeCount == nonEndMarkerElements.count,
+                        "\(ext): Tree should contain all non-end-marker elements (expected: \(nonEndMarkerElements.count), got: \(treeNodeCount))")
+            }
+            
+            // VERIFY PARENT/CHILD METHODS WORK CORRECTLY
+            for element in outline {
+                // Test parent() method
+                if let parentId = element.parentId {
+                    let parent = element.parent(from: outline)
+                    #expect(parent?.id == parentId, "\(ext): parent() method should return correct parent")
+                } else {
+                    let parent = element.parent(from: outline)
+                    #expect(parent == nil, "\(ext): parent() should return nil for elements without parent")
+                }
+                
+                // Test children() method
+                let children = element.children(from: outline)
+                #expect(children.count == element.childIds.count, "\(ext): children() count should match childIds count")
+                
+                for child in children {
+                    #expect(element.childIds.contains(child.id), "\(ext): children() should return elements in childIds")
+                    #expect(child.parentId == element.id, "\(ext): Child's parentId should match element id")
+                }
+                
+                // Test descendants() method
+                let descendants = element.descendants(from: outline)
+                let directChildren = element.children(from: outline)
+                #expect(descendants.count >= directChildren.count, "\(ext): descendants should include at least direct children")
+            }
+            
+            // VERIFY API COMPATIBILITY
+            for element in outline {
+                #expect(element.elementType == "outline", "\(ext): All elements should have elementType 'outline'")
+            }
+            
+            print("✅ \(name).\(ext) hierarchy validation complete")
+        }
+    }
+}
