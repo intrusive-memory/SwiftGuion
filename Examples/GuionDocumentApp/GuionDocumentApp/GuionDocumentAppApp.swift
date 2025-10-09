@@ -8,36 +8,60 @@
 import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
+import SwiftGuion
 
 @main
 struct GuionDocumentAppApp: App {
-    var body: some Scene {
-        DocumentGroup(editing: .itemDocument, migrationPlan: GuionDocumentAppMigrationPlan.self) {
-            ContentView()
+    var sharedModelContainer: ModelContainer = {
+        let schema = Schema([
+            GuionDocumentModel.self,
+            GuionElementModel.self,
+            TitlePageEntryModel.self,
+        ])
+        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+
+        do {
+            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+        } catch {
+            fatalError("Could not create ModelContainer: \(error)")
         }
+    }()
+
+    var body: some Scene {
+        DocumentGroup(newDocument: GuionDocumentConfiguration()) { file in
+            ContentView(configuration: file.$document)
+                .modelContainer(sharedModelContainer)
+        }
+
+        #if os(macOS)
+        // Auxiliary windows can be opened via menu commands
+        WindowGroup(id: "locations", for: String.self) { $documentID in
+            LocationsWindowView(documentID: documentID)
+                .modelContainer(sharedModelContainer)
+        }
+
+        WindowGroup(id: "characters", for: String.self) { $documentID in
+            CharactersWindowView(documentID: documentID)
+                .modelContainer(sharedModelContainer)
+        }
+        #endif
     }
 }
 
 extension UTType {
-    static var itemDocument: UTType {
-        UTType(importedAs: "com.example.item-document")
+    static var guionDocument: UTType {
+        UTType(importedAs: "com.swiftguion.screenplay")
     }
-}
 
-struct GuionDocumentAppMigrationPlan: SchemaMigrationPlan {
-    static var schemas: [VersionedSchema.Type] = [
-        GuionDocumentAppVersionedSchema.self,
-    ]
+    static var fdxDocument: UTType {
+        UTType(importedAs: "com.finaldraft.fdx")
+    }
 
-    static var stages: [MigrationStage] = [
-        // Stages of migration between VersionedSchema, if required.
-    ]
-}
+    static var fountainDocument: UTType {
+        UTType(importedAs: "com.fountain")
+    }
 
-struct GuionDocumentAppVersionedSchema: VersionedSchema {
-    static var versionIdentifier = Schema.Version(1, 0, 0)
-
-    static var models: [any PersistentModel.Type] = [
-        Item.self,
-    ]
+    static var highlandDocument: UTType {
+        UTType(importedAs: "com.highland")
+    }
 }

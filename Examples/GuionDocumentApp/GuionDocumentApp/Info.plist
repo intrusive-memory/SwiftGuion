@@ -11,10 +11,13 @@
 			<string>Default</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>com.example.item-document</string>
+				<string>com.swiftguion.screenplay</string>
+				<string>com.fountain</string>
+				<string>com.finaldraft.fdx</string>
+				<string>com.highland</string>
 			</array>
 			<key>NSUbiquitousDocumentUserActivityType</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER).exampledocument</string>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER).screenplay</string>
 		</dict>
 	</array>
 	<key>UTImportedTypeDeclarations</key>
@@ -22,17 +25,68 @@
 		<dict>
 			<key>UTTypeConformsTo</key>
 			<array>
-				<string>com.apple.package</string>
+				<string>public.data</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>Example Document</string>
+			<string>Guion Screenplay Document</string>
 			<key>UTTypeIdentifier</key>
-			<string>com.example.item-document</string>
+			<string>com.swiftguion.screenplay</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
 				<array>
-					<string>exampledocument</string>
+					<string>guion</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.plain-text</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Fountain Screenplay</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.fountain</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>fountain</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.xml</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Final Draft Document</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.finaldraft.fdx</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>fdx</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Highland Document</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.highland</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>highland</string>
 				</array>
 			</dict>
 		</dict>

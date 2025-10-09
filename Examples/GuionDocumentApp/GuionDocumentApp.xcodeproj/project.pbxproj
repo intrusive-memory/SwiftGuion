@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D6451B222E98085200D5BD0F /* SwiftGuion in Frameworks */ = {isa = PBXBuildFile; productRef = D6451B212E98085200D5BD0F /* SwiftGuion */; };
+		D63C5A4B2E9826FE00DC623E /* SwiftGuion in Frameworks */ = {isa = PBXBuildFile; productRef = D63C5A4A2E9826FE00DC623E /* SwiftGuion */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -69,7 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D6451B222E98085200D5BD0F /* SwiftGuion in Frameworks */,
+				D63C5A4B2E9826FE00DC623E /* SwiftGuion in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -130,7 +130,7 @@
 			);
 			name = GuionDocumentApp;
 			packageProductDependencies = (
-				D6451B212E98085200D5BD0F /* SwiftGuion */,
+				D63C5A4A2E9826FE00DC623E /* SwiftGuion */,
 			);
 			productName = GuionDocumentApp;
 			productReference = D6B10A6B2E97F69400CD0A05 /* GuionDocumentApp.app */;
@@ -216,7 +216,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				D6A3930E2E97F74E00838412 /* XCRemoteSwiftPackageReference "SwiftFijos" */,
-				D6451B202E98085200D5BD0F /* XCRemoteSwiftPackageReference "SwiftGuion" */,
+				D63C5A492E9826FE00DC623E /* XCLocalSwiftPackageReference "../../../SwiftGuion" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D6B10A6C2E97F69400CD0A05 /* Products */;
@@ -645,15 +645,14 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		D6451B202E98085200D5BD0F /* XCRemoteSwiftPackageReference "SwiftGuion" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/stovak/SwiftGuion";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.1;
-			};
+/* Begin XCLocalSwiftPackageReference section */
+		D63C5A492E9826FE00DC623E /* XCLocalSwiftPackageReference "../../../SwiftGuion" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../../SwiftGuion;
 		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
 		D6A3930E2E97F74E00838412 /* XCRemoteSwiftPackageReference "SwiftFijos" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/stovak/SwiftFijos";
@@ -665,9 +664,8 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		D6451B212E98085200D5BD0F /* SwiftGuion */ = {
+		D63C5A4A2E9826FE00DC623E /* SwiftGuion */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = D6451B202E98085200D5BD0F /* XCRemoteSwiftPackageReference "SwiftGuion" */;
 			productName = SwiftGuion;
 		};
 /* End XCSwiftPackageProductDependency section */

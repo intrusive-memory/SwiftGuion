@@ -1,5 +1,5 @@
 {
-  "originHash" : "8c02a469cf895cb379d921030f8634f9fb680d38e78fef064efc190d58eadc4f",
+  "originHash" : "701222df0dad3b3833747dd94bd158932cf07133eedd6ca22b8d360ae2f77827",
   "pins" : [
     {
       "identity" : "swiftfijos",
@@ -7,15 +7,6 @@
       "location" : "https://github.com/stovak/SwiftFijos",
       "state" : {
         "revision" : "cd3897d48eefddd27cd0fbedf066268fb59c3b38",
-        "version" : "1.0.1"
-      }
-    },
-    {
-      "identity" : "swiftguion",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/stovak/SwiftGuion",
-      "state" : {
-        "revision" : "7de4a76f989f3bd24747a43e187b04dc03da90c3",
         "version" : "1.0.1"
       }
     },

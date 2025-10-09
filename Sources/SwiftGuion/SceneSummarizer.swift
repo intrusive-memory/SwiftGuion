@@ -168,6 +168,7 @@ public class SceneSummarizer {
     ///   - script: The FountainScript containing the scene
     ///   - outline: The complete outline (optional)
     /// - Returns: A summary of the scene
+    @MainActor
     public static func summarizeScene(_ scene: OutlineElement, from script: FountainScript, outline: OutlineList? = nil) async -> String? {
         guard scene.type == "sceneHeader" else { return nil }
 

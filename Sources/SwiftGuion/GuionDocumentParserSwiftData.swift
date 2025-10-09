@@ -32,6 +32,7 @@ public class GuionDocumentParserSwiftData {
     ///   - modelContext: The ModelContext to use
     ///   - generateSummaries: Whether to generate AI summaries for scene headings (default: false)
     /// - Returns: The created GuionDocumentModel
+    @MainActor
     public static func parse(script: FountainScript, in modelContext: ModelContext, generateSummaries: Bool = false) async -> GuionDocumentModel {
         let titlePageEntries = script.titlePage.flatMap { dictionary in
             dictionary.map { GuionTitleEntrySnapshot(key: $0.key, values: $0.value) }
@@ -78,6 +79,7 @@ public class GuionDocumentParserSwiftData {
     ///   - generateSummaries: Whether to generate AI summaries for scene headings (default: false)
     /// - Returns: The created GuionDocumentModel
     /// - Throws: Parsing errors
+    @MainActor
     public static func loadAndParse(from url: URL, in modelContext: ModelContext, generateSummaries: Bool = false) async throws -> GuionDocumentModel {
         let pathExtension = url.pathExtension.lowercased()
 
@@ -147,6 +149,7 @@ public class GuionDocumentParserSwiftData {
         return FDXDocumentWriter.makeFDX(from: model)
     }
 
+    @MainActor
     private static func buildModel(
         filename: String?,
         rawContent: String?,

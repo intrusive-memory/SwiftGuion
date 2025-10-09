@@ -63,6 +63,7 @@ struct SceneSummaryTests {
     }
 
     @Test("Scene text extraction and summarization integration")
+    @MainActor
     func testSceneTextWithSummarization() async throws {
         let fountainURL = try FixtureManager.getBigFishFountain()
         let script = try FountainScript(file: fountainURL.path)
