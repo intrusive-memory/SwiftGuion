@@ -71,10 +71,15 @@ struct SceneGroupWidget: View {
                                 .font(.caption)
                                 .foregroundStyle(.tertiary)
                         }
+                        .accessibilityElement(children: .combine)
+                        .accessibilityLabel("\(directive), \(description)")
                     }
                 }
             }
         )
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Scene group: \(sceneGroup.title)")
+        .accessibilityHint("\(sceneGroup.scenes.count) scenes")
         .padding(.leading, 12) // Scene group indent
         .padding(.vertical, 6)
     }

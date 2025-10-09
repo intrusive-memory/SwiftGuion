@@ -27,6 +27,8 @@ struct SceneBrowserWidget: View {
                         .font(.largeTitle)
                         .bold()
                         .foregroundStyle(.primary)
+                        .accessibilityAddTraits(.isHeader)
+                        .accessibilityLabel("Script title: \(title.string)")
 
                     Divider()
                 }
@@ -35,34 +37,65 @@ struct SceneBrowserWidget: View {
                 .padding(.bottom, 12)
             }
 
-            // Scrollable chapter list
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 16) {
-                    ForEach(browserData.chapters) { chapter in
-                        ChapterWidget(
-                            chapter: chapter,
-                            isExpanded: Binding(
-                                get: { expandedChapters.contains(chapter.id) },
-                                set: { isExpanded in
-                                    if isExpanded {
-                                        expandedChapters.insert(chapter.id)
-                                    } else {
-                                        expandedChapters.remove(chapter.id)
+            // Scrollable chapter list or empty state
+            if browserData.chapters.isEmpty {
+                EmptyBrowserView()
+            } else {
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 16) {
+                        ForEach(browserData.chapters) { chapter in
+                            ChapterWidget(
+                                chapter: chapter,
+                                isExpanded: Binding(
+                                    get: { expandedChapters.contains(chapter.id) },
+                                    set: { isExpanded in
+                                        if isExpanded {
+                                            expandedChapters.insert(chapter.id)
+                                        } else {
+                                            expandedChapters.remove(chapter.id)
+                                        }
                                     }
-                                }
-                            ),
-                            expandedSceneGroups: $expandedSceneGroups,
-                            expandedScenes: $expandedScenes,
-                            expandedPreScenes: $expandedPreScenes
-                        )
+                                ),
+                                expandedSceneGroups: $expandedSceneGroups,
+                                expandedScenes: $expandedScenes,
+                                expandedPreScenes: $expandedPreScenes
+                            )
+                        }
                     }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+                .accessibilityLabel("Scene browser")
+                .accessibilityHint("\(browserData.chapters.count) chapters")
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(nsColor: .textBackgroundColor))
+        .accessibilityElement(children: .contain)
+    }
+}
+
+// MARK: - Empty State View
+
+struct EmptyBrowserView: View {
+    var body: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "doc.text.magnifyingglass")
+                .font(.system(size: 64))
+                .foregroundStyle(.secondary)
+
+            Text("No Chapters Found")
+                .font(.title2)
+                .foregroundStyle(.secondary)
+
+            Text("This screenplay doesn't have chapter markers (##).")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("No chapters found. This screenplay doesn't have chapter markers.")
     }
 }
 

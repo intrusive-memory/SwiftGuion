@@ -49,6 +49,9 @@ struct ChapterWidget: View {
                     .foregroundStyle(.primary)
             }
         )
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Chapter: \(chapter.title)")
+        .accessibilityHint("\(chapter.sceneGroups.count) scene groups")
         .padding(.vertical, 10)
         .padding(.horizontal, 12)
         .background(

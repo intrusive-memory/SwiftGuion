@@ -281,6 +281,232 @@ final class SceneBrowserUITests: XCTestCase {
         XCTAssertEqual(chapterTitles.count, browserData.chapters.count, "Chapter titles should be unique")
     }
 
+    // MARK: - Phase 5: Polish & Edge Case Tests
+
+    func testEmptyChapterHandling() {
+        // Create browser data with empty chapters array
+        let browserData = SceneBrowserData(
+            title: OutlineElement(
+                id: "title-1",
+                index: 0,
+                level: 1,
+                range: [0, 10],
+                rawString: "# Test Script",
+                string: "Test Script",
+                type: "sectionHeader"
+            ),
+            chapters: []
+        )
+
+        XCTAssertNotNil(browserData.title, "Should have title even with no chapters")
+        XCTAssertTrue(browserData.chapters.isEmpty, "Chapters should be empty")
+    }
+
+    func testChapterWithNoSceneGroups() {
+        let browserData = SceneBrowserData(
+            title: nil,
+            chapters: [
+                ChapterData(
+                    element: OutlineElement(
+                        id: "chapter-1",
+                        index: 1,
+                        level: 2,
+                        range: [10, 20],
+                        rawString: "## CHAPTER 1",
+                        string: "CHAPTER 1",
+                        type: "sectionHeader"
+                    ),
+                    sceneGroups: []
+                )
+            ]
+        )
+
+        XCTAssertEqual(browserData.chapters.count, 1, "Should have one chapter")
+        XCTAssertTrue(browserData.chapters[0].sceneGroups.isEmpty, "Chapter should have no scene groups")
+    }
+
+    func testSceneGroupWithNoScenes() {
+        let browserData = SceneBrowserData(
+            title: nil,
+            chapters: [
+                ChapterData(
+                    element: OutlineElement(
+                        id: "chapter-1",
+                        index: 1,
+                        level: 2,
+                        range: [10, 100],
+                        rawString: "## CHAPTER 1",
+                        string: "CHAPTER 1",
+                        type: "sectionHeader"
+                    ),
+                    sceneGroups: [
+                        SceneGroupData(
+                            element: OutlineElement(
+                                id: "group-1",
+                                index: 2,
+                                level: 3,
+                                range: [20, 30],
+                                rawString: "### PROLOGUE",
+                                string: "PROLOGUE",
+                                type: "sectionHeader"
+                            ),
+                            scenes: []
+                        )
+                    ]
+                )
+            ]
+        )
+
+        let firstChapter = browserData.chapters[0]
+        XCTAssertEqual(firstChapter.sceneGroups.count, 1, "Should have one scene group")
+        XCTAssertTrue(firstChapter.sceneGroups[0].scenes.isEmpty, "Scene group should have no scenes")
+    }
+
+    func testSceneWithNoElements() {
+        let sceneData = SceneData(
+            element: OutlineElement(
+                id: "scene-1",
+                index: 1,
+                level: 0,
+                range: [10, 20],
+                rawString: "INT. EMPTY ROOM - DAY",
+                string: "INT. EMPTY ROOM - DAY",
+                type: "sceneHeader"
+            ),
+            sceneElements: [],
+            sceneLocation: SceneLocation.parse("INT. EMPTY ROOM - DAY")
+        )
+
+        XCTAssertFalse(sceneData.slugline.isEmpty, "Scene should have slugline")
+        XCTAssertTrue(sceneData.sceneElements.isEmpty, "Scene should have no elements")
+        XCTAssertFalse(sceneData.hasPreScene, "Scene should have no preScene")
+    }
+
+    func testSceneWithNilLocation() {
+        let sceneData = SceneData(
+            element: OutlineElement(
+                id: "scene-1",
+                index: 1,
+                level: 0,
+                range: [10, 20],
+                rawString: "SOME INVALID SCENE HEADING",
+                string: "SOME INVALID SCENE HEADING",
+                type: "sceneHeader"
+            ),
+            sceneElements: [
+                GuionElement(type: "Action", text: "Something happens")
+            ],
+            sceneLocation: nil
+        )
+
+        XCTAssertNil(sceneData.sceneLocation, "Scene should have nil location")
+        XCTAssertFalse(sceneData.sceneElements.isEmpty, "Scene should still have elements")
+    }
+
+    func testPreSceneTextProperty() {
+        let sceneData = SceneData(
+            element: OutlineElement(
+                id: "scene-1",
+                index: 1,
+                level: 0,
+                range: [10, 20],
+                rawString: "INT. ROOM - DAY",
+                string: "INT. ROOM - DAY",
+                type: "sceneHeader"
+            ),
+            sceneElements: [],
+            preSceneElements: [
+                GuionElement(type: "Action", text: "CHAPTER 1"),
+                GuionElement(type: "Action", text: "BERNARD")
+            ],
+            sceneLocation: nil
+        )
+
+        XCTAssertTrue(sceneData.hasPreScene, "Scene should have preScene")
+        XCTAssertEqual(sceneData.preSceneText, "CHAPTER 1\nBERNARD", "PreScene text should be joined with newlines")
+    }
+
+    func testEmptyPreSceneText() {
+        let sceneData = SceneData(
+            element: OutlineElement(
+                id: "scene-1",
+                index: 1,
+                level: 0,
+                range: [10, 20],
+                rawString: "INT. ROOM - DAY",
+                string: "INT. ROOM - DAY",
+                type: "sceneHeader"
+            ),
+            sceneElements: [],
+            preSceneElements: nil,
+            sceneLocation: nil
+        )
+
+        XCTAssertFalse(sceneData.hasPreScene, "Scene should not have preScene")
+        XCTAssertTrue(sceneData.preSceneText.isEmpty, "PreScene text should be empty")
+    }
+
+    func testLargeScriptPerformance() throws {
+        // Test with BigFish which is a large script
+        let fountainPath = try FixtureManager.getFixture("bigfish", extension: "fountain").path
+        let script = try FountainScript(file: fountainPath)
+
+        // Measure extraction time
+        let startTime = Date()
+        let browserData = script.extractSceneBrowserData()
+        let duration = Date().timeIntervalSince(startTime)
+
+        // Extraction should be fast even for large scripts (under 1 second)
+        XCTAssertLessThan(duration, 1.0, "Scene browser extraction should complete in under 1 second")
+
+        // Verify data was extracted
+        XCTAssertNotNil(browserData.title, "BigFish should have a title")
+        print("⚡ Performance: BigFish extraction took \(String(format: "%.3f", duration)) seconds")
+    }
+
+    func testDataIntegrityWithRealScript() throws {
+        let fountainPath = try FixtureManager.getTestFountain().path
+        let script = try FountainScript(file: fountainPath)
+        let browserData = script.extractSceneBrowserData()
+
+        // Verify no empty IDs
+        for chapter in browserData.chapters {
+            XCTAssertFalse(chapter.id.isEmpty, "Chapter ID should not be empty")
+
+            for sceneGroup in chapter.sceneGroups {
+                XCTAssertFalse(sceneGroup.id.isEmpty, "Scene group ID should not be empty")
+
+                for scene in sceneGroup.scenes {
+                    XCTAssertFalse(scene.id.isEmpty, "Scene ID should not be empty")
+                    XCTAssertFalse(scene.slugline.isEmpty, "Scene slugline should not be empty")
+                }
+            }
+        }
+    }
+
+    func testSceneIdUniqueness() throws {
+        let fountainPath = try FixtureManager.getTestFountain().path
+        let script = try FountainScript(file: fountainPath)
+        let browserData = script.extractSceneBrowserData()
+
+        // Collect all scene IDs
+        var sceneIds = Set<String>()
+        var duplicates: [String] = []
+
+        for chapter in browserData.chapters {
+            for sceneGroup in chapter.sceneGroups {
+                for scene in sceneGroup.scenes {
+                    if sceneIds.contains(scene.id) {
+                        duplicates.append(scene.id)
+                    }
+                    sceneIds.insert(scene.id)
+                }
+            }
+        }
+
+        XCTAssertTrue(duplicates.isEmpty, "All scene IDs should be unique. Duplicates: \(duplicates)")
+    }
+
     // MARK: - Helper Methods
 
     private func createSampleBrowserData() -> SceneBrowserData {

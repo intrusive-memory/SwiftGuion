@@ -56,10 +56,14 @@ struct SceneWidget: View {
                                     Capsule()
                                         .fill(Color.secondary.opacity(0.1))
                                 )
+                                .accessibilityLabel("\(location.lighting.standardAbbreviation) scene")
                         }
                     }
                 }
             )
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel("Scene: \(scene.slugline)")
+            .accessibilityHint("\(scene.sceneElements.count) elements")
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
         }
