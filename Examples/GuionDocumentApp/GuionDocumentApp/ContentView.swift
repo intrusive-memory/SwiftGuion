@@ -17,6 +17,7 @@ struct ContentView: View {
     @State private var isParsing = false
     @State private var parseError: Error?
     @State private var showCharacterInspector = false
+    @State private var showSceneBrowser = false
 
     var body: some View {
         let _ = print("🔄 ContentView body rendered: \(configuration.document.elements.count) elements, isParsing: \(isParsing), rawContent: \(configuration.document.rawContent?.count ?? 0) chars")
@@ -58,12 +59,30 @@ struct ContentView: View {
                 .help("Toggle character inspector")
                 .disabled(configuration.document.elements.isEmpty)
                 .keyboardShortcut("i", modifiers: [.command, .option])
+
+                Button(action: { showSceneBrowser.toggle() }) {
+                    Label("Scene Browser", systemImage: "list.bullet.rectangle")
+                }
+                .help("Show scene browser")
+                .disabled(configuration.document.elements.isEmpty)
+                .keyboardShortcut("b", modifiers: [.command, .option])
             }
         }
         #endif
         .task {
             await parseDocumentIfNeeded()
         }
+        #if os(macOS)
+        .sheet(isPresented: $showSceneBrowser) {
+            if !configuration.document.elements.isEmpty,
+               let rawContent = configuration.document.rawContent {
+                // Convert GuionDocumentModel to FountainScript
+                let script = GuionDocumentParserSwiftData.toFountainScript(from: configuration.document)
+                SceneBrowserWidget(script: script)
+                    .frame(minWidth: 500, minHeight: 600)
+            }
+        }
+        #endif
     }
 
     private func parseDocumentIfNeeded() async {

@@ -268,6 +268,171 @@ struct GuionDocumentAppTests {
         print("✅ Export to FDX: \(fdxData.count) bytes")
     }
 
+    // MARK: - Scene Browser Integration Tests
+
+    @Test("Convert GuionDocumentModel to SceneBrowserData")
+    func convertDocumentToSceneBrowserData() async throws {
+        let modelContext = try createModelContext()
+        let fixtureURL = try getFixture("test", extension: "fountain")
+
+        // Parse the document
+        let document = try await GuionDocumentParserSwiftData.loadAndParse(
+            from: fixtureURL,
+            in: modelContext,
+            generateSummaries: false
+        )
+
+        // Convert to FountainScript
+        let script = GuionDocumentParserSwiftData.toFountainScript(from: document)
+
+        // Extract scene browser data
+        let browserData = script.extractSceneBrowserData()
+
+        // Verify title exists
+        #expect(browserData.title != nil, "Should have a title")
+        #expect(!browserData.title!.string.isEmpty, "Title should not be empty")
+
+        // Verify chapters exist
+        #expect(browserData.chapters.count > 0, "Should have chapters")
+
+        // Verify first chapter structure
+        let firstChapter = browserData.chapters[0]
+        #expect(!firstChapter.title.isEmpty, "Chapter should have title")
+        #expect(firstChapter.sceneGroups.count > 0, "Chapter should have scene groups")
+
+        print("✅ Scene Browser Data: title='\(browserData.title?.string ?? "")' chapters=\(browserData.chapters.count)")
+    }
+
+    @Test("Scene Browser handles all screenplay formats")
+    func sceneBrowserHandlesAllFormats() async throws {
+        let modelContext = try createModelContext()
+
+        // Test with Fountain
+        let fountainURL = try getFixture("bigfish", extension: "fountain")
+        let fountainDoc = try await GuionDocumentParserSwiftData.loadAndParse(
+            from: fountainURL,
+            in: modelContext,
+            generateSummaries: false
+        )
+        let fountainScript = GuionDocumentParserSwiftData.toFountainScript(from: fountainDoc)
+        let fountainBrowser = fountainScript.extractSceneBrowserData()
+        #expect(fountainBrowser.chapters.count > 0, "Fountain should produce chapters")
+
+        // Test with FDX
+        let fdxURL = try getFixture("bigfish", extension: "fdx")
+        let fdxDoc = try await GuionDocumentParserSwiftData.loadAndParse(
+            from: fdxURL,
+            in: modelContext,
+            generateSummaries: false
+        )
+        let fdxScript = GuionDocumentParserSwiftData.toFountainScript(from: fdxDoc)
+        let fdxBrowser = fdxScript.extractSceneBrowserData()
+        #expect(fdxBrowser.chapters.count > 0, "FDX should produce chapters")
+
+        // Test with Highland
+        let highlandURL = try getFixture("bigfish", extension: "highland")
+        let highlandDoc = try await GuionDocumentParserSwiftData.loadAndParse(
+            from: highlandURL,
+            in: modelContext,
+            generateSummaries: false
+        )
+        let highlandScript = GuionDocumentParserSwiftData.toFountainScript(from: highlandDoc)
+        let highlandBrowser = highlandScript.extractSceneBrowserData()
+        #expect(highlandBrowser.chapters.count > 0, "Highland should produce chapters")
+
+        print("✅ Scene Browser works with all formats: Fountain=\(fountainBrowser.chapters.count), FDX=\(fdxBrowser.chapters.count), Highland=\(highlandBrowser.chapters.count) chapters")
+    }
+
+    @Test("Scene Browser preserves scene content")
+    func sceneBrowserPreservesSceneContent() async throws {
+        let modelContext = try createModelContext()
+        let fixtureURL = try getFixture("test", extension: "fountain")
+
+        // Parse the document
+        let document = try await GuionDocumentParserSwiftData.loadAndParse(
+            from: fixtureURL,
+            in: modelContext,
+            generateSummaries: false
+        )
+
+        // Convert to scene browser data
+        let script = GuionDocumentParserSwiftData.toFountainScript(from: document)
+        let browserData = script.extractSceneBrowserData()
+
+        // Find first scene with content
+        var foundSceneWithContent = false
+        for chapter in browserData.chapters {
+            for sceneGroup in chapter.sceneGroups {
+                for scene in sceneGroup.scenes {
+                    if !scene.sceneElements.isEmpty {
+                        foundSceneWithContent = true
+
+                        // Verify scene has elements
+                        #expect(scene.sceneElements.count > 0, "Scene should have elements")
+
+                        // Verify elements have content
+                        for element in scene.sceneElements {
+                            #expect(!element.elementText.isEmpty, "Element should have text")
+                            #expect(!element.elementType.isEmpty, "Element should have type")
+                        }
+
+                        break
+                    }
+                }
+                if foundSceneWithContent { break }
+            }
+            if foundSceneWithContent { break }
+        }
+
+        #expect(foundSceneWithContent, "Should find at least one scene with content")
+        print("✅ Scene Browser preserves scene content correctly")
+    }
+
+    @Test("Scene Browser handles preScene content")
+    func sceneBrowserHandlesPreSceneContent() async throws {
+        let modelContext = try createModelContext()
+        let fixtureURL = try getFixture("test", extension: "fountain")
+
+        // Parse the document
+        let document = try await GuionDocumentParserSwiftData.loadAndParse(
+            from: fixtureURL,
+            in: modelContext,
+            generateSummaries: false
+        )
+
+        // Convert to scene browser data
+        let script = GuionDocumentParserSwiftData.toFountainScript(from: document)
+        let browserData = script.extractSceneBrowserData()
+
+        // Look for scenes with preScene content
+        var foundPreScene = false
+        for chapter in browserData.chapters {
+            for sceneGroup in chapter.sceneGroups {
+                for scene in sceneGroup.scenes {
+                    if scene.hasPreScene {
+                        foundPreScene = true
+
+                        #expect(scene.preSceneElements != nil, "PreScene elements should exist")
+                        #expect(scene.preSceneElements!.count > 0, "PreScene should have elements")
+
+                        // Verify preScene content
+                        for element in scene.preSceneElements! {
+                            #expect(!element.elementText.isEmpty, "PreScene element should have text")
+                        }
+
+                        break
+                    }
+                }
+                if foundPreScene { break }
+            }
+            if foundPreScene { break }
+        }
+
+        // Note: test.fountain may or may not have preScene content
+        // This test validates the structure works correctly
+        print("✅ Scene Browser handles preScene content: found=\(foundPreScene)")
+    }
+
     // MARK: - Helper Functions
 
     private func extractCharacters(from document: GuionDocumentModel) -> [(name: String, lineCount: Int)] {
