@@ -378,3 +378,5 @@ extension OutlineList {
         return OutlineTree(from: self)
     }
 }
+
+extension OutlineElement: Sendable {}
