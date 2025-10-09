@@ -223,6 +223,18 @@ public class FountainScript {
     private func getContentUrlFromHighland(_ highlandURL: URL) throws -> URL {
         let fileManager = FileManager.default
 
+        // Check if this is actually a plain Fountain file with .highland extension
+        let fileHandle = try FileHandle(forReadingFrom: highlandURL)
+        defer { try? fileHandle.close() }
+
+        let headerData = fileHandle.readData(ofLength: 4)
+        let isZipFile = headerData.count >= 2 && headerData[0] == 0x50 && headerData[1] == 0x4B  // "PK" signature
+
+        if !isZipFile {
+            // This is a plain text Fountain file with .highland extension
+            return highlandURL
+        }
+
         // Create a temporary directory to extract the highland file
         let tempDir = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try fileManager.createDirectory(at: tempDir, withIntermediateDirectories: true)
@@ -246,6 +258,18 @@ public class FountainScript {
 
     private func getContentFromHighland(_ highlandURL: URL) throws -> String {
         let fileManager = FileManager.default
+
+        // Check if this is actually a plain Fountain file with .highland extension
+        let fileHandle = try FileHandle(forReadingFrom: highlandURL)
+        defer { try? fileHandle.close() }
+
+        let headerData = fileHandle.readData(ofLength: 4)
+        let isZipFile = headerData.count >= 2 && headerData[0] == 0x50 && headerData[1] == 0x4B  // "PK" signature
+
+        if !isZipFile {
+            // This is a plain text Fountain file with .highland extension
+            return try String(contentsOf: highlandURL, encoding: .utf8)
+        }
 
         // Create a temporary directory to extract the highland file
         let tempDir = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString)

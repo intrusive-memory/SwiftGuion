@@ -161,9 +161,9 @@ import Foundation
     // Should have scene locations
     #expect(!scenes.isEmpty, "Should extract scene locations from Big Fish")
 
-    // Verify first scene
+    // Verify first scene (Big Fish starts with EXT. SWAMP SHACK ROAD)
     if let firstScene = scenes.first {
-        #expect(firstScene.location.lighting == .interior)
+        #expect(firstScene.location.lighting == .exterior)
         #expect(firstScene.sceneHeading.elementType == "Scene Heading")
         #expect(firstScene.sceneIndex >= 0)
     }

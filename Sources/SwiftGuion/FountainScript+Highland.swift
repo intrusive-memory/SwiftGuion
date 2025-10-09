@@ -47,6 +47,24 @@ extension FountainScript {
     public func loadHighland(_ highlandURL: URL, parser: ParserType = .fast) throws {
         let fileManager = FileManager.default
 
+        // First, check if this is actually a plain Fountain file with .highland extension
+        // by reading the first few bytes to see if it's a ZIP archive
+        let fileHandle = try FileHandle(forReadingFrom: highlandURL)
+        defer { try? fileHandle.close() }
+
+        let headerData = fileHandle.readData(ofLength: 4)
+        let isZipFile = headerData.count >= 2 && headerData[0] == 0x50 && headerData[1] == 0x4B  // "PK" signature
+
+        if !isZipFile {
+            // This is a plain text Fountain file with .highland extension
+            // Treat it as a regular Fountain file
+            try loadFile(highlandURL.path, parser: parser)
+            // Use .fountain extension since this is a plain Fountain file
+            let baseName = highlandURL.deletingPathExtension().lastPathComponent
+            filename = "\(baseName).fountain"
+            return
+        }
+
         // Create a temporary directory to extract the highland file
         let tempDir = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try fileManager.createDirectory(at: tempDir, withIntermediateDirectories: true)
