@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		D6451B222E98085200D5BD0F /* SwiftGuion in Frameworks */ = {isa = PBXBuildFile; productRef = D6451B212E98085200D5BD0F /* SwiftGuion */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		D6B10A7C2E97F69500CD0A05 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -65,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6451B222E98085200D5BD0F /* SwiftGuion in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +130,7 @@
 			);
 			name = GuionDocumentApp;
 			packageProductDependencies = (
+				D6451B212E98085200D5BD0F /* SwiftGuion */,
 			);
 			productName = GuionDocumentApp;
 			productReference = D6B10A6B2E97F69400CD0A05 /* GuionDocumentApp.app */;
@@ -210,6 +216,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				D6A3930E2E97F74E00838412 /* XCRemoteSwiftPackageReference "SwiftFijos" */,
+				D6451B202E98085200D5BD0F /* XCRemoteSwiftPackageReference "SwiftGuion" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D6B10A6C2E97F69400CD0A05 /* Products */;
@@ -639,6 +646,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		D6451B202E98085200D5BD0F /* XCRemoteSwiftPackageReference "SwiftGuion" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/stovak/SwiftGuion";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.1;
+			};
+		};
 		D6A3930E2E97F74E00838412 /* XCRemoteSwiftPackageReference "SwiftFijos" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/stovak/SwiftFijos";
@@ -648,6 +663,14 @@
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D6451B212E98085200D5BD0F /* SwiftGuion */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D6451B202E98085200D5BD0F /* XCRemoteSwiftPackageReference "SwiftGuion" */;
+			productName = SwiftGuion;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D6B10A632E97F69400CD0A05 /* Project object */;
 }

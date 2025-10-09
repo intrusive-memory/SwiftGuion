@@ -1,10 +1,12 @@
 # SwiftGuion
 
+##### Guión means "screenplay" in Spanish.
+
 ![SwiftGuion File Flow](images/swiftguion_file_flow.svg)
 
 [![Tests](https://github.com/stovak/SwiftGuion/actions/workflows/tests.yml/badge.svg)](https://github.com/stovak/SwiftGuion/actions/workflows/tests.yml)
 
-A performant Swift parser for Fountain screenplay markup that creates SwiftData-compatible objects without modifying source files.
+A performant Swift parser for Fountain, FDX, and Highland files that creates SwiftData-compatible objects without modifying source files.
 
 ## Overview
 
