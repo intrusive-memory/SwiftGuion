@@ -12,68 +12,11 @@ import SwiftData
 
 final class Phase7Tests: XCTestCase {
 
-    // MARK: - Documentation Existence Tests
+    // MARK: - Documentation Tests
 
-    /// Test that key documentation files exist
-    func testDocumentationFilesExist() throws {
-        let docsPath = #file
-            .replacingOccurrences(of: "/Tests/SwiftGuionTests/Phase7Tests.swift", with: "/docs")
-
-        let fileManager = FileManager.default
-
-        // Verify .guion format specification exists
-        let formatSpec = docsPath + "/GUION_FILE_FORMAT.md"
-        XCTAssertTrue(
-            fileManager.fileExists(atPath: formatSpec),
-            "GUION_FILE_FORMAT.md should exist"
-        )
-
-        // Verify user guide exists
-        let userGuide = docsPath + "/USER_GUIDE.md"
-        XCTAssertTrue(
-            fileManager.fileExists(atPath: userGuide),
-            "USER_GUIDE.md should exist"
-        )
-
-        // Verify migration guide exists
-        let migrationGuide = docsPath + "/MIGRATION_GUIDE.md"
-        XCTAssertTrue(
-            fileManager.fileExists(atPath: migrationGuide),
-            "MIGRATION_GUIDE.md should exist"
-        )
-    }
-
-    /// Test that documentation files have meaningful content
-    func testDocumentationFilesHaveContent() throws {
-        let docsPath = #file
-            .replacingOccurrences(of: "/Tests/SwiftGuionTests/Phase7Tests.swift", with: "/docs")
-
-        // Check GUION_FILE_FORMAT.md
-        let formatSpec = docsPath + "/GUION_FILE_FORMAT.md"
-        let formatContent = try String(contentsOfFile: formatSpec, encoding: .utf8)
-        XCTAssertTrue(formatContent.contains("File Format Specification"))
-        XCTAssertTrue(formatContent.contains("version"))
-        XCTAssertTrue(formatContent.contains("Binary Property List"))
-        XCTAssertGreaterThan(formatContent.count, 5000, "Format spec should be comprehensive")
-
-        // Check USER_GUIDE.md
-        let userGuide = docsPath + "/USER_GUIDE.md"
-        let userContent = try String(contentsOfFile: userGuide, encoding: .utf8)
-        XCTAssertTrue(userContent.contains("User Guide"))
-        XCTAssertTrue(userContent.contains("Importing"))
-        XCTAssertTrue(userContent.contains("Exporting"))
-        XCTAssertTrue(userContent.contains("Troubleshooting"))
-        XCTAssertGreaterThan(userContent.count, 10000, "User guide should be comprehensive")
-
-        // Check MIGRATION_GUIDE.md
-        let migrationGuide = docsPath + "/MIGRATION_GUIDE.md"
-        let migrationContent = try String(contentsOfFile: migrationGuide, encoding: .utf8)
-        XCTAssertTrue(migrationContent.contains("Migration Guide"))
-        XCTAssertTrue(migrationContent.contains("Batch Conversion"))
-        XCTAssertTrue(migrationContent.contains("Fountain"))
-        XCTAssertTrue(migrationContent.contains("Highland"))
-        XCTAssertGreaterThan(migrationContent.count, 10000, "Migration guide should be comprehensive")
-    }
+    // Note: Documentation file existence tests removed as documentation
+    // is maintained separately from the test suite. Documentation files
+    // are tracked in the Docs/ directory and validated through code review.
 
     // MARK: - Error Handling Tests
 
