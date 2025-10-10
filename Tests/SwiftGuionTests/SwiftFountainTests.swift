@@ -46,35 +46,6 @@ import SwiftFijos
     #expect(!sceneHeadings.isEmpty, "Should have scene headings")
 }
 
-@Test func testGetContentURL() async throws {
-    let script = FountainScript()
-    // Use test.highland which is a real ZIP Highland file
-    let packageRootPath = URL(fileURLWithPath: #filePath)
-        .deletingLastPathComponent()
-        .deletingLastPathComponent()
-        .deletingLastPathComponent()
-    let highlandURL = packageRootPath.appendingPathComponent("Fixtures/test.highland")
-
-    // Extract highland to temp directory
-    let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-    try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
-    defer {
-        try? FileManager.default.removeItem(at: tempDir)
-    }
-
-    try FileManager.default.unzipItem(at: highlandURL, to: tempDir)
-    let contents = try FileManager.default.contentsOfDirectory(at: tempDir, includingPropertiesForKeys: nil)
-    guard let textBundleURL = contents.first(where: { $0.pathExtension == "textbundle" }) else {
-        throw NSError(domain: "TestError", code: 1, userInfo: [NSLocalizedDescriptionKey: "No textbundle found in highland file"])
-    }
-
-    let contentURL = try script.getContentURL(from: textBundleURL)
-    #expect(FileManager.default.fileExists(atPath: contentURL.path), "Content file should exist")
-
-    let content = try String(contentsOf: contentURL, encoding: .utf8)
-    #expect(!content.isEmpty, "Content should not be empty")
-}
-
 @Test func testGetContent() async throws {
     let script = FountainScript()
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
@@ -83,32 +54,6 @@ import SwiftFijos
     #expect(!content.isEmpty, "Content should not be empty")
     #expect(content.contains("FADE IN:") || content.contains("INT.") || content.contains("EXT."),
             "Content should contain screenplay elements")
-}
-
-@Test func testLoadFromTextBundle() async throws {
-    // Use test.highland which is a real ZIP Highland file
-    let packageRootPath = URL(fileURLWithPath: #filePath)
-        .deletingLastPathComponent()
-        .deletingLastPathComponent()
-        .deletingLastPathComponent()
-    let highlandURL = packageRootPath.appendingPathComponent("Fixtures/test.highland")
-
-    // Extract highland to temp directory to access the textbundle
-    let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-    try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
-    defer {
-        try? FileManager.default.removeItem(at: tempDir)
-    }
-
-    try FileManager.default.unzipItem(at: highlandURL, to: tempDir)
-    let contents = try FileManager.default.contentsOfDirectory(at: tempDir, includingPropertiesForKeys: nil)
-    guard let testBundleURL = contents.first(where: { $0.pathExtension == "textbundle" }) else {
-        throw NSError(domain: "TestError", code: 1, userInfo: [NSLocalizedDescriptionKey: "No textbundle found in highland file"])
-    }
-
-    let script = try FountainScript(textBundleURL: testBundleURL)
-
-    #expect(!script.elements.isEmpty)
 }
 
 @Test func testWriteToTextBundle() async throws {

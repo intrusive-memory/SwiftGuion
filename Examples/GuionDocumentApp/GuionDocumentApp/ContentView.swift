@@ -18,6 +18,11 @@ struct ContentView: View {
     @State private var parseError: Error?
     @State private var showCharacterInspector = false
 
+    // Export state management
+    @State private var showFountainExport = false
+    @State private var showFDXExport = false
+    @State private var exportError: Error?
+
     var body: some View {
         let _ = print("🔄 ContentView body rendered: \(configuration.document.elements.count) elements, isParsing: \(isParsing), rawContent: \(configuration.document.rawContent?.count ?? 0) chars")
 
@@ -76,11 +81,51 @@ struct ContentView: View {
                 .help("Toggle character inspector")
                 .disabled(configuration.document.elements.isEmpty)
                 .keyboardShortcut("i", modifiers: [.command, .option])
+
+                Menu {
+                    Button("Fountain Format...") {
+                        showFountainExport = true
+                    }
+                    Button("Final Draft Format...") {
+                        showFDXExport = true
+                    }
+                } label: {
+                    Label("Export", systemImage: "square.and.arrow.up")
+                }
+                .disabled(configuration.document.elements.isEmpty)
+                .help("Export to other formats")
             }
         }
         #endif
+        .fileExporter(
+            isPresented: $showFountainExport,
+            document: FountainExportDocument(sourceDocument: configuration.document),
+            contentType: .fountainDocument,
+            defaultFilename: defaultExportFilename(for: .fountain)
+        ) { result in
+            handleExportResult(result, format: .fountain)
+        }
+        .fileExporter(
+            isPresented: $showFDXExport,
+            document: FDXExportDocument(sourceDocument: configuration.document),
+            contentType: .fdxDocument,
+            defaultFilename: defaultExportFilename(for: .fdx)
+        ) { result in
+            handleExportResult(result, format: .fdx)
+        }
+        .alert("Export Error", isPresented: .constant(exportError != nil), presenting: exportError) { _ in
+            Button("OK") { exportError = nil }
+        } message: { error in
+            Text(error.localizedDescription)
+        }
         .task {
             await parseDocumentIfNeeded()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .exportAsFountain)) { _ in
+            showFountainExport = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .exportAsFDX)) { _ in
+            showFDXExport = true
         }
     }
 
@@ -141,6 +186,30 @@ struct ContentView: View {
         // This would need to be implemented with proper window management
     }
     #endif
+
+    // MARK: - Export Helper Methods
+
+    /// Generate default export filename based on format
+    private func defaultExportFilename(for format: ExportFormat) -> String {
+        guard let currentFilename = configuration.document.filename else {
+            return "Untitled.\(format.fileExtension)"
+        }
+
+        // Strip .guion extension if present, add new extension
+        let baseName = (currentFilename as NSString).deletingPathExtension
+        return "\(baseName).\(format.fileExtension)"
+    }
+
+    /// Handle export result
+    private func handleExportResult(_ result: Result<URL, Error>, format: ExportFormat) {
+        switch result {
+        case .success(let url):
+            print("✅ Successfully exported to \(format.displayName): \(url.path)")
+        case .failure(let error):
+            print("❌ Export to \(format.displayName) failed: \(error.localizedDescription)")
+            exportError = error
+        }
+    }
 }
 
 struct ErrorView: View {
