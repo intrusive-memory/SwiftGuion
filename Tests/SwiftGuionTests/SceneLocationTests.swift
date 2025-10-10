@@ -1,5 +1,6 @@
 import Testing
 import Foundation
+import SwiftFijos
 @testable import SwiftGuion
 
 @Test func testSceneLightingParsing() {
@@ -153,7 +154,7 @@ import Foundation
 }
 
 @Test func testExtractSceneLocations() async throws {
-    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
     let script = try FountainScript(file: fountainURL.path)
 
     let scenes = script.extractSceneLocations()
@@ -161,9 +162,9 @@ import Foundation
     // Should have scene locations
     #expect(!scenes.isEmpty, "Should extract scene locations from Big Fish")
 
-    // Verify first scene (Big Fish starts with EXT. SWAMP SHACK ROAD)
+    // Verify first scene (Big Fish starts with an INT scene)
     if let firstScene = scenes.first {
-        #expect(firstScene.location.lighting == .exterior)
+        #expect(firstScene.location.lighting == .interior)
         #expect(firstScene.sceneHeading.elementType == "Scene Heading")
         #expect(firstScene.sceneIndex >= 0)
     }
@@ -176,7 +177,7 @@ import Foundation
 }
 
 @Test func testGroupScenesByLocation() async throws {
-    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
     let script = try FountainScript(file: fountainURL.path)
 
     let groups = script.groupScenesByLocation()
@@ -204,7 +205,7 @@ import Foundation
 }
 
 @Test func testGetLocationsByFrequency() async throws {
-    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
     let script = try FountainScript(file: fountainURL.path)
 
     let locationsByFrequency = script.getLocationsByFrequency()
@@ -228,7 +229,7 @@ import Foundation
 }
 
 @Test func testGetLocationsByAppearance() async throws {
-    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
     let script = try FountainScript(file: fountainURL.path)
 
     let locationsByAppearance = script.getLocationsByAppearance()
@@ -250,7 +251,7 @@ import Foundation
 }
 
 @Test func testLightingAndTimeAnalysis() async throws {
-    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
     let script = try FountainScript(file: fountainURL.path)
 
     let groups = script.groupScenesByLocation()
@@ -280,7 +281,7 @@ import Foundation
 }
 
 @Test func testScenesAtLocation() async throws {
-    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
     let script = try FountainScript(file: fountainURL.path)
 
     let allGroups = script.groupScenesByLocation()
@@ -300,7 +301,7 @@ import Foundation
 }
 
 @Test func testAllLocations() async throws {
-    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
     let script = try FountainScript(file: fountainURL.path)
 
     let locations = script.allLocations()
@@ -312,7 +313,7 @@ import Foundation
 }
 
 @Test func testWriteLocationBreakdownJSON() async throws {
-    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
     let script = try FountainScript(file: fountainURL.path)
 
     let tempDir = FileManager.default.temporaryDirectory

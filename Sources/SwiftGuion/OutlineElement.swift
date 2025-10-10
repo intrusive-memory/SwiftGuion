@@ -42,8 +42,9 @@ public struct OutlineElement: Codable {
     public var isEndMarker: Bool // True if this is an END chapter marker
     public var sceneId: String? // UUID linking to GuionElement.sceneId for Scene Heading elements
     public var isSynthetic: Bool // True if this element was synthetically generated (not in original screenplay)
+    public var hasHierarchyError: Bool // True if this element has a hierarchy/formatting error
 
-    public init(id: String = UUID().uuidString, index: Int, isCollapsed: Bool = false, level: Int, range: [Int], rawString: String, string: String, type: String, sceneDirective: String? = nil, sceneDirectiveDescription: String? = nil, parentId: String? = nil, childIds: [String] = [], isEndMarker: Bool = false, sceneId: String? = nil, isSynthetic: Bool = false) {
+    public init(id: String = UUID().uuidString, index: Int, isCollapsed: Bool = false, level: Int, range: [Int], rawString: String, string: String, type: String, sceneDirective: String? = nil, sceneDirectiveDescription: String? = nil, parentId: String? = nil, childIds: [String] = [], isEndMarker: Bool = false, sceneId: String? = nil, isSynthetic: Bool = false, hasHierarchyError: Bool = false) {
         self.id = id
         self.index = index
         self.isCollapsed = isCollapsed
@@ -59,6 +60,7 @@ public struct OutlineElement: Codable {
         self.isEndMarker = isEndMarker
         self.sceneId = sceneId
         self.isSynthetic = isSynthetic
+        self.hasHierarchyError = hasHierarchyError
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -77,6 +79,7 @@ public struct OutlineElement: Codable {
         case isEndMarker
         case sceneId
         case isSynthetic
+        case hasHierarchyError
     }
 
     public init(from decoder: Decoder) throws {
@@ -97,6 +100,7 @@ public struct OutlineElement: Codable {
         self.isEndMarker = try container.decodeIfPresent(Bool.self, forKey: .isEndMarker) ?? false
         self.sceneId = try container.decodeIfPresent(String.self, forKey: .sceneId)
         self.isSynthetic = try container.decodeIfPresent(Bool.self, forKey: .isSynthetic) ?? false
+        self.hasHierarchyError = try container.decodeIfPresent(Bool.self, forKey: .hasHierarchyError) ?? false
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -125,6 +129,9 @@ public struct OutlineElement: Codable {
             try container.encode(isEndMarker, forKey: .isEndMarker)
         }
         try container.encodeIfPresent(sceneId, forKey: .sceneId)
+        if hasHierarchyError {
+            try container.encode(hasHierarchyError, forKey: .hasHierarchyError)
+        }
     }
     
     /// Returns "outline" for API compatibility with GuionElement
@@ -141,7 +148,13 @@ public struct OutlineElement: Codable {
     
     /// Returns true if this is a chapter-level header (level 2)
     public var isChapter: Bool {
-        return level == 2 && type == "sectionHeader"
+        guard level == 2 && type == "sectionHeader" && !isEndMarker else { return false }
+
+        // Filter out technical directives (SHOT:, CUT TO:, etc.)
+        let upperString = string.uppercased()
+        let technicalDirectives = ["SHOT:", "CUT TO:", "FADE IN:", "FADE OUT:", "DISSOLVE TO:", "MATCH CUT:", "SMASH CUT:"]
+
+        return !technicalDirectives.contains { upperString.hasPrefix($0) }
     }
     
     /// Returns true if this is the main title (level 1)

@@ -65,7 +65,9 @@ extension FountainScript {
                 sceneDirectiveDescription: nil,
                 parentId: nil,
                 childIds: [],
-                isEndMarker: false
+                isEndMarker: false,
+                sceneId: nil,
+                isSynthetic: true
             )
             outline.append(titleElement)
             parentStack.append(titleElement)
@@ -129,7 +131,8 @@ extension FountainScript {
                 var sceneDirective: String? = nil
                 var sceneDirectiveDescription: String? = nil
                 var isEndMarker = false
-                
+                var hasHierarchyError = false
+
                 // Check if this is an END marker for level 2 (chapter) elements
                 if level == 2 && outlineType == "sectionHeader" {
                     let trimmedText = element.elementText.trimmingCharacters(in: .whitespaces).uppercased()
@@ -140,6 +143,12 @@ extension FountainScript {
                             isEndMarker = true
                         }
                     }
+
+                    // Check if this is a technical directive at the wrong level (should be level 3)
+                    let technicalDirectives = ["SHOT:", "CUT TO:", "FADE IN:", "FADE OUT:", "DISSOLVE TO:", "MATCH CUT:", "SMASH CUT:"]
+                    if technicalDirectives.contains(where: { trimmedText.hasPrefix($0) }) {
+                        hasHierarchyError = true
+                    }
                 }
                 
                 // For level 3 section headers, extract scene directive information
@@ -147,14 +156,15 @@ extension FountainScript {
                     let fullText = element.elementText.trimmingCharacters(in: .whitespaces)
                     var directiveText = fullText
 
-                    if let markerRange = directiveText.range(of: "S#") {
-                        directiveText = String(directiveText[..<markerRange.lowerBound]).trimmingCharacters(in: .whitespaces)
+                    // Extract scene directive description (everything after S#)
+                    if let markerRange = fullText.range(of: "S#") {
+                        sceneDirectiveDescription = String(fullText[markerRange.lowerBound...]).trimmingCharacters(in: .whitespaces)
+                        directiveText = String(fullText[..<markerRange.lowerBound]).trimmingCharacters(in: .whitespaces)
                     }
 
+                    // Extract directive name (handle colon separator if present)
                     if let colonIndex = directiveText.firstIndex(of: ":") {
                         let beforeColon = String(directiveText[..<colonIndex]).trimmingCharacters(in: .whitespaces)
-                        let afterColon = String(directiveText[directiveText.index(after: colonIndex)...]).trimmingCharacters(in: .whitespaces)
-                        sceneDirectiveDescription = afterColon
                         directiveText = beforeColon
                     }
 
@@ -206,7 +216,9 @@ extension FountainScript {
                     parentId: parentId,
                     childIds: [],
                     isEndMarker: isEndMarker,
-                    sceneId: linkedSceneId
+                    sceneId: linkedSceneId,
+                    isSynthetic: false,
+                    hasHierarchyError: hasHierarchyError
                 )
 
                 outline.append(outlineElement)

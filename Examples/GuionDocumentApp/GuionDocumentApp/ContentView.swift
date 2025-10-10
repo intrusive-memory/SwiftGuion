@@ -18,6 +18,11 @@ struct ContentView: View {
     @State private var parseError: Error?
     @State private var showCharacterInspector = false
 
+    // Export state management
+    @State private var showFountainExport = false
+    @State private var showFDXExport = false
+    @State private var exportError: Error?
+
     var body: some View {
         let _ = print("🔄 ContentView body rendered: \(configuration.document.elements.count) elements, isParsing: \(isParsing), rawContent: \(configuration.document.rawContent?.count ?? 0) chars")
 
@@ -76,11 +81,51 @@ struct ContentView: View {
                 .help("Toggle character inspector")
                 .disabled(configuration.document.elements.isEmpty)
                 .keyboardShortcut("i", modifiers: [.command, .option])
+
+                Menu {
+                    Button("Fountain Format...") {
+                        showFountainExport = true
+                    }
+                    Button("Final Draft Format...") {
+                        showFDXExport = true
+                    }
+                } label: {
+                    Label("Export", systemImage: "square.and.arrow.up")
+                }
+                .disabled(configuration.document.elements.isEmpty)
+                .help("Export to other formats")
             }
         }
         #endif
+        .fileExporter(
+            isPresented: $showFountainExport,
+            document: FountainExportDocument(sourceDocument: configuration.document),
+            contentType: .fountainDocument,
+            defaultFilename: defaultExportFilename(for: .fountain)
+        ) { result in
+            handleExportResult(result, format: .fountain)
+        }
+        .fileExporter(
+            isPresented: $showFDXExport,
+            document: FDXExportDocument(sourceDocument: configuration.document),
+            contentType: .fdxDocument,
+            defaultFilename: defaultExportFilename(for: .fdx)
+        ) { result in
+            handleExportResult(result, format: .fdx)
+        }
+        .alert("Export Error", isPresented: .constant(exportError != nil), presenting: exportError) { _ in
+            Button("OK") { exportError = nil }
+        } message: { error in
+            Text(error.localizedDescription)
+        }
         .task {
             await parseDocumentIfNeeded()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .exportAsFountain)) { _ in
+            showFountainExport = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .exportAsFDX)) { _ in
+            showFDXExport = true
         }
     }
 
@@ -141,23 +186,142 @@ struct ContentView: View {
         // This would need to be implemented with proper window management
     }
     #endif
+
+    // MARK: - Export Helper Methods
+
+    /// Generate default export filename based on format
+    private func defaultExportFilename(for format: ExportFormat) -> String {
+        guard let currentFilename = configuration.document.filename else {
+            return "Untitled.\(format.fileExtension)"
+        }
+
+        // Strip .guion extension if present, add new extension
+        let baseName = (currentFilename as NSString).deletingPathExtension
+        return "\(baseName).\(format.fileExtension)"
+    }
+
+    /// Handle export result
+    private func handleExportResult(_ result: Result<URL, Error>, format: ExportFormat) {
+        switch result {
+        case .success(let url):
+            print("✅ Successfully exported to \(format.displayName): \(url.path)")
+        case .failure(let error):
+            print("❌ Export to \(format.displayName) failed: \(error.localizedDescription)")
+            exportError = error
+        }
+    }
 }
 
 struct ErrorView: View {
     let error: Error
 
     var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "exclamationmark.triangle")
+        VStack(spacing: 20) {
+            Image(systemName: errorIcon)
                 .font(.system(size: 64))
                 .foregroundStyle(.red)
-            Text("Error loading screenplay")
-                .font(.title2)
-            Text(error.localizedDescription)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .accessibilityLabel("Error icon")
+
+            VStack(spacing: 8) {
+                Text("Error Loading Screenplay")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+
+                Text(errorMessage)
+                    .font(.body)
+                    .foregroundStyle(.primary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: 500)
+
+                if let recovery = recoverySuggestion {
+                    Text(recovery)
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: 500)
+                        .padding(.top, 4)
+                }
+            }
+
+            // Action buttons for common recovery options
+            HStack(spacing: 12) {
+                Button("Copy Error") {
+                    copyErrorToClipboard()
+                }
+                .keyboardShortcut("c", modifiers: [.command])
+                .help("Copy error details to clipboard")
+
+                if canRetry {
+                    Button("Try Again") {
+                        // This would trigger a re-parse
+                    }
+                    .keyboardShortcut(.defaultAction)
+                    .help("Attempt to load the screenplay again")
+                }
+            }
+            .padding(.top, 8)
         }
+        .padding(32)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    /// Get appropriate icon for error type
+    private var errorIcon: String {
+        if let serializationError = error as? GuionSerializationError {
+            switch serializationError {
+            case .unsupportedVersion:
+                return "arrow.up.circle"
+            case .corruptedFile:
+                return "doc.badge.exclamationmark"
+            default:
+                return "exclamationmark.triangle"
+            }
+        }
+        return "exclamationmark.triangle"
+    }
+
+    /// Get user-friendly error message
+    private var errorMessage: String {
+        if let localizedError = error as? LocalizedError {
+            return localizedError.errorDescription ?? error.localizedDescription
+        }
+        return error.localizedDescription
+    }
+
+    /// Get recovery suggestion if available
+    private var recoverySuggestion: String? {
+        if let localizedError = error as? LocalizedError {
+            return localizedError.recoverySuggestion
+        }
+        return nil
+    }
+
+    /// Determine if retry is a viable option
+    private var canRetry: Bool {
+        // Don't offer retry for version errors or corrupted files
+        if let serializationError = error as? GuionSerializationError {
+            switch serializationError {
+            case .unsupportedVersion, .corruptedFile:
+                return false
+            default:
+                return true
+            }
+        }
+        return true
+    }
+
+    /// Copy error details to clipboard
+    private func copyErrorToClipboard() {
+        var details = "Error: \(errorMessage)"
+        if let recovery = recoverySuggestion {
+            details += "\n\nSuggestion: \(recovery)"
+        }
+        details += "\n\nTechnical Details: \(error)"
+
+        #if os(macOS)
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(details, forType: .string)
+        #endif
     }
 }
 

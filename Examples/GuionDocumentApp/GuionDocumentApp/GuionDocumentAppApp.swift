@@ -32,6 +32,9 @@ struct GuionDocumentAppApp: App {
             ContentView(configuration: file.$document)
                 .modelContainer(sharedModelContainer)
         }
+        .commands {
+            ExportCommands()
+        }
 
         #if os(macOS)
         // Auxiliary windows can be opened via menu commands
@@ -46,6 +49,31 @@ struct GuionDocumentAppApp: App {
         }
         #endif
     }
+}
+
+/// Custom menu commands for export functionality
+struct ExportCommands: Commands {
+    var body: some Commands {
+        CommandGroup(after: .saveItem) {
+            Divider()
+
+            Button("Export as Fountain...") {
+                NotificationCenter.default.post(name: .exportAsFountain, object: nil)
+            }
+            .keyboardShortcut("E", modifiers: [.command, .shift])
+
+            Button("Export as Final Draft...") {
+                NotificationCenter.default.post(name: .exportAsFDX, object: nil)
+            }
+            .keyboardShortcut("D", modifiers: [.command, .shift])
+        }
+    }
+}
+
+// Notification names for export commands
+extension Notification.Name {
+    static let exportAsFountain = Notification.Name("exportAsFountain")
+    static let exportAsFDX = Notification.Name("exportAsFDX")
 }
 
 extension UTType {
