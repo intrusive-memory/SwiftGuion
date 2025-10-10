@@ -1,5 +1,6 @@
 import Testing
 import Foundation
+import SwiftFijos
 @testable import SwiftGuion
 
 @Test func testSpeakableContentProtocol() async throws {
@@ -53,7 +54,7 @@ import Foundation
 }
 
 @Test func testSpeakableContentWithRealScript() async throws {
-    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
     let script = try FountainScript(file: fountainURL.path)
 
     // Find a scene heading and verify it's speakable
@@ -88,7 +89,7 @@ import Foundation
 }
 
 @Test func testSpeakableContentForAllElementTypes() async throws {
-    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
     let script = try FountainScript(file: fountainURL.path)
 
     // Iterate through all elements and verify speakableText doesn't crash

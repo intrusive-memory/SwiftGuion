@@ -8,6 +8,7 @@
 //
 
 import Testing
+import SwiftFijos
 @testable import SwiftGuion
 
 @Suite("Enhanced Outline Level Tests")
@@ -15,7 +16,7 @@ struct OutlineExtensionTests {
 
     @Test("Outline with no level 1 header should generate script title")
     func testOutlineWithNoLevelOneHeader() async throws {
-        let fountainURL = try FixtureManager.getBigFishFountain()
+        let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
         let script = try FountainScript(file: fountainURL.path)
         script.filename = "bigfish.fountain"
         let outline = script.extractOutline()
@@ -29,7 +30,7 @@ struct OutlineExtensionTests {
 
     @Test("Outline with level 1 header should respect existing title")
     func testOutlineWithLevelOneHeader() async throws {
-        let fountainURL = try FixtureManager.getBigFishFountain()
+        let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
         let script = try FountainScript(file: fountainURL.path)
         let outline = script.extractOutline()
 
@@ -41,7 +42,7 @@ struct OutlineExtensionTests {
 
     @Test("Scene directive parsing")
     func testSceneDirectiveParsing() async throws {
-        let fountainURL = try FixtureManager.getBigFishFountain()
+        let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
         let script = try FountainScript(file: fountainURL.path)
         let outline = script.extractOutline()
 
@@ -57,7 +58,7 @@ struct OutlineExtensionTests {
 
     @Test("Multiple level 1 headers should be demoted")
     func testMultipleLevelOneHeaders() async throws {
-        let fountainURL = try FixtureManager.getBigFishFountain()
+        let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
         let script = try FountainScript(file: fountainURL.path)
         let outline = script.extractOutline()
 
@@ -69,7 +70,7 @@ struct OutlineExtensionTests {
 
     @Test("Chapter level headers identification")
     func testChapterLevelHeaders() async throws {
-        let fountainURL = try FixtureManager.getBigFishFountain()
+        let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
         let script = try FountainScript(file: fountainURL.path)
         let outline = script.extractOutline()
 
@@ -79,7 +80,7 @@ struct OutlineExtensionTests {
 
     @Test("ElementType property returns 'outline' for API compatibility")
     func testElementTypePropertyReturnsOutline() async throws {
-        let fountainURL = try FixtureManager.getBigFishFountain()
+        let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
         let script = try FountainScript(file: fountainURL.path)
         let outline = script.extractOutline()
 
@@ -106,7 +107,7 @@ struct OutlineExtensionTests {
 
     @Test("Parent-child relationships and tree structure")
     func testParentChildRelationships() async throws {
-        let fountainURL = try FixtureManager.getBigFishFountain()
+        let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
         let script = try FountainScript(file: fountainURL.path)
         let outline = script.extractOutline()
 
@@ -128,7 +129,7 @@ struct OutlineExtensionTests {
 
     @Test("Tree structure functionality")
     func testTreeStructure() async throws {
-        let fountainURL = try FixtureManager.getBigFishFountain()
+        let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
         let script = try FountainScript(file: fountainURL.path)
         let outline = script.extractOutline()
         let tree = outline.tree()
@@ -153,7 +154,7 @@ struct OutlineExtensionTests {
 
     @Test("END marker detection")
     func testEndMarkerDetection() async throws {
-        let fountainURL = try FixtureManager.getBigFishFountain()
+        let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
         let script = try FountainScript(file: fountainURL.path)
         let outline = script.extractOutline()
 
@@ -168,7 +169,7 @@ struct OutlineExtensionTests {
 
     @Test("Convenience tree extraction method")
     func testConvenienceTreeExtraction() async throws {
-        let fountainURL = try FixtureManager.getBigFishFountain()
+        let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
         let script = try FountainScript(file: fountainURL.path)
 
         // Test convenience method
@@ -185,7 +186,7 @@ struct OutlineExtensionTests {
 
     @Test("Scene text extraction returns complete scene content")
     func testSceneTextExtraction() async throws {
-        let fountainURL = try FixtureManager.getBigFishFountain()
+        let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
         let script = try FountainScript(file: fountainURL.path)
         let outline = script.extractOutline()
 
@@ -204,7 +205,7 @@ struct OutlineExtensionTests {
 
     @Test("Scene text extraction for non-scene elements returns string")
     func testSceneTextExtractionForNonScenes() async throws {
-        let fountainURL = try FixtureManager.getBigFishFountain()
+        let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
         let script = try FountainScript(file: fountainURL.path)
         let outline = script.extractOutline()
 

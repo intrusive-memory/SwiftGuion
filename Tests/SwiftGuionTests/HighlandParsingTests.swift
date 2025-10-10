@@ -7,6 +7,7 @@
 
 import XCTest
 import SwiftData
+import SwiftFijos
 @testable import SwiftGuion
 
 final class HighlandParsingTests: XCTestCase {
@@ -32,20 +33,9 @@ final class HighlandParsingTests: XCTestCase {
     /// Test parsing all Highland files in the Fixtures directory
     @MainActor
     func testAllHighlandFilesInFixtures() async throws {
-        // Get the package root directory
-        let packageRootPath = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-
-        let fixturesURL = packageRootPath.appendingPathComponent("Fixtures")
-
-        // Ensure Fixtures directory exists
-        XCTAssertTrue(FileManager.default.fileExists(atPath: fixturesURL.path), "Fixtures directory not found at \(fixturesURL.path)")
-
-        // Get all Highland files
-        let contents = try FileManager.default.contentsOfDirectory(at: fixturesURL, includingPropertiesForKeys: nil)
-        let highlandFiles = contents.filter { $0.pathExtension == "highland" }
+        // Get all Highland fixtures using Fijos
+        let highlandFixtures = try Fijos.listFixtures(withExtension: "highland")
+        let highlandFiles = highlandFixtures.map { $0.url }
 
         XCTAssertFalse(highlandFiles.isEmpty, "No Highland files found in Fixtures directory")
 
@@ -117,18 +107,7 @@ final class HighlandParsingTests: XCTestCase {
 
     /// Test that Highland file structure is correctly identified
     func testHighlandFileStructure() throws {
-        let packageRootPath = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-
-        let fixturesURL = packageRootPath.appendingPathComponent("Fixtures")
-        let testHighlandURL = fixturesURL.appendingPathComponent("test.highland")
-
-        guard FileManager.default.fileExists(atPath: testHighlandURL.path) else {
-            XCTFail("test.highland not found")
-            return
-        }
+        let testHighlandURL = try Fijos.getFixture("test", extension: "highland")
 
         // Highland files are ZIP archives
         let data = try Data(contentsOf: testHighlandURL)

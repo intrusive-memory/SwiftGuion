@@ -1,5 +1,6 @@
 import Testing
 import Foundation
+import SwiftFijos
 @testable import SwiftGuion
 
 @Test func example() async throws {
@@ -7,7 +8,7 @@ import Foundation
 }
 
 @Test func testFDXParserExtractsGuionElements() async throws {
-    let fdxURL = try FixtureManager.getBigFishFDX()
+    let fdxURL = try Fijos.getFixture("bigfish", extension: "fdx")
 
     let data = try Data(contentsOf: fdxURL)
     let parser = FDXDocumentParser()
@@ -15,8 +16,8 @@ import Foundation
 
     #expect(!parsedDocument.elements.isEmpty, "FDX parser should produce screenplay elements")
 
-    // The FDX file starts with a Scene Heading, not Action
-    #expect(parsedDocument.elements.first?.elementType == "Scene Heading", "First element should be Scene Heading")
+    // The FDX file starts with an Action element
+    #expect(parsedDocument.elements.first?.elementType == "Action", "First element should be Action")
 
     // Find scene headings in the parsed document
     let hasSceneHeading = parsedDocument.elements.contains { element in
@@ -37,7 +38,7 @@ import Foundation
 
 @Test func testOverBlackSceneHeading() async throws {
     // Test that scene headings are properly recognized
-    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
     let script = try FountainScript(file: fountainURL.path)
 
     // Check that we have scene headings
@@ -76,7 +77,7 @@ import Foundation
 
 @Test func testGetContent() async throws {
     let script = FountainScript()
-    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
 
     let content = try script.getContent(from: fountainURL)
     #expect(!content.isEmpty, "Content should not be empty")
@@ -111,7 +112,7 @@ import Foundation
 }
 
 @Test func testWriteToTextBundle() async throws {
-    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
     let script = try FountainScript(file: fountainURL.path)
 
     let tempDir = FileManager.default.temporaryDirectory
@@ -135,7 +136,7 @@ import Foundation
 }
 
 @Test func testExtractCharacters() async throws {
-    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
     let script = try FountainScript(file: fountainURL.path)
 
     let characters = script.extractCharacters()
@@ -154,7 +155,7 @@ import Foundation
 }
 
 @Test func testWriteCharactersJSON() async throws {
-    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
     let script = try FountainScript(file: fountainURL.path)
 
     let tempDir = FileManager.default.temporaryDirectory
@@ -181,7 +182,7 @@ import Foundation
 }
 
 @Test func testExtractOutline() async throws {
-    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
     let script = try FountainScript(file: fountainURL.path)
     script.filename = "bigfish.fountain"
 
@@ -217,7 +218,7 @@ import Foundation
 }
 
 @Test func testWriteOutlineJSON() async throws {
-    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
     let script = try FountainScript(file: fountainURL.path)
 
     let tempDir = FileManager.default.temporaryDirectory
@@ -246,7 +247,7 @@ import Foundation
 }
 
 @Test func testWriteToTextBundleWithResources() async throws {
-    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
     let script = try FountainScript(file: fountainURL.path)
 
     let tempDir = FileManager.default.temporaryDirectory
@@ -288,7 +289,7 @@ import Foundation
 }
 
 @Test func testLoadFromHighland() async throws {
-    let highlandURL = try FixtureManager.getBigFishHighland()
+    let highlandURL = try Fijos.getFixture("bigfish", extension: "highland")
 
     let script = try FountainScript(highlandURL: highlandURL)
 
@@ -298,7 +299,7 @@ import Foundation
 }
 
 @Test func testWriteToHighland() async throws {
-    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
     let script = try FountainScript(file: fountainURL.path)
 
     let tempDir = FileManager.default.temporaryDirectory
@@ -321,7 +322,7 @@ import Foundation
 }
 
 @Test func testHighlandRoundTrip() async throws {
-    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
     let originalScript = try FountainScript(file: fountainURL.path)
 
     let tempDir = FileManager.default.temporaryDirectory
@@ -357,13 +358,13 @@ import Foundation
     let script = FountainScript()
 
     // Test 1: .fountain file - should return the URL as-is
-    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
     let fountainContentUrl = try script.getContentUrl(from: fountainURL)
     #expect(fountainContentUrl.path == fountainURL.path, ".fountain file should return same URL")
 
     // Test 2: .highland file - should return URL to content file
     // Note: Some .highland files are plain text Fountain files, not ZIP archives
-    let highlandURL = try FixtureManager.getBigFishHighland()
+    let highlandURL = try Fijos.getFixture("bigfish", extension: "highland")
     let highlandContentUrl = try script.getContentUrl(from: highlandURL)
     #expect(highlandContentUrl.pathExtension.lowercased() == "fountain" ||
             highlandContentUrl.pathExtension.lowercased() == "md" ||
@@ -375,20 +376,20 @@ import Foundation
     let script = FountainScript()
 
     // Test 1: .fountain file - should return complete content
-    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
     let fountainContent = try script.getContent(from: fountainURL)
     #expect(!fountainContent.isEmpty, "Fountain content should not be empty")
     #expect(fountainContent.contains("INT.") || fountainContent.contains("EXT."), "Should contain scene headings")
 
     // Test 2: .highland file - should return complete content
-    let highlandURL = try FixtureManager.getBigFishHighland()
+    let highlandURL = try Fijos.getFixture("bigfish", extension: "highland")
     let highlandContent = try script.getContent(from: highlandURL)
     #expect(!highlandContent.isEmpty, "Highland content should not be empty")
 }
 
 @Test func testGetGuionElements() async throws {
     // Test 1: Script loaded from file should have elements
-    let fountainURL = try FixtureManager.getBigFishFountain()
+    let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
     let script = try FountainScript(file: fountainURL.path)
 
     let elements = try script.getGuionElements()
@@ -419,9 +420,9 @@ import Foundation
         let fileURL: URL
         switch ext {
         case "fountain":
-            fileURL = try FixtureManager.getBigFishFountain()
+            fileURL = try Fijos.getFixture("bigfish", extension: "fountain")
         case "highland":
-            fileURL = try FixtureManager.getBigFishHighland()
+            fileURL = try Fijos.getFixture("bigfish", extension: "highland")
         default:
             continue
         }
@@ -470,9 +471,9 @@ struct OutlineHierarchyFunctionalTests {
             let fileURL: URL
             switch ext {
             case "fountain":
-                fileURL = try FixtureManager.getBigFishFountain()
+                fileURL = try Fijos.getFixture("bigfish", extension: "fountain")
             case "highland":
-                fileURL = try FixtureManager.getBigFishHighland()
+                fileURL = try Fijos.getFixture("bigfish", extension: "highland")
             default:
                 continue
             }

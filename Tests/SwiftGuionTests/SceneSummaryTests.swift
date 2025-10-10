@@ -7,6 +7,7 @@
 //  Tests for scene summarization functionality
 
 import Testing
+import SwiftFijos
 @testable import SwiftGuion
 #if canImport(SwiftData)
 import SwiftData
@@ -17,7 +18,7 @@ struct SceneSummaryTests {
 
     @Test("SceneSummarizer extracts basic scene information")
     func testSceneSummarizerBasicExtraction() async throws {
-        let fountainURL = try FixtureManager.getBigFishFountain()
+        let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
         let script = try FountainScript(file: fountainURL.path)
         let outline = script.extractOutline()
 
@@ -48,7 +49,7 @@ struct SceneSummaryTests {
 
     @Test("SceneSummarizer handles scene with minimal dialogue")
     func testSceneSummarizerMinimalDialogue() async throws {
-        let fountainURL = try FixtureManager.getBigFishFountain()
+        let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
         let script = try FountainScript(file: fountainURL.path)
         let outline = script.extractOutline()
 
@@ -65,7 +66,7 @@ struct SceneSummaryTests {
     @Test("Scene text extraction and summarization integration")
     @MainActor
     func testSceneTextWithSummarization() async throws {
-        let fountainURL = try FixtureManager.getBigFishFountain()
+        let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
         let script = try FountainScript(file: fountainURL.path)
         let outline = script.extractOutline()
 

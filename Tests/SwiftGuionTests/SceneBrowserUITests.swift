@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import SwiftFijos
 @testable import SwiftGuion
 
 final class SceneBrowserUITests: XCTestCase {
@@ -14,7 +15,7 @@ final class SceneBrowserUITests: XCTestCase {
 
     func testSceneBrowserDataFromTestFixture() throws {
         // Load test.fountain and extract browser data
-        let fountainPath = try FixtureManager.getTestFountain().path
+        let fountainPath = try Fijos.getFixture("test", extension: "fountain").path
         let script = try FountainScript(file: fountainPath)
         let browserData = script.extractSceneBrowserData()
 
@@ -42,7 +43,7 @@ final class SceneBrowserUITests: XCTestCase {
     }
 
     func testHierarchyIntegrityWithRealData() throws {
-        let fountainPath = try FixtureManager.getTestFountain().path
+        let fountainPath = try Fijos.getFixture("test", extension: "fountain").path
         let script = try FountainScript(file: fountainPath)
         let browserData = script.extractSceneBrowserData()
 
@@ -67,7 +68,7 @@ final class SceneBrowserUITests: XCTestCase {
     }
 
     func testSceneContentExtraction() throws {
-        let fountainPath = try FixtureManager.getTestFountain().path
+        let fountainPath = try Fijos.getFixture("test", extension: "fountain").path
         let script = try FountainScript(file: fountainPath)
         let browserData = script.extractSceneBrowserData()
 
@@ -100,7 +101,7 @@ final class SceneBrowserUITests: XCTestCase {
     }
 
     func testPreSceneContentAttachment() throws {
-        let fountainPath = try FixtureManager.getTestFountain().path
+        let fountainPath = try Fijos.getFixture("test", extension: "fountain").path
         let script = try FountainScript(file: fountainPath)
         let browserData = script.extractSceneBrowserData()
 
@@ -136,7 +137,7 @@ final class SceneBrowserUITests: XCTestCase {
     }
 
     func testSceneLocationParsing() throws {
-        let fountainPath = try FixtureManager.getTestFountain().path
+        let fountainPath = try Fijos.getFixture("test", extension: "fountain").path
         let script = try FountainScript(file: fountainPath)
         let browserData = script.extractSceneBrowserData()
 
@@ -164,7 +165,7 @@ final class SceneBrowserUITests: XCTestCase {
     }
 
     func testSceneDirectiveMetadata() throws {
-        let fountainPath = try FixtureManager.getTestFountain().path
+        let fountainPath = try Fijos.getFixture("test", extension: "fountain").path
         let script = try FountainScript(file: fountainPath)
         let browserData = script.extractSceneBrowserData()
 
@@ -269,7 +270,7 @@ final class SceneBrowserUITests: XCTestCase {
     }
 
     func testMultipleChapters() throws {
-        let fountainPath = try FixtureManager.getTestFountain().path
+        let fountainPath = try Fijos.getFixture("test", extension: "fountain").path
         let script = try FountainScript(file: fountainPath)
         let browserData = script.extractSceneBrowserData()
 
@@ -448,7 +449,7 @@ final class SceneBrowserUITests: XCTestCase {
 
     func testLargeScriptPerformance() throws {
         // Test with BigFish which is a large script
-        let fountainPath = try FixtureManager.getFixture("bigfish", extension: "fountain").path
+        let fountainPath = try Fijos.getFixture("bigfish", extension: "fountain").path
         let script = try FountainScript(file: fountainPath)
 
         // Measure extraction time
@@ -465,7 +466,7 @@ final class SceneBrowserUITests: XCTestCase {
     }
 
     func testDataIntegrityWithRealScript() throws {
-        let fountainPath = try FixtureManager.getTestFountain().path
+        let fountainPath = try Fijos.getFixture("test", extension: "fountain").path
         let script = try FountainScript(file: fountainPath)
         let browserData = script.extractSceneBrowserData()
 
@@ -485,7 +486,7 @@ final class SceneBrowserUITests: XCTestCase {
     }
 
     func testSceneIdUniqueness() throws {
-        let fountainPath = try FixtureManager.getTestFountain().path
+        let fountainPath = try Fijos.getFixture("test", extension: "fountain").path
         let script = try FountainScript(file: fountainPath)
         let browserData = script.extractSceneBrowserData()
 

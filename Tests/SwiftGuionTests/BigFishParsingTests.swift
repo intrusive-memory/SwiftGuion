@@ -8,6 +8,7 @@
 import Testing
 import Foundation
 import SwiftData
+import SwiftFijos
 @testable import SwiftGuion
 
 struct BigFishParsingTests {
@@ -32,7 +33,7 @@ struct BigFishParsingTests {
     @MainActor
     func parseBigFishFountain() async throws {
         let modelContext = try createModelContext()
-        let fixtureURL = try FixtureManager.getBigFishFountain()
+        let fixtureURL = try Fijos.getFixture("bigfish", extension: "fountain")
 
         // Parse using the unified parser
         let document = try await GuionDocumentParserSwiftData.loadAndParse(
@@ -72,7 +73,7 @@ struct BigFishParsingTests {
     @MainActor
     func parseBigFishFDX() async throws {
         let modelContext = try createModelContext()
-        let fixtureURL = try FixtureManager.getBigFishFDX()
+        let fixtureURL = try Fijos.getFixture("bigfish", extension: "fdx")
 
         // Parse using the unified parser
         let document = try await GuionDocumentParserSwiftData.loadAndParse(
@@ -109,7 +110,7 @@ struct BigFishParsingTests {
     @MainActor
     func parseBigFishHighland() async throws {
         let modelContext = try createModelContext()
-        let fixtureURL = try FixtureManager.getBigFishHighland()
+        let fixtureURL = try Fijos.getFixture("bigfish", extension: "highland")
 
         // Parse using the unified parser
         let document = try await GuionDocumentParserSwiftData.loadAndParse(
@@ -148,9 +149,9 @@ struct BigFishParsingTests {
         let modelContext = try createModelContext()
 
         // Parse all three formats
-        let fountainURL = try FixtureManager.getBigFishFountain()
-        let fdxURL = try FixtureManager.getBigFishFDX()
-        let highlandURL = try FixtureManager.getBigFishHighland()
+        let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
+        let fdxURL = try Fijos.getFixture("bigfish", extension: "fdx")
+        let highlandURL = try Fijos.getFixture("bigfish", extension: "highland")
 
         let fountainDoc = try await GuionDocumentParserSwiftData.loadAndParse(
             from: fountainURL,
@@ -199,7 +200,7 @@ struct BigFishParsingTests {
     @MainActor
     func exportToFountain() async throws {
         let modelContext = try createModelContext()
-        let fixtureURL = try FixtureManager.getBigFishFDX()
+        let fixtureURL = try Fijos.getFixture("bigfish", extension: "fdx")
 
         // Parse FDX
         let document = try await GuionDocumentParserSwiftData.loadAndParse(
@@ -222,7 +223,7 @@ struct BigFishParsingTests {
     @MainActor
     func exportToFDX() async throws {
         let modelContext = try createModelContext()
-        let fixtureURL = try FixtureManager.getBigFishFountain()
+        let fixtureURL = try Fijos.getFixture("bigfish", extension: "fountain")
 
         // Parse Fountain
         let document = try await GuionDocumentParserSwiftData.loadAndParse(

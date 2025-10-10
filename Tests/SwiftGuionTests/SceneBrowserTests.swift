@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import SwiftFijos
 @testable import SwiftGuion
 
 final class SceneBrowserTests: XCTestCase {
@@ -155,7 +156,7 @@ final class SceneBrowserTests: XCTestCase {
 
     func testExtractSceneBrowserDataWithTestFixture() throws {
         // Load test.fountain fixture
-        let fountainPath = try FixtureManager.getTestFountain().path
+        let fountainPath = try Fijos.getFixture("test", extension: "fountain").path
 
         let script = try FountainScript(file: fountainPath)
         let browserData = script.extractSceneBrowserData()
@@ -175,7 +176,7 @@ final class SceneBrowserTests: XCTestCase {
     }
 
     func testSceneGroupsInChapter() throws {
-        let fountainPath = try FixtureManager.getTestFountain().path
+        let fountainPath = try Fijos.getFixture("test", extension: "fountain").path
 
         let script = try FountainScript(file: fountainPath)
         let browserData = script.extractSceneBrowserData()
@@ -196,7 +197,7 @@ final class SceneBrowserTests: XCTestCase {
     }
 
     func testScenesInSceneGroup() throws {
-        let fountainPath = try FixtureManager.getTestFountain().path
+        let fountainPath = try Fijos.getFixture("test", extension: "fountain").path
 
         let script = try FountainScript(file: fountainPath)
         let browserData = script.extractSceneBrowserData()
@@ -219,7 +220,7 @@ final class SceneBrowserTests: XCTestCase {
     }
 
     func testOverBlackAttachmentToNextScene() throws {
-        let fountainPath = try FixtureManager.getTestFountain().path
+        let fountainPath = try Fijos.getFixture("test", extension: "fountain").path
 
         let script = try FountainScript(file: fountainPath)
         let browserData = script.extractSceneBrowserData()
@@ -246,7 +247,7 @@ final class SceneBrowserTests: XCTestCase {
     }
 
     func testSceneDirectiveMetadata() throws {
-        let fountainPath = try FixtureManager.getTestFountain().path
+        let fountainPath = try Fijos.getFixture("test", extension: "fountain").path
 
         let script = try FountainScript(file: fountainPath)
         let browserData = script.extractSceneBrowserData()
@@ -290,7 +291,7 @@ final class SceneBrowserTests: XCTestCase {
     }
 
     func testMultipleChapters() throws {
-        let fountainPath = try FixtureManager.getTestFountain().path
+        let fountainPath = try Fijos.getFixture("test", extension: "fountain").path
 
         let script = try FountainScript(file: fountainPath)
         let browserData = script.extractSceneBrowserData()
