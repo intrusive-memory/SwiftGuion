@@ -511,4 +511,189 @@ final class GuionSerializationTests: XCTestCase {
         // Cleanup
         try? FileManager.default.removeItem(at: tempURL)
     }
+
+    func testValidationMissingData() async throws {
+        // Test validation with missing required data
+        let document = GuionDocumentModel()
+        document.filename = nil
+        document.rawContent = nil
+        modelContext.insert(document)
+
+        XCTAssertThrowsError(try document.validate()) { error in
+            guard let serializationError = error as? GuionSerializationError else {
+                XCTFail("Expected GuionSerializationError")
+                return
+            }
+            if case .missingData = serializationError {
+                // Expected error
+            } else {
+                XCTFail("Expected missingData error, got \(serializationError)")
+            }
+        }
+    }
+
+    func testValidationSucceedsWithValidRelationships() async throws {
+        // Test that validation succeeds when relationships are correct
+        let document = GuionDocumentModel(filename: "valid.guion")
+
+        let element = GuionElementModel(elementText: "Test", elementType: "Action")
+        element.document = document
+        document.elements.append(element)
+
+        let entry = TitlePageEntryModel(key: "Title", values: ["Test"])
+        entry.document = document
+        document.titlePage.append(entry)
+
+        modelContext.insert(document)
+
+        // Validation should succeed
+        XCTAssertNoThrow(try document.validate())
+    }
+
+    func testLocationCachingForSceneHeadings() async throws {
+        // Test that scene headings have their location data cached
+        let document = GuionDocumentModel(filename: "locations.guion")
+
+        let sceneElement = GuionElementModel(
+            elementText: "INT. COFFEE SHOP - DAY",
+            elementType: "Scene Heading"
+        )
+        sceneElement.document = document
+        document.elements.append(sceneElement)
+
+        modelContext.insert(document)
+
+        // Validate should ensure locations are cached
+        try document.validate()
+
+        XCTAssertNotNil(sceneElement.locationLighting, "Scene heading should have cached lighting")
+        XCTAssertNotNil(sceneElement.locationScene, "Scene heading should have cached scene")
+    }
+
+    func testValidationReparseMissingLocation() async throws {
+        // Test validation triggers re-parsing for scene headings with missing location data
+        let document = GuionDocumentModel(filename: "reparse.guion")
+
+        let element = GuionElementModel(
+            elementText: "INT. COFFEE SHOP - DAY",
+            elementType: "Scene Heading"
+        )
+        element.document = document
+        document.elements.append(element)
+
+        // Clear the cached location data
+        element.locationLighting = nil
+        element.locationScene = nil
+
+        modelContext.insert(document)
+
+        // Validate should trigger re-parsing
+        try document.validate()
+
+        // Location should now be cached
+        XCTAssertNotNil(element.locationLighting, "Location should be re-parsed")
+        XCTAssertNotNil(element.locationScene, "Location should be re-parsed")
+    }
+
+    func testUnsupportedVersionError() async throws {
+        // Create a document with future version number
+        let document = GuionDocumentModel(filename: "future.guion")
+        let element = GuionElementModel(elementText: "Test", elementType: "Action")
+        element.document = document
+        document.elements.append(element)
+        modelContext.insert(document)
+
+        // Save and modify the version
+        let tempURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("test_future_version.guion")
+
+        try document.save(to: tempURL)
+
+        // Read and modify the data to have a future version
+        var data = try Data(contentsOf: tempURL)
+        let decoder = PropertyListDecoder()
+        var snapshot = try decoder.decode(GuionDocumentSnapshot.self, from: data)
+
+        // Manually construct a dictionary with future version
+        var plist = try PropertyListSerialization.propertyList(from: data, options: [], format: nil) as! [String: Any]
+        plist["version"] = 999
+        data = try PropertyListSerialization.data(fromPropertyList: plist, format: .binary, options: 0)
+        try data.write(to: tempURL)
+
+        // Attempt to load should throw unsupportedVersion error
+        XCTAssertThrowsError(try GuionDocumentModel.load(from: tempURL, in: modelContext)) { error in
+            guard let serializationError = error as? GuionSerializationError else {
+                XCTFail("Expected GuionSerializationError")
+                return
+            }
+            if case .unsupportedVersion(let version) = serializationError {
+                XCTAssertEqual(version, 999, "Version should be 999")
+            } else {
+                XCTFail("Expected unsupportedVersion error, got \(serializationError)")
+            }
+        }
+
+        // Cleanup
+        try? FileManager.default.removeItem(at: tempURL)
+    }
+
+    func testBinaryDataUnsupportedVersion() async throws {
+        // Test unsupportedVersion error in binary data decoding
+        let document = GuionDocumentModel(filename: "binary_future.guion")
+        let element = GuionElementModel(elementText: "Test", elementType: "Action")
+        element.document = document
+        document.elements.append(element)
+        modelContext.insert(document)
+
+        // Encode and modify to future version
+        var data = try document.encodeToBinaryData()
+        var plist = try PropertyListSerialization.propertyList(from: data, options: [], format: nil) as! [String: Any]
+        plist["version"] = 999
+        data = try PropertyListSerialization.data(fromPropertyList: plist, format: .binary, options: 0)
+
+        // Attempt to decode should throw unsupportedVersion error
+        XCTAssertThrowsError(try GuionDocumentModel.decodeFromBinaryData(data, in: modelContext)) { error in
+            guard let serializationError = error as? GuionSerializationError else {
+                XCTFail("Expected GuionSerializationError")
+                return
+            }
+            if case .unsupportedVersion(let version) = serializationError {
+                XCTAssertEqual(version, 999, "Version should be 999")
+            } else {
+                XCTFail("Expected unsupportedVersion error, got \(serializationError)")
+            }
+        }
+    }
+
+    func testBinaryDataCorruptedData() async throws {
+        // Test corrupted data in binary data decoding
+        let corruptedData = Data([0x00, 0x01, 0x02, 0x03, 0xFF, 0xFE])
+
+        XCTAssertThrowsError(try GuionDocumentModel.decodeFromBinaryData(corruptedData, in: modelContext)) { error in
+            XCTAssertTrue(error is GuionSerializationError, "Should throw GuionSerializationError")
+        }
+    }
+
+    func testErrorDescriptions() {
+        // Test error descriptions and recovery suggestions
+        let encodingError = GuionSerializationError.encodingFailed(NSError(domain: "test", code: 1))
+        XCTAssertNotNil(encodingError.errorDescription)
+        XCTAssertNotNil(encodingError.recoverySuggestion)
+
+        let decodingError = GuionSerializationError.decodingFailed(NSError(domain: "test", code: 2))
+        XCTAssertNotNil(decodingError.errorDescription)
+        XCTAssertNotNil(decodingError.recoverySuggestion)
+
+        let corruptedError = GuionSerializationError.corruptedFile("test.guion")
+        XCTAssertNotNil(corruptedError.errorDescription)
+        XCTAssertNotNil(corruptedError.recoverySuggestion)
+
+        let versionError = GuionSerializationError.unsupportedVersion(999)
+        XCTAssertNotNil(versionError.errorDescription)
+        XCTAssertNotNil(versionError.recoverySuggestion)
+
+        let missingDataError = GuionSerializationError.missingData
+        XCTAssertNotNil(missingDataError.errorDescription)
+        XCTAssertNotNil(missingDataError.recoverySuggestion)
+    }
 }
