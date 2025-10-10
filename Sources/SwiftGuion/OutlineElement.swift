@@ -41,8 +41,9 @@ public struct OutlineElement: Codable {
     public var childIds: [String] // Array of child element IDs
     public var isEndMarker: Bool // True if this is an END chapter marker
     public var sceneId: String? // UUID linking to GuionElement.sceneId for Scene Heading elements
+    public var isSynthetic: Bool // True if this element was synthetically generated (not in original screenplay)
 
-    public init(id: String = UUID().uuidString, index: Int, isCollapsed: Bool = false, level: Int, range: [Int], rawString: String, string: String, type: String, sceneDirective: String? = nil, sceneDirectiveDescription: String? = nil, parentId: String? = nil, childIds: [String] = [], isEndMarker: Bool = false, sceneId: String? = nil) {
+    public init(id: String = UUID().uuidString, index: Int, isCollapsed: Bool = false, level: Int, range: [Int], rawString: String, string: String, type: String, sceneDirective: String? = nil, sceneDirectiveDescription: String? = nil, parentId: String? = nil, childIds: [String] = [], isEndMarker: Bool = false, sceneId: String? = nil, isSynthetic: Bool = false) {
         self.id = id
         self.index = index
         self.isCollapsed = isCollapsed
@@ -57,6 +58,7 @@ public struct OutlineElement: Codable {
         self.childIds = childIds
         self.isEndMarker = isEndMarker
         self.sceneId = sceneId
+        self.isSynthetic = isSynthetic
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -74,6 +76,7 @@ public struct OutlineElement: Codable {
         case childIds
         case isEndMarker
         case sceneId
+        case isSynthetic
     }
 
     public init(from decoder: Decoder) throws {
@@ -93,10 +96,17 @@ public struct OutlineElement: Codable {
         self.childIds = try container.decodeIfPresent([String].self, forKey: .childIds) ?? []
         self.isEndMarker = try container.decodeIfPresent(Bool.self, forKey: .isEndMarker) ?? false
         self.sceneId = try container.decodeIfPresent(String.self, forKey: .sceneId)
+        self.isSynthetic = try container.decodeIfPresent(Bool.self, forKey: .isSynthetic) ?? false
     }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
+
+        // Don't encode synthetic elements - they should be regenerated on load
+        if isSynthetic {
+            return
+        }
+
         try container.encode(id, forKey: .id)
         try container.encode(index, forKey: .index)
         try container.encode(isCollapsed, forKey: .isCollapsed)
@@ -378,3 +388,5 @@ extension OutlineList {
         return OutlineTree(from: self)
     }
 }
+
+extension OutlineElement: Sendable {}
