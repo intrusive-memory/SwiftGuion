@@ -24,15 +24,50 @@ struct GuionDocumentConfiguration: FileDocument {
     }
 
     init(configuration: ReadConfiguration) throws {
-        // Create a temporary document - will be populated in the view
-        self.document = GuionDocumentModel()
+        // Check if this is a native .guion file or an import format
+        if configuration.contentType == .guionDocument {
+            // Load native .guion file directly
+            print("📥 Loading native .guion file: \(configuration.file.filename ?? "unknown")")
+            guard let data = configuration.file.regularFileContents else {
+                throw GuionSerializationError.missingData
+            }
 
-        // Store the file wrapper for later processing
-        let content = Self.extractContent(from: configuration.file, filename: configuration.file.filename)
-        print("📥 Document loaded: \(configuration.file.filename ?? "unknown"), content length: \(content?.count ?? 0)")
-        document.rawContent = content
-        document.filename = configuration.file.filename
-        print("📄 GuionDocument initialized with rawContent: \(document.rawContent?.count ?? 0) chars")
+            // Create temporary model context for deserialization
+            let schema = Schema([
+                GuionDocumentModel.self,
+                GuionElementModel.self,
+                TitlePageEntryModel.self,
+            ])
+            let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+            let modelContainer = try ModelContainer(for: schema, configurations: [modelConfiguration])
+            let modelContext = modelContainer.mainContext
+
+            // Deserialize from binary data
+            self.document = try GuionDocumentModel.decodeFromBinaryData(data, in: modelContext)
+            print("✅ Loaded .guion file with \(document.elements.count) elements")
+        } else {
+            // Import workflow - create temporary document and store raw content
+            print("📥 Importing file: \(configuration.file.filename ?? "unknown")")
+            self.document = GuionDocumentModel()
+
+            // Store the file wrapper for later processing
+            let content = Self.extractContent(from: configuration.file, filename: configuration.file.filename)
+            print("📥 Extracted content length: \(content?.count ?? 0)")
+            document.rawContent = content
+
+            // Transform filename to .guion extension
+            document.filename = Self.transformFilenameForImport(configuration.file.filename)
+            print("📄 Import filename transformed to: \(document.filename ?? "unknown")")
+        }
+    }
+
+    /// Transform imported filename to .guion extension
+    private static func transformFilenameForImport(_ originalFilename: String?) -> String? {
+        guard let original = originalFilename else { return nil }
+
+        // Strip original extension, add .guion
+        let baseName = (original as NSString).deletingPathExtension
+        return "\(baseName).guion"
     }
 
     /// Extract content from FileWrapper, handling both regular files and packages
@@ -124,11 +159,17 @@ struct GuionDocumentConfiguration: FileDocument {
         let data: Data
 
         // Determine output format based on content type
-        if configuration.contentType == .fdxDocument {
+        if configuration.contentType == .guionDocument {
+            // Save as native .guion binary format
+            print("💾 Saving as native .guion format")
+            data = try document.encodeToBinaryData()
+        } else if configuration.contentType == .fdxDocument {
             // Export as FDX
+            print("💾 Exporting as FDX format")
             data = GuionDocumentParserSwiftData.toFDXData(from: document)
         } else {
-            // Default to Fountain format
+            // Export as Fountain format
+            print("💾 Exporting as Fountain format")
             let script = GuionDocumentParserSwiftData.toFountainScript(from: document)
             let fountainText = script.stringFromDocument()
             data = Data(fountainText.utf8)
