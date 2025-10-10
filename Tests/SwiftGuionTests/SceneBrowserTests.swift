@@ -292,9 +292,34 @@ final class SceneBrowserTests: XCTestCase {
 
     func testMultipleChapters() throws {
         let fountainPath = try Fijos.getFixture("test", extension: "fountain").path
+        print("\n=== DEBUG: Loading file from: \(fountainPath) ===")
 
         let script = try FountainScript(file: fountainPath)
+        print("Loaded \(script.elements.count) elements")
+
+        // Debug: Check for Section Headings
+        let sectionHeadings = script.elements.filter { $0.elementType == "Section Heading" }
+        print("Found \(sectionHeadings.count) Section Headings")
+        for heading in sectionHeadings.prefix(10) {
+            print("  - Depth \(heading.sectionDepth): '\(heading.elementText)'")
+        }
+
+        let outline = script.extractOutline()
+
+        // Debug: Print all level 2 elements
+        print("\n=== DEBUG: All Level 2 Elements ===")
+        let level2 = outline.filter { $0.level == 2 && $0.type == "sectionHeader" }
+        for element in level2 {
+            print("[\(element.index)] '\(element.string)' - isChapter:\(element.isChapter) END:\(element.isEndMarker) ERROR:\(element.hasHierarchyError)")
+        }
+
         let browserData = script.extractSceneBrowserData()
+
+        print("\n=== DEBUG: Chapters Found ===")
+        for (index, chapter) in browserData.chapters.enumerated() {
+            print("[\(index)] '\(chapter.title)'")
+        }
+        print("Total chapters: \(browserData.chapters.count)\n")
 
         // test.fountain should have multiple chapters
         XCTAssertGreaterThan(browserData.chapters.count, 1, "Should have multiple chapters")

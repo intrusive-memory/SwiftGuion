@@ -131,7 +131,8 @@ extension FountainScript {
                 var sceneDirective: String? = nil
                 var sceneDirectiveDescription: String? = nil
                 var isEndMarker = false
-                
+                var hasHierarchyError = false
+
                 // Check if this is an END marker for level 2 (chapter) elements
                 if level == 2 && outlineType == "sectionHeader" {
                     let trimmedText = element.elementText.trimmingCharacters(in: .whitespaces).uppercased()
@@ -141,6 +142,12 @@ extension FountainScript {
                         if words.first == "END" {
                             isEndMarker = true
                         }
+                    }
+
+                    // Check if this is a technical directive at the wrong level (should be level 3)
+                    let technicalDirectives = ["SHOT:", "CUT TO:", "FADE IN:", "FADE OUT:", "DISSOLVE TO:", "MATCH CUT:", "SMASH CUT:"]
+                    if technicalDirectives.contains(where: { trimmedText.hasPrefix($0) }) {
+                        hasHierarchyError = true
                     }
                 }
                 
@@ -209,7 +216,9 @@ extension FountainScript {
                     parentId: parentId,
                     childIds: [],
                     isEndMarker: isEndMarker,
-                    sceneId: linkedSceneId
+                    sceneId: linkedSceneId,
+                    isSynthetic: false,
+                    hasHierarchyError: hasHierarchyError
                 )
 
                 outline.append(outlineElement)

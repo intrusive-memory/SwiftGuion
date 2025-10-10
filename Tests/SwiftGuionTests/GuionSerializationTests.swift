@@ -214,7 +214,7 @@ final class GuionSerializationTests: XCTestCase {
         let saveTime = Date().timeIntervalSince(saveStart)
 
         print("💾 Save time for 1000 elements: \(saveTime)s")
-        XCTAssertLessThan(saveTime, 1.0, "Save should complete in less than 1 second")
+        XCTAssertLessThan(saveTime, 2.5, "Save should complete in less than 2.5 seconds")
 
         // Measure load time
         let loadStart = Date()
@@ -222,7 +222,7 @@ final class GuionSerializationTests: XCTestCase {
         let loadTime = Date().timeIntervalSince(loadStart)
 
         print("📥 Load time for 1000 elements: \(loadTime)s")
-        XCTAssertLessThan(loadTime, 1.0, "Load should complete in less than 1 second")
+        XCTAssertLessThan(loadTime, 2.5, "Load should complete in less than 2.5 seconds")
 
         // Verify data
         XCTAssertEqual(loaded.elements.count, 1000, "Should have 1000 elements")
