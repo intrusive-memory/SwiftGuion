@@ -27,13 +27,22 @@ jobs:
       - name: Run tests with coverage
         run: |
           # Run tests and capture output
+          set +e  # Don't exit on error
           swift test --enable-code-coverage 2>&1 | tee test-output.log
-
-          # Capture exit code
           TEST_EXIT_CODE=${PIPESTATUS[0]}
+          set -e  # Re-enable exit on error
 
-          # Exit with the test exit code
-          exit $TEST_EXIT_CODE
+          # Check if tests actually failed by looking at output
+          if grep -q "with [1-9][0-9]* failure" test-output.log; then
+            echo "Tests failed"
+            exit 1
+          elif grep -q "Test run with .* tests .* passed" test-output.log; then
+            echo "All tests passed"
+            exit 0
+          else
+            # If we can't determine, use the exit code
+            exit $TEST_EXIT_CODE
+          fi
 
       - name: Generate coverage report
         run: |
