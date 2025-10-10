@@ -58,13 +58,10 @@ public class FountainScript {
         cachedContent = try String(contentsOfFile: path, encoding: .utf8)
 
         switch parser {
-        case .fast:
+        case .fast, .regex:
             let fountainParser = try FastFountainParser(file: path)
             elements = fountainParser.elements
             titlePage = fountainParser.titlePage
-        case .regex:
-            elements = try FountainParser.parseBody(ofFile: path)
-            titlePage = try FountainParser.parseTitlePage(ofFile: path)
         }
     }
 
@@ -75,13 +72,10 @@ public class FountainScript {
         cachedContent = string
 
         switch parser {
-        case .fast:
+        case .fast, .regex:
             let fountainParser = FastFountainParser(string: string)
             elements = fountainParser.elements
             titlePage = fountainParser.titlePage
-        case .regex:
-            elements = try FountainParser.parseBody(ofString: string)
-            titlePage = try FountainParser.parseTitlePage(ofString: string)
         }
     }
 

@@ -141,7 +141,13 @@ public struct OutlineElement: Codable {
     
     /// Returns true if this is a chapter-level header (level 2)
     public var isChapter: Bool {
-        return level == 2 && type == "sectionHeader"
+        guard level == 2 && type == "sectionHeader" && !isEndMarker else { return false }
+
+        // Filter out technical directives (SHOT:, CUT TO:, etc.)
+        let upperString = string.uppercased()
+        let technicalDirectives = ["SHOT:", "CUT TO:", "FADE IN:", "FADE OUT:", "DISSOLVE TO:", "MATCH CUT:", "SMASH CUT:"]
+
+        return !technicalDirectives.contains { upperString.hasPrefix($0) }
     }
     
     /// Returns true if this is the main title (level 1)

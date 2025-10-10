@@ -65,7 +65,9 @@ extension FountainScript {
                 sceneDirectiveDescription: nil,
                 parentId: nil,
                 childIds: [],
-                isEndMarker: false
+                isEndMarker: false,
+                sceneId: nil,
+                isSynthetic: true
             )
             outline.append(titleElement)
             parentStack.append(titleElement)
@@ -147,14 +149,15 @@ extension FountainScript {
                     let fullText = element.elementText.trimmingCharacters(in: .whitespaces)
                     var directiveText = fullText
 
-                    if let markerRange = directiveText.range(of: "S#") {
-                        directiveText = String(directiveText[..<markerRange.lowerBound]).trimmingCharacters(in: .whitespaces)
+                    // Extract scene directive description (everything after S#)
+                    if let markerRange = fullText.range(of: "S#") {
+                        sceneDirectiveDescription = String(fullText[markerRange.lowerBound...]).trimmingCharacters(in: .whitespaces)
+                        directiveText = String(fullText[..<markerRange.lowerBound]).trimmingCharacters(in: .whitespaces)
                     }
 
+                    // Extract directive name (handle colon separator if present)
                     if let colonIndex = directiveText.firstIndex(of: ":") {
                         let beforeColon = String(directiveText[..<colonIndex]).trimmingCharacters(in: .whitespaces)
-                        let afterColon = String(directiveText[directiveText.index(after: colonIndex)...]).trimmingCharacters(in: .whitespaces)
-                        sceneDirectiveDescription = afterColon
                         directiveText = beforeColon
                     }
 
