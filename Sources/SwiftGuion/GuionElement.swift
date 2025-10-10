@@ -26,19 +26,128 @@
 
 import Foundation
 
-/// Protocol defining the core properties of a screenplay element
+/// Protocol defining the core properties of a screenplay element.
+///
+/// This protocol defines the fundamental properties that all screenplay elements must have,
+/// regardless of their storage mechanism (in-memory, SwiftData, etc.).
+///
+/// ## Overview
+///
+/// Screenplay elements represent the building blocks of a script, including:
+/// - Scene headings (sluglines)
+/// - Action lines
+/// - Character names
+/// - Dialogue
+/// - Parentheticals
+/// - Transitions
+/// - And more
+///
+/// ## Conforming Types
+///
+/// - ``GuionElement``: Lightweight struct for in-memory representation
+/// - ``GuionElementModel``: SwiftData model for persistent storage
+///
+/// ## Topics
+///
+/// ### Element Properties
+/// - ``elementType``
+/// - ``elementText``
+///
+/// ### Formatting
+/// - ``isCentered``
+/// - ``isDualDialogue``
+///
+/// ### Scene Information
+/// - ``sceneNumber``
+/// - ``sectionDepth``
+/// - ``sceneId``
 public protocol GuionElementProtocol {
+    /// The type of screenplay element (e.g., "Scene Heading", "Action", "Character", "Dialogue").
+    ///
+    /// Common element types include:
+    /// - "Scene Heading": INT. LOCATION - DAY
+    /// - "Action": Narrative description
+    /// - "Character": Character name
+    /// - "Dialogue": Character speech
+    /// - "Parenthetical": (action while speaking)
+    /// - "Transition": FADE TO:
+    /// - "Section Heading": # Act One
     var elementType: String { get set }
+
+    /// The actual text content of the element.
     var elementText: String { get set }
+
+    /// Whether this element should be centered on the page.
+    ///
+    /// Centered elements are typically used for titles or special formatting.
     var isCentered: Bool { get set }
+
+    /// Whether this element is part of dual dialogue.
+    ///
+    /// Dual dialogue allows two characters to speak simultaneously,
+    /// displayed in side-by-side columns.
     var isDualDialogue: Bool { get set }
+
+    /// The scene number, if this is a scene heading.
+    ///
+    /// Scene numbers can be automatic (1, 2, 3...) or custom (#123A#).
     var sceneNumber: String? { get set }
+
+    /// The depth level for section headings.
+    ///
+    /// Section headings use `#` characters to indicate hierarchy:
+    /// - `# Act One` = depth 1
+    /// - `## Scene 1` = depth 2
+    /// - `### Beat` = depth 3
     var sectionDepth: Int { get set }
+
+    /// Unique identifier for the scene, used to correlate elements across parsing.
+    ///
+    /// This UUID helps track scenes even when their text changes or when
+    /// multiple scenes have identical headings.
     var sceneId: String? { get set }
 }
 
-/// Lightweight struct representing a screenplay element
-/// Used by parsers and FountainScript for in-memory representation
+/// Lightweight struct representing a screenplay element.
+///
+/// This struct provides an efficient, value-type representation of screenplay elements
+/// suitable for parsing, in-memory manipulation, and export operations.
+///
+/// ## Overview
+///
+/// `GuionElement` is the primary type used by ``FountainScript`` for parsing and
+/// storing screenplay elements. It can be easily converted to ``GuionElementModel``
+/// for persistent storage via SwiftData.
+///
+/// ## Example
+///
+/// ```swift
+/// // Create a scene heading
+/// let sceneHeading = GuionElement(
+///     elementType: "Scene Heading",
+///     elementText: "INT. COFFEE SHOP - DAY"
+/// )
+///
+/// // Create dialogue
+/// var character = GuionElement(elementType: "Character", elementText: "JOHN")
+/// var dialogue = GuionElement(elementType: "Dialogue", elementText: "Hello, world!")
+/// ```
+///
+/// ## Topics
+///
+/// ### Creating Elements
+/// - ``init(elementType:elementText:)``
+/// - ``init(type:text:)``
+/// - ``init(from:)``
+///
+/// ### Element Properties
+/// - ``elementType``
+/// - ``elementText``
+/// - ``isCentered``
+/// - ``isDualDialogue``
+/// - ``sceneNumber``
+/// - ``sectionDepth``
+/// - ``sceneId``
 public struct GuionElement: GuionElementProtocol {
     public var elementType: String
     public var elementText: String
@@ -48,6 +157,21 @@ public struct GuionElement: GuionElementProtocol {
     public var sectionDepth: Int
     public var sceneId: String?
 
+    /// Creates a new screenplay element with the specified type and text.
+    ///
+    /// - Parameters:
+    ///   - elementType: The type of element (default: empty string)
+    ///   - elementText: The text content (default: empty string)
+    ///
+    /// - Returns: A new `GuionElement` with default formatting properties
+    ///
+    /// ## Example
+    /// ```swift
+    /// let action = GuionElement(
+    ///     elementType: "Action",
+    ///     elementText: "The door swings open."
+    /// )
+    /// ```
     public init(elementType: String = "", elementText: String = "") {
         self.elementType = elementType
         self.elementText = elementText
@@ -58,11 +182,29 @@ public struct GuionElement: GuionElementProtocol {
         self.sceneId = nil
     }
 
+    /// Creates a new screenplay element with the specified type and text.
+    ///
+    /// This is a convenience initializer with shorter parameter names.
+    ///
+    /// - Parameters:
+    ///   - type: The type of element
+    ///   - text: The text content
     public init(type: String, text: String) {
         self.init(elementType: type, elementText: text)
     }
 
-    /// Initialize from any GuionElementProtocol conforming type
+    /// Initialize from any `GuionElementProtocol` conforming type.
+    ///
+    /// This initializer allows conversion between different implementations
+    /// of screenplay elements (e.g., from ``GuionElementModel`` to ``GuionElement``).
+    ///
+    /// - Parameter element: Any type conforming to `GuionElementProtocol`
+    ///
+    /// ## Example
+    /// ```swift
+    /// let model: GuionElementModel = // ... from SwiftData
+    /// let element = GuionElement(from: model)
+    /// ```
     public init<T: GuionElementProtocol>(from element: T) {
         self.elementType = element.elementType
         self.elementText = element.elementText

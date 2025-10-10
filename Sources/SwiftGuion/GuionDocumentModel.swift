@@ -9,6 +9,52 @@ import Foundation
 #if canImport(SwiftData)
 import SwiftData
 
+/// SwiftData model representing a complete screenplay document.
+///
+/// This is the root model for screenplay storage, containing all elements,
+/// title page entries, and document metadata.
+///
+/// ## Overview
+///
+/// `GuionDocumentModel` is the persistent storage representation of a screenplay,
+/// designed to work seamlessly with SwiftData for automatic persistence and iCloud sync.
+///
+/// ## Example
+///
+/// ```swift
+/// let document = GuionDocumentModel(filename: "MyScript.guion")
+///
+/// let sceneHeading = GuionElementModel(
+///     elementText: "INT. COFFEE SHOP - DAY",
+///     elementType: "Scene Heading"
+/// )
+/// document.elements.append(sceneHeading)
+///
+/// modelContext.insert(document)
+/// ```
+///
+/// ## Topics
+///
+/// ### Creating Documents
+/// - ``init(filename:rawContent:suppressSceneNumbers:)``
+///
+/// ### Document Properties
+/// - ``filename``
+/// - ``rawContent``
+/// - ``suppressSceneNumbers``
+///
+/// ### Content
+/// - ``elements``
+/// - ``titlePage``
+///
+/// ### Location Management
+/// - ``reparseAllLocations()``
+/// - ``sceneLocations``
+///
+/// ### Serialization
+/// - ``save(to:)``
+/// - ``load(from:in:)``
+/// - ``validate()``
 @Model
 public final class GuionDocumentModel {
     public var filename: String?
@@ -45,6 +91,55 @@ public final class GuionDocumentModel {
     }
 }
 
+/// SwiftData model representing a single screenplay element.
+///
+/// This persistent model stores screenplay elements with automatic scene location
+/// caching for improved performance.
+///
+/// ## Overview
+///
+/// `GuionElementModel` extends ``GuionElementProtocol`` with SwiftData persistence
+/// and intelligent location caching. When a scene heading is created or modified,
+/// the location is automatically parsed and cached for quick access.
+///
+/// ## Example
+///
+/// ```swift
+/// let element = GuionElementModel(
+///     elementText: "INT. COFFEE SHOP - DAY",
+///     elementType: "Scene Heading"
+/// )
+///
+/// // Location is automatically parsed and cached
+/// if let location = element.cachedSceneLocation {
+///     print(location.scene) // "COFFEE SHOP"
+///     print(location.lighting) // .interior
+/// }
+/// ```
+///
+/// ## Topics
+///
+/// ### Creating Elements
+/// - ``init(elementText:elementType:isCentered:isDualDialogue:sceneNumber:sectionDepth:summary:sceneId:)``
+/// - ``init(from:summary:)``
+///
+/// ### Element Properties
+/// - ``elementText``
+/// - ``elementType``
+/// - ``isCentered``
+/// - ``isDualDialogue``
+/// - ``sceneNumber``
+/// - ``sectionDepth``
+/// - ``sceneId``
+/// - ``summary``
+///
+/// ### Location Caching
+/// - ``cachedSceneLocation``
+/// - ``reparseLocation()``
+///
+/// ### Updating Elements
+/// - ``updateText(_:)``
+/// - ``updateType(_:)``
 @Model
 public final class GuionElementModel: GuionElementProtocol {
     public var elementText: String

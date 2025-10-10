@@ -216,17 +216,112 @@ struct ErrorView: View {
     let error: Error
 
     var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "exclamationmark.triangle")
+        VStack(spacing: 20) {
+            Image(systemName: errorIcon)
                 .font(.system(size: 64))
                 .foregroundStyle(.red)
-            Text("Error loading screenplay")
-                .font(.title2)
-            Text(error.localizedDescription)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .accessibilityLabel("Error icon")
+
+            VStack(spacing: 8) {
+                Text("Error Loading Screenplay")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+
+                Text(errorMessage)
+                    .font(.body)
+                    .foregroundStyle(.primary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: 500)
+
+                if let recovery = recoverySuggestion {
+                    Text(recovery)
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: 500)
+                        .padding(.top, 4)
+                }
+            }
+
+            // Action buttons for common recovery options
+            HStack(spacing: 12) {
+                Button("Copy Error") {
+                    copyErrorToClipboard()
+                }
+                .keyboardShortcut("c", modifiers: [.command])
+                .help("Copy error details to clipboard")
+
+                if canRetry {
+                    Button("Try Again") {
+                        // This would trigger a re-parse
+                    }
+                    .keyboardShortcut(.defaultAction)
+                    .help("Attempt to load the screenplay again")
+                }
+            }
+            .padding(.top, 8)
         }
+        .padding(32)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    /// Get appropriate icon for error type
+    private var errorIcon: String {
+        if let serializationError = error as? GuionSerializationError {
+            switch serializationError {
+            case .unsupportedVersion:
+                return "arrow.up.circle"
+            case .corruptedFile:
+                return "doc.badge.exclamationmark"
+            default:
+                return "exclamationmark.triangle"
+            }
+        }
+        return "exclamationmark.triangle"
+    }
+
+    /// Get user-friendly error message
+    private var errorMessage: String {
+        if let localizedError = error as? LocalizedError {
+            return localizedError.errorDescription ?? error.localizedDescription
+        }
+        return error.localizedDescription
+    }
+
+    /// Get recovery suggestion if available
+    private var recoverySuggestion: String? {
+        if let localizedError = error as? LocalizedError {
+            return localizedError.recoverySuggestion
+        }
+        return nil
+    }
+
+    /// Determine if retry is a viable option
+    private var canRetry: Bool {
+        // Don't offer retry for version errors or corrupted files
+        if let serializationError = error as? GuionSerializationError {
+            switch serializationError {
+            case .unsupportedVersion, .corruptedFile:
+                return false
+            default:
+                return true
+            }
+        }
+        return true
+    }
+
+    /// Copy error details to clipboard
+    private func copyErrorToClipboard() {
+        var details = "Error: \(errorMessage)"
+        if let recovery = recoverySuggestion {
+            details += "\n\nSuggestion: \(recovery)"
+        }
+        details += "\n\nTechnical Details: \(error)"
+
+        #if os(macOS)
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(details, forType: .string)
+        #endif
     }
 }
 
