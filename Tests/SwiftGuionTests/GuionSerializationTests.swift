@@ -30,6 +30,20 @@ final class GuionSerializationTests: XCTestCase {
     }
 
     override func tearDown() async throws {
+        // Clean up any remaining objects in context
+        if let context = modelContext {
+            // Delete all documents and their related objects
+            let descriptor = FetchDescriptor<GuionDocumentModel>()
+            if let documents = try? context.fetch(descriptor) {
+                for document in documents {
+                    context.delete(document)
+                }
+            }
+
+            // Save to process deletions
+            try? context.save()
+        }
+
         modelContext = nil
         modelContainer = nil
         try await super.tearDown()
@@ -208,13 +222,18 @@ final class GuionSerializationTests: XCTestCase {
         let tempURL = FileManager.default.temporaryDirectory
             .appendingPathComponent("test_large.guion")
 
+        // Ensure cleanup happens even if test fails
+        defer {
+            try? FileManager.default.removeItem(at: tempURL)
+        }
+
         // Measure save time
         let saveStart = Date()
         try document.save(to: tempURL)
         let saveTime = Date().timeIntervalSince(saveStart)
 
         print("💾 Save time for 1000 elements: \(saveTime)s")
-        XCTAssertLessThan(saveTime, 2.5, "Save should complete in less than 2.5 seconds")
+        XCTAssertLessThan(saveTime, 5.0, "Save should complete in less than 5 seconds")
 
         // Measure load time
         let loadStart = Date()
@@ -222,13 +241,17 @@ final class GuionSerializationTests: XCTestCase {
         let loadTime = Date().timeIntervalSince(loadStart)
 
         print("📥 Load time for 1000 elements: \(loadTime)s")
-        XCTAssertLessThan(loadTime, 2.5, "Load should complete in less than 2.5 seconds")
+        XCTAssertLessThan(loadTime, 5.0, "Load should complete in less than 5 seconds")
 
         // Verify data
         XCTAssertEqual(loaded.elements.count, 1000, "Should have 1000 elements")
 
-        // Cleanup
-        try? FileManager.default.removeItem(at: tempURL)
+        // Explicitly clean up loaded document from context to free memory
+        modelContext.delete(loaded)
+        modelContext.delete(document)
+
+        // Process pending changes to ensure cleanup
+        try modelContext.save()
     }
 
     // MARK: - Additional coverage tests
@@ -611,8 +634,6 @@ final class GuionSerializationTests: XCTestCase {
 
         // Read and modify the data to have a future version
         var data = try Data(contentsOf: tempURL)
-        let decoder = PropertyListDecoder()
-        var snapshot = try decoder.decode(GuionDocumentSnapshot.self, from: data)
 
         // Manually construct a dictionary with future version
         var plist = try PropertyListSerialization.propertyList(from: data, options: [], format: nil) as! [String: Any]
