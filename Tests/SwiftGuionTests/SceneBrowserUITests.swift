@@ -507,6 +507,130 @@ final class SceneBrowserUITests: XCTestCase {
         XCTAssertTrue(duplicates.isEmpty, "All scene IDs should be unique. Duplicates: \(duplicates)")
     }
 
+    func testSyntheticChapterWithNoChapters() throws {
+        // Create a simple fountain script without chapter markers
+        let fountainText = """
+# Script Title
+
+### ACT ONE
+
+INT. ROOM - DAY
+
+Action line.
+
+CHARACTER
+Dialogue.
+"""
+        let tempDir = FileManager.default.temporaryDirectory
+        let tempURL = tempDir.appendingPathComponent("test-no-chapters.fountain")
+        try fountainText.write(to: tempURL, atomically: true, encoding: .utf8)
+
+        defer {
+            try? FileManager.default.removeItem(at: tempURL)
+        }
+
+        let script = try FountainScript(file: tempURL.path)
+        let browserData = script.extractSceneBrowserData()
+
+        // Should create a synthetic chapter
+        XCTAssertEqual(browserData.chapters.count, 1, "Should have one synthetic chapter")
+        XCTAssertEqual(browserData.chapters[0].title, "Scenes", "Synthetic chapter should be named 'Scenes'")
+        XCTAssertTrue(browserData.chapters[0].element.isSynthetic, "Synthetic chapter should be marked as synthetic")
+
+        // Should contain scene groups
+        XCTAssertGreaterThan(browserData.chapters[0].sceneGroups.count, 0, "Synthetic chapter should have scene groups")
+    }
+
+    func testSyntheticChapterWithNoSceneGroups() throws {
+        // Create a fountain script with only scenes, no structure
+        let fountainText = """
+INT. ROOM - DAY
+
+Action line.
+
+EXT. STREET - NIGHT
+
+More action.
+"""
+        let tempDir = FileManager.default.temporaryDirectory
+        let tempURL = tempDir.appendingPathComponent("test-no-groups.fountain")
+        try fountainText.write(to: tempURL, atomically: true, encoding: .utf8)
+
+        defer {
+            try? FileManager.default.removeItem(at: tempURL)
+        }
+
+        let script = try FountainScript(file: tempURL.path)
+        let outline = script.extractOutline()
+
+        print("📋 Outline elements:")
+        for element in outline {
+            print("  - \(element.type) level:\(element.level) parent:\(element.parentId ?? "nil") '\(element.string)'")
+        }
+
+        let browserData = script.extractSceneBrowserData()
+
+        print("📊 Browser data:")
+        print("  Chapters: \(browserData.chapters.count)")
+        for chapter in browserData.chapters {
+            print("  Chapter: '\(chapter.title)'")
+            for group in chapter.sceneGroups {
+                print("    Group: '\(group.title)' (\(group.scenes.count) scenes)")
+                for scene in group.scenes {
+                    print("      Scene: '\(scene.slugline)'")
+                }
+            }
+        }
+
+        // Should create synthetic chapter
+        XCTAssertEqual(browserData.chapters.count, 1, "Should have one synthetic chapter")
+
+        // The synthetic chapter will contain whatever structure is found
+        // If there are scene headers at level 0, they become scene groups
+        XCTAssertGreaterThan(browserData.chapters[0].sceneGroups.count, 0, "Should have scene groups")
+    }
+
+    func testSyntheticElementsNotExported() throws {
+        // Create a synthetic element directly
+        let syntheticElement = OutlineElement(
+            id: "synthetic-test",
+            index: -1,
+            level: 2,
+            range: [0, 0],
+            rawString: "## Scenes",
+            string: "Scenes",
+            type: "sectionHeader",
+            isSynthetic: true
+        )
+
+        // Encode the synthetic element
+        let encoder = JSONEncoder()
+        let elementData = try encoder.encode(syntheticElement)
+
+        // Verify it's empty (synthetic elements skip encoding)
+        let elementJSON = String(data: elementData, encoding: .utf8)!
+        XCTAssertEqual(elementJSON, "{}", "Synthetic elements should encode as empty JSON object")
+
+        // Test a non-synthetic element for comparison
+        let regularElement = OutlineElement(
+            id: "regular-test",
+            index: 1,
+            level: 2,
+            range: [0, 10],
+            rawString: "## Chapter 1",
+            string: "Chapter 1",
+            type: "sectionHeader",
+            isSynthetic: false
+        )
+
+        let regularData = try encoder.encode(regularElement)
+        let regularJSON = String(data: regularData, encoding: .utf8)!
+        XCTAssertNotEqual(regularJSON, "{}", "Regular elements should encode with full data")
+        XCTAssertTrue(regularJSON.contains("Chapter 1"), "Regular element JSON should contain the element string")
+
+        print("✅ Verified synthetic elements are not exported")
+    }
+
     // MARK: - Helper Methods
 
     private func createSampleBrowserData() -> SceneBrowserData {

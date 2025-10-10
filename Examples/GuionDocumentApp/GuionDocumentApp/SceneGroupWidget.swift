@@ -54,7 +54,7 @@ struct SceneGroupWidget: View {
                     Text(sceneGroup.title)
                         .font(.title3)
                         .fontWeight(.semibold)
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(sceneGroup.element.isSynthetic ? .secondary : .primary)
 
                     if let directive = sceneGroup.directive,
                        let description = sceneGroup.directiveDescription {

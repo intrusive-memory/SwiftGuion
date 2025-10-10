@@ -46,7 +46,7 @@ struct ChapterWidget: View {
                 Text(chapter.title)
                     .font(.title2)
                     .bold()
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(chapter.element.isSynthetic ? .secondary : .primary)
             }
         )
         .accessibilityElement(children: .contain)

@@ -17,22 +17,123 @@ extension FountainScript {
     /// - Detects and attaches OVER BLACK content as preScene elements
     /// - Uses existing outline infrastructure for hierarchy
     ///
+    /// If no chapters exist, creates a synthetic chapter containing all content.
+    /// If no outline elements exist, creates scenes from all scene headers.
+    ///
     /// - Returns: SceneBrowserData containing the complete hierarchy
     public func extractSceneBrowserData() -> SceneBrowserData {
         let outline = extractOutline()
 
         // Find the root/title element (Level 1)
-        let title = outline.first { $0.isMainTitle }
+        var title = outline.first { $0.isMainTitle }
+
+        // If no level 1 title, create synthetic one from screenplay title
+        if title == nil {
+            var titleText = "Untitled"
+
+            // Extract title from title page
+            for titlePageSection in titlePage {
+                if let titleArray = titlePageSection["Title"] ?? titlePageSection["title"] {
+                    if let firstTitle = titleArray.first, !firstTitle.trimmingCharacters(in: .whitespaces).isEmpty {
+                        titleText = firstTitle.trimmingCharacters(in: .whitespaces)
+                        break
+                    }
+                }
+            }
+
+            title = OutlineElement(
+                id: "synthetic-title",
+                index: -1,
+                level: 1,
+                range: [0, 0],
+                rawString: "# \(titleText)",
+                string: titleText,
+                type: "sectionHeader",
+                isSynthetic: true
+            )
+        }
 
         // Find all chapters (Level 2 elements)
         let chapterElements = outline.filter { $0.isChapter }
 
-        // Build chapter data with scene groups and scenes
-        let chapters = chapterElements.map { chapterElement in
-            buildChapterData(chapter: chapterElement, outline: outline)
+        // Build chapter data
+        let chapters: [ChapterData]
+
+        if chapterElements.isEmpty {
+            // No chapters found - create synthetic hierarchy
+            chapters = buildSyntheticHierarchy(outline: outline, titleId: title!.id)
+        } else {
+            // Build chapter data with scene groups and scenes
+            chapters = chapterElements.map { chapterElement in
+                buildChapterData(chapter: chapterElement, outline: outline)
+            }
         }
 
         return SceneBrowserData(title: title, chapters: chapters)
+    }
+
+    /// Build synthetic hierarchy when outline structure is missing
+    /// Creates Level 2 "Scenes" and Level 3 "Main" elements as needed
+    private func buildSyntheticHierarchy(outline: OutlineList, titleId: String) -> [ChapterData] {
+        // Find all scene groups (Level 3) - these may exist even without chapters
+        var sceneGroupElements = outline.filter { $0.level == 3 && $0.type == "sectionHeader" }
+
+        // Find all scenes
+        let allScenes = outline.filter { $0.type == "sceneHeader" }
+
+        if allScenes.isEmpty {
+            // No scenes at all - return empty
+            return []
+        }
+
+        // If no level 3 scene groups exist, create synthetic "Main"
+        if sceneGroupElements.isEmpty {
+            let syntheticMainGroup = OutlineElement(
+                id: "synthetic-main",
+                index: -3,
+                level: 3,
+                range: [0, 0],
+                rawString: "### Main",
+                string: "Main",
+                type: "sectionHeader",
+                parentId: "synthetic-scenes",
+                isSynthetic: true
+            )
+            sceneGroupElements = [syntheticMainGroup]
+        }
+
+        // Build scene groups with collected scenes
+        let sceneGroups = sceneGroupElements.map { sceneGroupElement in
+            // If this is the synthetic main group, assign all scenes to it
+            if sceneGroupElement.isSynthetic {
+                return SceneGroupData(
+                    element: sceneGroupElement,
+                    scenes: buildScenesWithOverBlack(sceneElements: allScenes, outline: outline)
+                )
+            } else {
+                return buildSceneGroupData(sceneGroup: sceneGroupElement, outline: outline)
+            }
+        }
+
+        // Create synthetic "Scenes" chapter (Level 2)
+        let syntheticScenesChapter = OutlineElement(
+            id: "synthetic-scenes",
+            index: -2,
+            level: 2,
+            range: [0, 0],
+            rawString: "## Scenes",
+            string: "Scenes",
+            type: "sectionHeader",
+            parentId: titleId,
+            isSynthetic: true
+        )
+
+        let chapterData = ChapterData(
+            element: syntheticScenesChapter,
+            sceneGroups: sceneGroups
+        )
+
+        return [chapterData]
     }
 
     /// Build chapter data with its scene groups
@@ -52,15 +153,50 @@ extension FountainScript {
 
     /// Build scene group data with its scenes
     private func buildSceneGroupData(sceneGroup: OutlineElement, outline: OutlineList) -> SceneGroupData {
-        // Find scenes that are children of this scene group
-        let sceneElements = outline.filter { element in
+        // Find ALL scene headers that are descendants of this scene group
+        // This handles the case where scenes might have been incorrectly nested
+        var sceneElements: [OutlineElement] = []
+
+        // Start with direct children
+        let directChildren = outline.filter { element in
             element.type == "sceneHeader" && element.parentId == sceneGroup.id
+        }
+
+        // For each direct child scene, also collect any scenes that mistakenly have it as a parent
+        for directScene in directChildren {
+            sceneElements.append(directScene)
+
+            // Find any scenes that were incorrectly nested under this scene
+            let nestedScenes = collectNestedScenes(under: directScene, in: outline)
+            sceneElements.append(contentsOf: nestedScenes)
+        }
+
+        // If no direct children but the scene group itself is a scene header, use it
+        if sceneElements.isEmpty && sceneGroup.type == "sceneHeader" {
+            sceneElements = [sceneGroup]
         }
 
         // Build scene data with OVER BLACK detection
         let scenes = buildScenesWithOverBlack(sceneElements: sceneElements, outline: outline)
 
         return SceneGroupData(element: sceneGroup, scenes: scenes)
+    }
+
+    /// Recursively collect scenes that were nested under another scene
+    private func collectNestedScenes(under parent: OutlineElement, in outline: OutlineList) -> [OutlineElement] {
+        var result: [OutlineElement] = []
+
+        let children = outline.filter { element in
+            element.type == "sceneHeader" && element.parentId == parent.id
+        }
+
+        for child in children {
+            result.append(child)
+            // Recursively collect any further nested scenes
+            result.append(contentsOf: collectNestedScenes(under: child, in: outline))
+        }
+
+        return result
     }
 
     /// Build scene data with OVER BLACK detection and attachment

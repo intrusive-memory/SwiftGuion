@@ -26,7 +26,7 @@ struct SceneBrowserWidget: View {
                     Text(title.string)
                         .font(.largeTitle)
                         .bold()
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(title.isSynthetic ? .secondary : .primary)
                         .accessibilityAddTraits(.isHeader)
                         .accessibilityLabel("Script title: \(title.string)")
 

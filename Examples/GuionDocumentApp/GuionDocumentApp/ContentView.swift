@@ -17,31 +17,48 @@ struct ContentView: View {
     @State private var isParsing = false
     @State private var parseError: Error?
     @State private var showCharacterInspector = false
-    @State private var showSceneBrowser = false
 
     var body: some View {
         let _ = print("🔄 ContentView body rendered: \(configuration.document.elements.count) elements, isParsing: \(isParsing), rawContent: \(configuration.document.rawContent?.count ?? 0) chars")
 
-        HStack(spacing: 0) {
-            // Main content
-            VStack(spacing: 0) {
-                if isParsing {
-                    ProgressView("Loading screenplay...")
-                } else if let error = parseError {
-                    ErrorView(error: error)
-                } else if configuration.document.elements.isEmpty {
-                    EmptyScreenplayView()
-                } else {
-                    ScreenplayView(document: configuration.document)
+        VStack(spacing: 0) {
+            HStack(spacing: 0) {
+                // Main content - Scene Browser
+                VStack(spacing: 0) {
+                    if let error = parseError {
+                        ErrorView(error: error)
+                    } else if configuration.document.elements.isEmpty && !isParsing {
+                        EmptyScreenplayView()
+                    } else if !configuration.document.elements.isEmpty {
+                        // Scene Browser as main content
+                        let script = GuionDocumentParserSwiftData.toFountainScript(from: configuration.document)
+                        SceneBrowserWidget(script: script)
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                // Character inspector (right side panel)
+                if showCharacterInspector && !configuration.document.elements.isEmpty {
+                    Divider()
+                    CharacterInspectorView(characters: configuration.document.extractCharacters())
+                        .frame(minWidth: 300, idealWidth: 300, maxWidth: 300, maxHeight: .infinity)
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            // Character inspector (right side)
-            if showCharacterInspector && !configuration.document.elements.isEmpty {
+            // Progress bar at bottom
+            if isParsing {
                 Divider()
-                CharacterInspectorView(characters: configuration.document.extractCharacters())
-                    .frame(maxHeight: .infinity)
+                HStack(spacing: 12) {
+                    ProgressView()
+                        .scaleEffect(0.7)
+                    Text("Loading screenplay...")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(Color(nsColor: .controlBackgroundColor))
             }
         }
         #if os(macOS)
@@ -59,30 +76,12 @@ struct ContentView: View {
                 .help("Toggle character inspector")
                 .disabled(configuration.document.elements.isEmpty)
                 .keyboardShortcut("i", modifiers: [.command, .option])
-
-                Button(action: { showSceneBrowser.toggle() }) {
-                    Label("Scene Browser", systemImage: "list.bullet.rectangle")
-                }
-                .help("Show scene browser")
-                .disabled(configuration.document.elements.isEmpty)
-                .keyboardShortcut("b", modifiers: [.command, .option])
             }
         }
         #endif
         .task {
             await parseDocumentIfNeeded()
         }
-        #if os(macOS)
-        .sheet(isPresented: $showSceneBrowser) {
-            if !configuration.document.elements.isEmpty,
-               let rawContent = configuration.document.rawContent {
-                // Convert GuionDocumentModel to FountainScript
-                let script = GuionDocumentParserSwiftData.toFountainScript(from: configuration.document)
-                SceneBrowserWidget(script: script)
-                    .frame(minWidth: 500, minHeight: 600)
-            }
-        }
-        #endif
     }
 
     private func parseDocumentIfNeeded() async {
