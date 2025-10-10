@@ -23,6 +23,7 @@ struct GuionDocumentConfiguration: FileDocument {
         self.document = document
     }
 
+    @MainActor
     init(configuration: ReadConfiguration) throws {
         // Check if this is a native .guion file or an import format
         if configuration.contentType == .guionDocument {
