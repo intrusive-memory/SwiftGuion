@@ -8,3 +8,4 @@ DerivedData/
 .netrc
 Tests/SwiftFountainTests/generated-*.json
 generated-outline.json
+/test-output.log

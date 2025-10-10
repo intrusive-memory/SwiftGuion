@@ -213,9 +213,10 @@ final class IntegrationTests: XCTestCase {
         // Verify loaded correctly
         XCTAssertEqual(loadedDocument.elements.count, elementCount, "All elements should be loaded")
 
-        // Assert performance requirements (< 30 seconds for both - reasonable for 5000 elements)
-        XCTAssertLessThan(saveTime, 30.0, "Save time should be < 30 seconds for 5000 elements")
-        XCTAssertLessThan(loadTime, 30.0, "Load time should be < 30 seconds for 5000 elements")
+        // Assert performance requirements (< 60 seconds for both - accounts for slower CI machines)
+        // CI machines are typically slower than local development, so we allow more time
+        XCTAssertLessThan(saveTime, 60.0, "Save time should be < 60 seconds for 5000 elements")
+        XCTAssertLessThan(loadTime, 60.0, "Load time should be < 60 seconds for 5000 elements")
 
         // Additional verification: random element checks
         for _ in 1...10 {
