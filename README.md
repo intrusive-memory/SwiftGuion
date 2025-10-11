@@ -4,7 +4,7 @@
 
 ![SwiftGuion File Flow](images/swiftguion_file_flow.svg)
 
-[![Tests](https://github.com/stovak/SwiftGuion/actions/workflows/tests.yml/badge.svg)](https://github.com/stovak/SwiftGuion/actions/workflows/tests.yml)
+[![Tests](https://github.com/intrusive-memory/SwiftGuion/actions/workflows/tests.yml/badge.svg)](https://github.com/intrusive-memory/SwiftGuion/actions/workflows/tests.yml)
 
 A performant Swift parser for Fountain, FDX, and Highland files that creates SwiftData-compatible objects without modifying source files.
 
@@ -48,7 +48,7 @@ Add SwiftGuion to your Swift package dependencies:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/stovak/SwiftGuion.git", from: "1.0.0")
+    .package(url: "https://github.com/intrusive-memory/SwiftGuion.git", from: "1.0.0")
 ]
 ```
 

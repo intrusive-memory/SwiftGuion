@@ -7,7 +7,7 @@ SwiftGuion is a Swift package for parsing and exporting Fountain-formatted scree
 Add the package as a dependency in your `Package.swift` (macOS 15 or newer is required):
 
 ```swift
-.package(url: "https://github.com/stovak/SwiftGuion.git", from: "1.0.0")
+.package(url: "https://github.com/intrusive-memory/SwiftGuion.git", from: "1.0.0")
 ```
 
 Then depend on the `SwiftGuion` product from your target.
