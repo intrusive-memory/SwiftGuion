@@ -1,6 +1,6 @@
 # SwiftGuion Sample App Requirements
 
-**Document Version:** 1.1
+**Document Version:** 1.2
 **Date:** October 12, 2025
 **Status:** Draft
 
@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-This document defines the requirements for a macOS sample application that demonstrates the capabilities of the SwiftGuion library. The app will showcase file format import/export capabilities (.fountain, .highland, .fdx, .guion), visual screenplay structure browsing, and native document-based architecture.
+This document defines the requirements for **GuionView**, a macOS sample application that demonstrates the capabilities of the SwiftGuion library. The app will showcase file format import/export capabilities (.fountain, .highland, .fdx, .guion), visual screenplay structure browsing, and native document-based architecture.
 
 ---
 
@@ -16,11 +16,12 @@ This document defines the requirements for a macOS sample application that demon
 
 ### 1.1 Purpose
 
-The SwiftGuion Sample App serves as:
+**GuionView** serves as:
 - A reference implementation for developers using the SwiftGuion library
-- A demonstration of the library's core features
+- A demonstration of the library's core features, particularly the GuionViewer component
 - A working example of document-based app architecture with SwiftData
 - A testing tool for screenplay file format compatibility
+- A simple, focused viewer application for .guion screenplay files
 
 ### 1.2 Target Audience
 
@@ -449,7 +450,52 @@ The SwiftGuion Sample App serves as:
 
 ## 3. Non-Functional Requirements
 
-### 3.1 Platform Requirements
+### 3.1 Application Identity
+
+**REQ-APP-001**: Application Name and Branding
+**Priority**: P0 (Critical)
+**Description**: The application shall be named "GuionView" across all user-facing elements.
+
+**Acceptance Criteria:**
+- App name in Finder: **GuionView**
+- App name in menu bar: **GuionView**
+- Bundle display name (CFBundleDisplayName): **GuionView**
+- Bundle name (CFBundleName): **GuionView**
+- Product name in Xcode: **GuionView**
+- About panel shows "GuionView" as application name
+- Dock icon label shows "GuionView"
+- No references to "GuionDocumentApp" or other placeholder names in UI
+
+---
+
+**REQ-APP-002**: Application Icon
+**Priority**: P0 (Critical)
+**Description**: The application icon shall be a creative reinterpretation of the macOS Preview.app icon, clearly distinguishing it as a screenplay viewer.
+
+**Acceptance Criteria:**
+- Icon design inspired by macOS Preview.app icon (magnifying glass aesthetic)
+- Distinguishing elements that identify it as screenplay-related:
+  - Incorporate screenplay/script visual elements (e.g., stacked pages, scene markers, or screenplay formatting indicators)
+  - Use complementary but distinct color palette from Preview.app
+  - Maintain macOS design language (rounded square, gradient, shadow)
+- All required icon sizes provided (1024x1024, 512x512, 256x256, 128x128, 64x64, 32x32, 16x16)
+- Icons work well at all sizes (details remain visible at 16x16)
+- Retina @2x versions provided for all sizes
+- Icon passes macOS icon design guidelines
+- Icon exported in .icns format for Assets.xcassets
+- Document type icons use consistent visual language
+
+**Design Notes:**
+- Preview.app uses a magnifying glass over layered documents
+- GuionView could use similar magnifying glass but with screenplay-specific elements:
+  - Pages showing screenplay formatting (scene headings, dialogue)
+  - Film/clapperboard iconography
+  - Script/document imagery with distinct screenplay layout
+- Color suggestions: Complementary to Preview.app's blue/gray tones (e.g., warmer tones, screenplay-green, or film-amber)
+
+---
+
+### 3.2 Platform Requirements
 
 **REQ-PLAT-001**: macOS Version Support
 **Priority**: P0 (Critical)
@@ -475,7 +521,20 @@ The SwiftGuion Sample App serves as:
 
 ---
 
-### 3.2 Reliability
+**REQ-PLAT-003**: Bundle Configuration
+**Priority**: P0 (Critical)
+**Description**: The app shall use proper bundle identifiers and naming conventions.
+
+**Acceptance Criteria:**
+- Bundle identifier: **com.swiftguion.GuionView**
+- Bundle display name: **GuionView**
+- Product name: **GuionView**
+- Executable name: **GuionView**
+- No placeholder or generic identifiers in production build
+
+---
+
+### 3.3 Reliability
 
 **REQ-REL-001**: Error Handling
 **Priority**: P0 (Critical)
@@ -503,7 +562,7 @@ The SwiftGuion Sample App serves as:
 
 ---
 
-### 3.3 Accessibility
+### 3.4 Accessibility
 
 **REQ-ACC-001**: VoiceOver Support
 **Priority**: P1 (High)
@@ -543,7 +602,7 @@ The SwiftGuion Sample App serves as:
 
 ---
 
-### 3.4 Usability
+### 3.5 Usability
 
 **REQ-USE-001**: First-Run Experience
 **Priority**: P2 (Medium)
@@ -574,14 +633,16 @@ The SwiftGuion Sample App serves as:
 ### 4.1 Application Structure
 
 ```
-GuionDocumentApp/
-├── GuionDocumentApp.swift          # Main app entry point with DocumentGroup
+GuionView/
+├── GuionViewApp.swift               # Main app entry point with DocumentGroup
 ├── GuionDocument.swift              # FileDocument implementation
 ├── ContentView.swift                # Main document view (GuionViewer wrapper)
 ├── ImportCommands.swift             # Import menu commands
 ├── ExportCommands.swift             # Export menu commands
 ├── Info.plist                       # Bundle configuration & UTTypes
 └── Assets.xcassets/                 # App icons and resources
+    ├── AppIcon.appiconset/          # GuionView app icon (Preview-inspired)
+    └── [Document type icons]
 ```
 
 ### 4.2 Key Components
@@ -831,7 +892,7 @@ var documentModel: GuionDocumentModel {
 
 ## 8. Success Criteria
 
-The SwiftGuion Sample App will be considered complete when:
+**GuionView** will be considered complete when:
 
 1. **Functional**: All P0 and P1 requirements implemented and tested
 2. **Reliable**: No crashes or data loss in normal operation
@@ -917,6 +978,7 @@ Items out of scope for initial release but worth considering:
 |---------|------|--------|---------|
 | 1.0 | 2025-10-12 | Claude Code | Initial draft |
 | 1.1 | 2025-10-12 | Claude Code | Updated to use GuionViewer component, added drag-and-drop support (REQ-UI-004), restructured File menu with Import submenu (REQ-IMP-005), updated keyboard shortcuts |
+| 1.2 | 2025-10-12 | Claude Code | Named app "GuionView" (REQ-APP-001), added app icon requirements inspired by Preview.app (REQ-APP-002), added bundle configuration requirement (REQ-PLAT-003), updated application structure |
 
 ---
 
