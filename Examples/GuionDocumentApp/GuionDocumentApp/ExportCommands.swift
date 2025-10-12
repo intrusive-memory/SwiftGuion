@@ -8,11 +8,15 @@
 import SwiftUI
 import UniformTypeIdentifiers
 import SwiftGuion
+#if canImport(AppKit)
+import AppKit
+#endif
 
 struct ExportCommands: Commands {
     @FocusedValue(\.document) var document: GuionDocument?
 
     var body: some Commands {
+        #if os(macOS)
         CommandMenu("Export") {
             Button("Export as Fountain...") {
                 exportAsFountain()
@@ -37,8 +41,10 @@ struct ExportCommands: Commands {
             }
             .disabled(document == nil)
         }
+        #endif
     }
 
+    #if os(macOS)
     private func exportAsFountain() {
         guard let document = document else { return }
 
@@ -154,6 +160,7 @@ struct ExportCommands: Commands {
         alert.alertStyle = .critical
         alert.runModal()
     }
+    #endif
 }
 
 // FocusedValues extension to access the current document
