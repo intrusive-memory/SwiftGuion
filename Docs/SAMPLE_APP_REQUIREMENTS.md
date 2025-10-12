@@ -1,6 +1,6 @@
 # SwiftGuion Sample App Requirements
 
-**Document Version:** 1.2
+**Document Version:** 1.3
 **Date:** October 12, 2025
 **Status:** Draft
 
@@ -96,6 +96,67 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 
 ---
 
+**REQ-DOC-004**: Crash Recovery
+**Priority**: P0 (Critical)
+**Description**: The app shall automatically recover documents after unexpected crashes or force quits.
+
+**Acceptance Criteria:**
+- Auto-saved versions preserved in `~/Library/Application Support/GuionView/AutoSave/`
+- Auto-save creates backup every N minutes based on preferences (default: 5 minutes)
+- Temporary backup named: `[filename].[random-uuid].guion`
+- On clean application quit, temporary backups deleted
+- On crash/force quit, temporary backups preserved
+- On relaunch after crash, recovery dialog shown automatically
+- Recovery dialog displays:
+  - Document name
+  - Last auto-save time (human-readable, e.g., "5 minutes ago")
+  - File size of recovered version
+- User options: "Recover", "Don't Recover", "Show in Finder"
+- Recovered documents marked with "Recovered" badge in title bar until explicitly saved
+- Recovery data automatically cleaned up after 7 days
+- Maximum 10 recovery files retained (oldest deleted first)
+
+---
+
+**REQ-DOC-005**: Version Browsing
+**Priority**: P1 (High)
+**Description**: The app shall support macOS Versions for browsing document history.
+
+**Acceptance Criteria:**
+- File → Revert To → Browse All Versions... available when document has been saved
+- Integration with Time Machine backups (if available)
+- User can browse and compare current version with previous versions
+- Restore previous version with confirmation dialog:
+  - "Are you sure you want to restore [filename] to the version from [date/time]?"
+  - "Your current version will be saved as a backup."
+- Version metadata shows date/time stamp for each saved version
+- Standard macOS Versions interface used (no custom implementation needed)
+- Menu item disabled for unsaved documents
+
+---
+
+**REQ-DOC-006**: Close Unsaved Document
+**Priority**: P0 (Critical)
+**Description**: The app shall prompt users before closing documents with unsaved changes.
+
+**Acceptance Criteria:**
+- "Do you want to save changes to [filename]?" alert sheet appears
+- Three options provided:
+  - **Save** (default, blue button): Triggers save or save dialog if never saved
+  - **Don't Save** (destructive, red text): Discards all changes since last save
+  - **Cancel**: Returns to document without closing
+- Alert triggered by:
+  - Cmd+W (Close Window)
+  - Red close button click
+  - Quit application with unsaved documents
+  - System shutdown/logout with unsaved documents
+- If document never saved, "Save" button shows save dialog with suggested filename
+- Don't Save confirms with secondary alert if > 100 elements would be lost
+- Auto-save reduces frequency of this dialog (only shown if changes since last auto-save)
+- When quitting with multiple unsaved documents, shows "Review Unsaved..." dialog
+
+---
+
 #### 2.1.2 Import Capabilities
 
 **REQ-IMP-001**: Import .fountain Files
@@ -152,21 +213,54 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 ---
 
 **REQ-IMP-004**: Import User Experience
-**Priority**: P1 (High)
+**Priority**: P0 (Critical)
 **Description**: Import operations shall provide clear feedback and error handling.
 
 **Acceptance Criteria:**
 - Progress indicator shown during import (spinning cursor or progress bar)
-- Estimated time shown for large files (> 1MB)
-- Cancel button available during long imports
-- Detailed error messages for parse failures
+- Estimated time shown for large files (> 1MB), calculated as: (file size / average parse speed)
+  - Average parse speed measured during first 10% of file
+  - Estimate updates every 5 seconds during parse
+  - If estimate > 10 seconds, show time remaining
+  - If estimate < 10 seconds, show "A few seconds remaining"
+  - Accuracy target: ±25% of actual time
+- Cancel button available during long imports (operations are cancellable)
+- Detailed error messages for parse failures with specific line numbers
 - File path shown in error dialogs
 - Import source format preserved in document metadata
 - Original content available in rawContent field
 
 ---
 
-**REQ-IMP-005**: File Menu Structure
+**REQ-IMP-005**: Import Failure Recovery
+**Priority**: P0 (Critical)
+**Description**: Import failures shall provide detailed diagnostics and recovery options.
+
+**Acceptance Criteria:**
+- Parsing errors display error dialog with:
+  - Error type (e.g., "Invalid Scene Heading", "Malformed Character Name")
+  - Line number where error occurred
+  - Context: 5 lines before and after error location
+  - Problematic content highlighted in monospace font
+- Error dialog buttons:
+  - **View in Editor** (if TextEdit available): Opens original file at error line
+  - **Import Anyway**: Best-effort import, skipping problematic sections
+  - **Copy Error Details**: Copies full error to clipboard for bug reporting
+  - **Cancel**: Aborts import, returns to previous state
+- Failed imports never modify or delete original file
+- Error details logged to `~/Library/Logs/GuionView/import-errors.log` with:
+  - Timestamp
+  - File path
+  - File size
+  - Error description
+  - Stack trace (if available)
+- Help → View Import Logs... opens log directory in Finder
+- Last 10 failed imports accessible via Help → Recent Import Errors...
+- Import errors include recovery suggestion specific to error type
+
+---
+
+**REQ-IMP-006**: File Menu Structure
 **Priority**: P0 (Critical)
 **Description**: The File menu shall provide a comprehensive and organized structure for all document operations.
 
@@ -255,6 +349,61 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 - Format name clearly indicated in menu items
 - Recently used export locations remembered
 - Export preserves original filename (changes extension only)
+
+---
+
+**REQ-EXP-005**: Export Validation
+**Priority**: P1 (High)
+**Description**: Exported files shall be validated for correctness before completion.
+
+**Acceptance Criteria:**
+- After export write completes, file is parsed back to verify validity
+- Validation checks:
+  - File can be read successfully
+  - File parses without errors
+  - Element count matches source document (±5% tolerance for format differences)
+  - Title page entries preserved
+  - Critical data not lost (scene headings, character names)
+- If validation fails:
+  - Warning dialog: "Export may have issues. Validation found [N] problems."
+  - Show list of validation issues (e.g., "3 scene headings missing")
+  - Options: "Export Anyway", "Cancel and Review", "Show Details"
+  - Details button expands to show full validation report
+- If validation succeeds:
+  - Success notification: "Exported to [filename]" with "Reveal in Finder" button
+  - No modal dialog (non-intrusive)
+- Validation can be disabled in Preferences → Advanced → "Validate exports"
+- Validation errors logged to `~/Library/Logs/GuionView/export-errors.log`
+- Validation timeout: 30 seconds (after which export is considered successful with warning)
+
+---
+
+**REQ-EXP-006**: Format Version Migration
+**Priority**: P0 (Critical)
+**Description**: The app shall migrate documents from older .guion format versions transparently.
+
+**Acceptance Criteria:**
+- Document format version stored in file header
+- Current format version: 1.0
+- On open, if document version < current version:
+  - Document automatically upgraded to current version
+  - Original file backed up to: `[filename].guion.v[N].backup`
+  - Backup created before any modifications
+  - Backup kept until user explicitly saves migrated document
+  - Info banner shown: "Document upgraded from version [N] to [M]"
+  - Banner includes "Learn More" link to format changes documentation
+- Migration process:
+  - Reads old format
+  - Converts to new format in memory
+  - Original file unchanged until user saves
+  - Save operation writes new format
+- Migration errors:
+  - If migration fails, document refuses to open
+  - Error dialog: "Cannot upgrade document from version [N]"
+  - Suggestion: "This version requires GuionView [X.Y] or later"
+  - "Show Backup" button reveals backup file in Finder
+- User can revert to backup via File → Revert To → [Version N Backup]
+- Format changes documented in Help → Release Notes
 
 ---
 
@@ -977,8 +1126,9 @@ Items out of scope for initial release but worth considering:
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2025-10-12 | Claude Code | Initial draft |
-| 1.1 | 2025-10-12 | Claude Code | Updated to use GuionViewer component, added drag-and-drop support (REQ-UI-004), restructured File menu with Import submenu (REQ-IMP-005), updated keyboard shortcuts |
+| 1.1 | 2025-10-12 | Claude Code | Updated to use GuionViewer component, added drag-and-drop support (REQ-UI-004), restructured File menu with Import submenu (REQ-IMP-006), updated keyboard shortcuts |
 | 1.2 | 2025-10-12 | Claude Code | Named app "GuionView" (REQ-APP-001), added app icon requirements inspired by Preview.app (REQ-APP-002), added bundle configuration requirement (REQ-PLAT-003), updated application structure |
+| 1.3 | 2025-10-12 | Claude Code | Added critical requirements from analysis: crash recovery (REQ-DOC-004), version browsing (REQ-DOC-005), close unsaved (REQ-DOC-006), import failure recovery (REQ-IMP-005), export validation (REQ-EXP-005), format migration (REQ-EXP-006). Enhanced REQ-IMP-004 with specific progress calculation details. |
 
 ---
 
