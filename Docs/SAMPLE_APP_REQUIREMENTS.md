@@ -1,6 +1,6 @@
 # SwiftGuion Sample App Requirements
 
-**Document Version:** 1.0
+**Document Version:** 1.1
 **Date:** October 12, 2025
 **Status:** Draft
 
@@ -99,10 +99,11 @@ The SwiftGuion Sample App serves as:
 
 **REQ-IMP-001**: Import .fountain Files
 **Priority**: P0 (Critical)
-**Description**: The app shall import Fountain-formatted screenplay files (.fountain extension).
+**Description**: The app shall import Fountain-formatted screenplay files (.fountain extension) via File menu or drag-and-drop.
 
 **Acceptance Criteria:**
-- File → Import or Cmd+I prompts file selection dialog filtered to .fountain
+- File → Import → Fountain... or Cmd+I prompts file selection dialog filtered to .fountain
+- Drag-and-drop .fountain files directly onto GuionViewer window
 - Parser successfully reads Fountain syntax
 - All element types imported (scene headings, action, dialogue, etc.)
 - Title page metadata preserved
@@ -110,32 +111,34 @@ The SwiftGuion Sample App serves as:
 - Section headers preserved with correct hierarchy
 - Import progress indicated for large files
 - Success/failure message shown after import
-- Imported content displayed in Scene Browser
+- Imported content displayed in GuionViewer
 
 ---
 
 **REQ-IMP-002**: Import .highland Files
 **Priority**: P0 (Critical)
-**Description**: The app shall import Highland 2 archive files (.highland extension).
+**Description**: The app shall import Highland 2 archive files (.highland extension) via File menu or drag-and-drop.
 
 **Acceptance Criteria:**
-- File → Import dialog includes .highland format
+- File → Import → Highland... prompts file selection dialog filtered to .highland
+- Drag-and-drop .highland files directly onto GuionViewer window
 - ZIP archive extracted to temporary location
 - TextBundle structure parsed correctly
 - Both .fountain and .md content files supported
 - Character and outline JSON resources preserved (if present)
 - Temporary files cleaned up after import
 - Import failures handled gracefully with error messages
-- Imported content displayed in Scene Browser
+- Imported content displayed in GuionViewer
 
 ---
 
 **REQ-IMP-003**: Import .fdx Files
 **Priority**: P0 (Critical)
-**Description**: The app shall import Final Draft XML files (.fdx extension).
+**Description**: The app shall import Final Draft XML files (.fdx extension) via File menu or drag-and-drop.
 
 **Acceptance Criteria:**
-- File → Import dialog includes .fdx format
+- File → Import → Final Draft... prompts file selection dialog filtered to .fdx
+- Drag-and-drop .fdx files directly onto GuionViewer window
 - XML structure parsed using FDXDocumentParser
 - All paragraph types mapped to GuionElement types
 - Scene properties (numbers, etc.) preserved
@@ -143,7 +146,7 @@ The SwiftGuion Sample App serves as:
 - Character formatting handled (bold, italic, underline)
 - Import errors logged with diagnostic information
 - Partial import supported (continues on non-critical errors)
-- Imported content displayed in Scene Browser
+- Imported content displayed in GuionViewer
 
 ---
 
@@ -159,6 +162,33 @@ The SwiftGuion Sample App serves as:
 - File path shown in error dialogs
 - Import source format preserved in document metadata
 - Original content available in rawContent field
+
+---
+
+**REQ-IMP-005**: File Menu Structure
+**Priority**: P0 (Critical)
+**Description**: The File menu shall provide a comprehensive and organized structure for all document operations.
+
+**Acceptance Criteria:**
+- File menu includes the following structure:
+  - New (Cmd+N)
+  - Open... (Cmd+O)
+  - Open Recent → [submenu with recent files]
+  - Close (Cmd+W)
+  - **Import** → [submenu]
+    - Fountain... (Cmd+Shift+I, F)
+    - Highland... (Cmd+Shift+I, H)
+    - Final Draft... (Cmd+Shift+I, D)
+  - Save (Cmd+S)
+  - Save As... (Cmd+Shift+S)
+  - **Export** → [submenu]
+    - Fountain... (Cmd+Shift+E, F)
+    - Highland... (Cmd+Shift+E, H)
+    - Final Draft... (Cmd+Shift+E, D)
+- Menu items properly enabled/disabled based on context
+- Import submenu disabled when no document is open
+- Export submenu disabled when document is empty
+- Keyboard shortcuts follow macOS conventions
 
 ---
 
@@ -229,14 +259,15 @@ The SwiftGuion Sample App serves as:
 
 ### 2.2 User Interface
 
-#### 2.2.1 Scene Browser Widget
+#### 2.2.1 GuionViewer Component
 
-**REQ-UI-001**: Display Scene Browser
+**REQ-UI-001**: Display GuionViewer
 **Priority**: P0 (Critical)
-**Description**: The main window shall display the Scene Browser Widget as the primary content view.
+**Description**: The main window shall display the GuionViewer component as the primary content view in a resizable window.
 
 **Acceptance Criteria:**
-- SceneBrowserWidget fills main window content area
+- GuionViewer fills main window content area
+- Window is fully resizable with minimum size of 600x800 points
 - Hierarchical structure displayed: Title → Chapters → Scene Groups → Scenes
 - Title displayed at top with large, bold typography
 - Chapters displayed as collapsible sections (Level 2)
@@ -244,12 +275,14 @@ The SwiftGuion Sample App serves as:
 - Individual scenes displayed with scene headings (Level 4)
 - Empty state shown when document has no chapters
 - Smooth scrolling for long screenplays
+- Loading states displayed during file operations
+- Error states displayed with user-friendly messages
 
 ---
 
-**REQ-UI-002**: Scene Browser Interaction
+**REQ-UI-002**: GuionViewer Interaction
 **Priority**: P1 (High)
-**Description**: Users shall be able to interact with the Scene Browser to explore screenplay structure.
+**Description**: Users shall be able to interact with the GuionViewer to explore screenplay structure.
 
 **Acceptance Criteria:**
 - Chapters can be expanded/collapsed by clicking
@@ -278,20 +311,39 @@ The SwiftGuion Sample App serves as:
 
 ---
 
+**REQ-UI-004**: Drag-and-Drop Import
+**Priority**: P0 (Critical)
+**Description**: GuionViewer shall support drag-and-drop of importable screenplay files directly onto the window.
+
+**Acceptance Criteria:**
+- Accepts .fountain, .highland, and .fdx file drops
+- Visual feedback when dragging files over window (highlight border or overlay)
+- Drop zone covers entire window content area
+- Dropped files are imported automatically
+- Multiple files dropped show import dialog for selection
+- Invalid file types rejected with visual feedback (no action)
+- Drag-and-drop works in both empty state and when document is loaded
+- Progress indicator shown during import from drop
+- Error handling same as File → Import
+- Keyboard accessibility: Paste file path imports file (Cmd+V)
+
+---
+
 #### 2.2.2 Window Management
 
 **REQ-WIN-001**: Resizable Window
 **Priority**: P0 (Critical)
-**Description**: The document window shall be fully resizable with appropriate constraints.
+**Description**: The document window shall be fully resizable with GuionViewer adapting to window size changes.
 
 **Acceptance Criteria:**
 - Window can be resized horizontally and vertically
-- Minimum window size: 400x300 points
+- Minimum window size: 600x800 points (optimal for GuionViewer)
 - Maximum window size: unrestricted (up to screen bounds)
 - Window size persisted between launches (per-user preference)
-- Content reflows appropriately when resized
+- GuionViewer content reflows appropriately when resized
 - No content clipping at minimum size
 - Scrollbars appear when content exceeds viewport
+- GuionViewer frame constrained to window bounds using .frame(minWidth:minHeight:)
 
 ---
 
@@ -523,9 +575,10 @@ The SwiftGuion Sample App serves as:
 
 ```
 GuionDocumentApp/
-├── GuionDocumentApp.swift          # Main app entry point
+├── GuionDocumentApp.swift          # Main app entry point with DocumentGroup
 ├── GuionDocument.swift              # FileDocument implementation
-├── ContentView.swift                # Main document view (Scene Browser)
+├── ContentView.swift                # Main document view (GuionViewer wrapper)
+├── ImportCommands.swift             # Import menu commands
 ├── ExportCommands.swift             # Export menu commands
 ├── Info.plist                       # Bundle configuration & UTTypes
 └── Assets.xcassets/                 # App icons and resources
@@ -552,15 +605,50 @@ func fileWrapper(configuration: WriteConfiguration) -> FileWrapper
 
 #### 4.2.2 ContentView
 
-**Purpose**: Displays document content using SceneBrowserWidget.
+**Purpose**: Displays document content using GuionViewer component.
 
 **Responsibilities:**
 - Receive GuionDocument binding
-- Extract SceneBrowserData from documentModel
-- Display SceneBrowserWidget
-- Handle empty states
+- Pass GuionDocumentModel to GuionViewer
+- Set up drag-and-drop functionality for file imports
+- Handle window frame constraints (minimum 600x800)
+- Coordinate with ImportCommands for drag-and-drop imports
 
-#### 4.2.3 ExportCommands
+**Key Implementation:**
+```swift
+struct ContentView: View {
+    @Binding var document: GuionDocument
+
+    var body: some View {
+        GuionViewer(document: document.documentModel)
+            .frame(minWidth: 600, minHeight: 800)
+            .onDrop(of: [.fileURL], isTargeted: nil) { providers in
+                handleFileDrop(providers)
+            }
+    }
+}
+
+#### 4.2.3 ImportCommands
+
+**Purpose**: Implements import menu commands.
+
+**Responsibilities:**
+- Define File → Import submenu
+- Handle import from .fountain, .highland, .fdx
+- Show open panels with appropriate filters
+- Execute import operations and update document
+- Support drag-and-drop import coordination
+
+**Menu Structure:**
+```
+File
+├── Import
+│   ├── Fountain...       (Cmd+Shift+I, F)
+│   ├── Highland...       (Cmd+Shift+I, H)
+│   └── Final Draft...    (Cmd+Shift+I, D)
+```
+
+#### 4.2.4 ExportCommands
 
 **Purpose**: Implements export menu commands.
 
@@ -811,11 +899,13 @@ Items out of scope for initial release but worth considering:
 | Open... | Cmd+O |
 | Save | Cmd+S |
 | Save As... | Cmd+Shift+S |
-| Import... | Cmd+I |
+| Close Window | Cmd+W |
+| **Import Fountain...** | Cmd+Shift+I, F |
+| **Import Highland...** | Cmd+Shift+I, H |
+| **Import Final Draft...** | Cmd+Shift+I, D |
 | Export to Fountain... | Cmd+Shift+E, F |
 | Export to Highland... | Cmd+Shift+E, H |
 | Export to Final Draft... | Cmd+Shift+E, D |
-| Close Window | Cmd+W |
 | Minimize | Cmd+M |
 | Cycle Windows | Cmd+` |
 
@@ -826,6 +916,7 @@ Items out of scope for initial release but worth considering:
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2025-10-12 | Claude Code | Initial draft |
+| 1.1 | 2025-10-12 | Claude Code | Updated to use GuionViewer component, added drag-and-drop support (REQ-UI-004), restructured File menu with Import submenu (REQ-IMP-005), updated keyboard shortcuts |
 
 ---
 
