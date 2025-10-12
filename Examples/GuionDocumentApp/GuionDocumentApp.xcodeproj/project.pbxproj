@@ -7,57 +7,57 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D63C5A4B2E9826FE00DC623E /* SwiftGuion in Frameworks */ = {isa = PBXBuildFile; productRef = D63C5A4A2E9826FE00DC623E /* SwiftGuion */; };
+		D6E045912E9B4C270023204F /* SwiftGuion in Frameworks */ = {isa = PBXBuildFile; productRef = D6E045902E9B4C270023204F /* SwiftGuion */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		D6B10A7C2E97F69500CD0A05 /* PBXContainerItemProxy */ = {
+		D6E0455E2E9B48260023204F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = D6B10A632E97F69400CD0A05 /* Project object */;
+			containerPortal = D6E045452E9B48250023204F /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = D6B10A6A2E97F69400CD0A05;
+			remoteGlobalIDString = D6E0454C2E9B48250023204F;
 			remoteInfo = GuionDocumentApp;
 		};
-		D6B10A862E97F69500CD0A05 /* PBXContainerItemProxy */ = {
+		D6E045682E9B48260023204F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = D6B10A632E97F69400CD0A05 /* Project object */;
+			containerPortal = D6E045452E9B48250023204F /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = D6B10A6A2E97F69400CD0A05;
+			remoteGlobalIDString = D6E0454C2E9B48250023204F;
 			remoteInfo = GuionDocumentApp;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		D6B10A6B2E97F69400CD0A05 /* GuionDocumentApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GuionDocumentApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		D6B10A7B2E97F69500CD0A05 /* GuionDocumentAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GuionDocumentAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		D6B10A852E97F69500CD0A05 /* GuionDocumentAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GuionDocumentAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D6E0454D2E9B48250023204F /* GuionDocumentApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GuionDocumentApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D6E0455D2E9B48260023204F /* GuionDocumentAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GuionDocumentAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D6E045672E9B48260023204F /* GuionDocumentAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GuionDocumentAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		D6B10A8D2E97F69500CD0A05 /* Exceptions for "GuionDocumentApp" folder in "GuionDocumentApp" target */ = {
+		D6E0456F2E9B48260023204F /* Exceptions for "GuionDocumentApp" folder in "GuionDocumentApp" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = D6B10A6A2E97F69400CD0A05 /* GuionDocumentApp */;
+			target = D6E0454C2E9B48250023204F /* GuionDocumentApp */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		D6B10A6D2E97F69400CD0A05 /* GuionDocumentApp */ = {
+		D6E0454F2E9B48250023204F /* GuionDocumentApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				D6B10A8D2E97F69500CD0A05 /* Exceptions for "GuionDocumentApp" folder in "GuionDocumentApp" target */,
+				D6E0456F2E9B48260023204F /* Exceptions for "GuionDocumentApp" folder in "GuionDocumentApp" target */,
 			);
 			path = GuionDocumentApp;
 			sourceTree = "<group>";
 		};
-		D6B10A7E2E97F69500CD0A05 /* GuionDocumentAppTests */ = {
+		D6E045602E9B48260023204F /* GuionDocumentAppTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = GuionDocumentAppTests;
 			sourceTree = "<group>";
 		};
-		D6B10A882E97F69500CD0A05 /* GuionDocumentAppUITests */ = {
+		D6E0456A2E9B48260023204F /* GuionDocumentAppUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = GuionDocumentAppUITests;
 			sourceTree = "<group>";
@@ -65,22 +65,22 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		D6B10A682E97F69400CD0A05 /* Frameworks */ = {
+		D6E0454A2E9B48250023204F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D63C5A4B2E9826FE00DC623E /* SwiftGuion in Frameworks */,
+				D6E045912E9B4C270023204F /* SwiftGuion in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D6B10A782E97F69500CD0A05 /* Frameworks */ = {
+		D6E0455A2E9B48260023204F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D6B10A822E97F69500CD0A05 /* Frameworks */ = {
+		D6E045642E9B48260023204F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -90,22 +90,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		D6B10A622E97F69400CD0A05 = {
+		D6E045442E9B48250023204F = {
 			isa = PBXGroup;
 			children = (
-				D6B10A6D2E97F69400CD0A05 /* GuionDocumentApp */,
-				D6B10A7E2E97F69500CD0A05 /* GuionDocumentAppTests */,
-				D6B10A882E97F69500CD0A05 /* GuionDocumentAppUITests */,
-				D6B10A6C2E97F69400CD0A05 /* Products */,
+				D6E0454F2E9B48250023204F /* GuionDocumentApp */,
+				D6E045602E9B48260023204F /* GuionDocumentAppTests */,
+				D6E0456A2E9B48260023204F /* GuionDocumentAppUITests */,
+				D6E0454E2E9B48250023204F /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		D6B10A6C2E97F69400CD0A05 /* Products */ = {
+		D6E0454E2E9B48250023204F /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D6B10A6B2E97F69400CD0A05 /* GuionDocumentApp.app */,
-				D6B10A7B2E97F69500CD0A05 /* GuionDocumentAppTests.xctest */,
-				D6B10A852E97F69500CD0A05 /* GuionDocumentAppUITests.xctest */,
+				D6E0454D2E9B48250023204F /* GuionDocumentApp.app */,
+				D6E0455D2E9B48260023204F /* GuionDocumentAppTests.xctest */,
+				D6E045672E9B48260023204F /* GuionDocumentAppUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -113,139 +113,138 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		D6B10A6A2E97F69400CD0A05 /* GuionDocumentApp */ = {
+		D6E0454C2E9B48250023204F /* GuionDocumentApp */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D6B10A8E2E97F69500CD0A05 /* Build configuration list for PBXNativeTarget "GuionDocumentApp" */;
+			buildConfigurationList = D6E045702E9B48260023204F /* Build configuration list for PBXNativeTarget "GuionDocumentApp" */;
 			buildPhases = (
-				D6B10A672E97F69400CD0A05 /* Sources */,
-				D6B10A682E97F69400CD0A05 /* Frameworks */,
-				D6B10A692E97F69400CD0A05 /* Resources */,
+				D6E045492E9B48250023204F /* Sources */,
+				D6E0454A2E9B48250023204F /* Frameworks */,
+				D6E0454B2E9B48250023204F /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				D6B10A6D2E97F69400CD0A05 /* GuionDocumentApp */,
+				D6E0454F2E9B48250023204F /* GuionDocumentApp */,
 			);
 			name = GuionDocumentApp;
 			packageProductDependencies = (
-				D63C5A4A2E9826FE00DC623E /* SwiftGuion */,
+				D6E045902E9B4C270023204F /* SwiftGuion */,
 			);
 			productName = GuionDocumentApp;
-			productReference = D6B10A6B2E97F69400CD0A05 /* GuionDocumentApp.app */;
+			productReference = D6E0454D2E9B48250023204F /* GuionDocumentApp.app */;
 			productType = "com.apple.product-type.application";
 		};
-		D6B10A7A2E97F69500CD0A05 /* GuionDocumentAppTests */ = {
+		D6E0455C2E9B48260023204F /* GuionDocumentAppTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D6B10A932E97F69500CD0A05 /* Build configuration list for PBXNativeTarget "GuionDocumentAppTests" */;
+			buildConfigurationList = D6E045752E9B48260023204F /* Build configuration list for PBXNativeTarget "GuionDocumentAppTests" */;
 			buildPhases = (
-				D6B10A772E97F69500CD0A05 /* Sources */,
-				D6B10A782E97F69500CD0A05 /* Frameworks */,
-				D6B10A792E97F69500CD0A05 /* Resources */,
+				D6E045592E9B48260023204F /* Sources */,
+				D6E0455A2E9B48260023204F /* Frameworks */,
+				D6E0455B2E9B48260023204F /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				D6B10A7D2E97F69500CD0A05 /* PBXTargetDependency */,
+				D6E0455F2E9B48260023204F /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				D6B10A7E2E97F69500CD0A05 /* GuionDocumentAppTests */,
+				D6E045602E9B48260023204F /* GuionDocumentAppTests */,
 			);
 			name = GuionDocumentAppTests;
 			packageProductDependencies = (
 			);
 			productName = GuionDocumentAppTests;
-			productReference = D6B10A7B2E97F69500CD0A05 /* GuionDocumentAppTests.xctest */;
+			productReference = D6E0455D2E9B48260023204F /* GuionDocumentAppTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		D6B10A842E97F69500CD0A05 /* GuionDocumentAppUITests */ = {
+		D6E045662E9B48260023204F /* GuionDocumentAppUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D6B10A962E97F69500CD0A05 /* Build configuration list for PBXNativeTarget "GuionDocumentAppUITests" */;
+			buildConfigurationList = D6E045782E9B48260023204F /* Build configuration list for PBXNativeTarget "GuionDocumentAppUITests" */;
 			buildPhases = (
-				D6B10A812E97F69500CD0A05 /* Sources */,
-				D6B10A822E97F69500CD0A05 /* Frameworks */,
-				D6B10A832E97F69500CD0A05 /* Resources */,
+				D6E045632E9B48260023204F /* Sources */,
+				D6E045642E9B48260023204F /* Frameworks */,
+				D6E045652E9B48260023204F /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				D6B10A872E97F69500CD0A05 /* PBXTargetDependency */,
+				D6E045692E9B48260023204F /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				D6B10A882E97F69500CD0A05 /* GuionDocumentAppUITests */,
+				D6E0456A2E9B48260023204F /* GuionDocumentAppUITests */,
 			);
 			name = GuionDocumentAppUITests;
 			packageProductDependencies = (
 			);
 			productName = GuionDocumentAppUITests;
-			productReference = D6B10A852E97F69500CD0A05 /* GuionDocumentAppUITests.xctest */;
+			productReference = D6E045672E9B48260023204F /* GuionDocumentAppUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		D6B10A632E97F69400CD0A05 /* Project object */ = {
+		D6E045452E9B48250023204F /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2600;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
-					D6B10A6A2E97F69400CD0A05 = {
+					D6E0454C2E9B48250023204F = {
 						CreatedOnToolsVersion = 26.0.1;
 					};
-					D6B10A7A2E97F69500CD0A05 = {
+					D6E0455C2E9B48260023204F = {
 						CreatedOnToolsVersion = 26.0.1;
-						TestTargetID = D6B10A6A2E97F69400CD0A05;
+						TestTargetID = D6E0454C2E9B48250023204F;
 					};
-					D6B10A842E97F69500CD0A05 = {
+					D6E045662E9B48260023204F = {
 						CreatedOnToolsVersion = 26.0.1;
-						TestTargetID = D6B10A6A2E97F69400CD0A05;
+						TestTargetID = D6E0454C2E9B48250023204F;
 					};
 				};
 			};
-			buildConfigurationList = D6B10A662E97F69400CD0A05 /* Build configuration list for PBXProject "GuionDocumentApp" */;
+			buildConfigurationList = D6E045482E9B48250023204F /* Build configuration list for PBXProject "GuionDocumentApp" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = D6B10A622E97F69400CD0A05;
+			mainGroup = D6E045442E9B48250023204F;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				D6A3930E2E97F74E00838412 /* XCRemoteSwiftPackageReference "SwiftFijos" */,
-				D63C5A492E9826FE00DC623E /* XCLocalSwiftPackageReference "../../../SwiftGuion" */,
+				D6E0458F2E9B4C270023204F /* XCLocalSwiftPackageReference "../../../SwiftGuion" */,
 			);
 			preferredProjectObjectVersion = 77;
-			productRefGroup = D6B10A6C2E97F69400CD0A05 /* Products */;
+			productRefGroup = D6E0454E2E9B48250023204F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				D6B10A6A2E97F69400CD0A05 /* GuionDocumentApp */,
-				D6B10A7A2E97F69500CD0A05 /* GuionDocumentAppTests */,
-				D6B10A842E97F69500CD0A05 /* GuionDocumentAppUITests */,
+				D6E0454C2E9B48250023204F /* GuionDocumentApp */,
+				D6E0455C2E9B48260023204F /* GuionDocumentAppTests */,
+				D6E045662E9B48260023204F /* GuionDocumentAppUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		D6B10A692E97F69400CD0A05 /* Resources */ = {
+		D6E0454B2E9B48250023204F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D6B10A792E97F69500CD0A05 /* Resources */ = {
+		D6E0455B2E9B48260023204F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D6B10A832E97F69500CD0A05 /* Resources */ = {
+		D6E045652E9B48260023204F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -255,21 +254,21 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		D6B10A672E97F69400CD0A05 /* Sources */ = {
+		D6E045492E9B48250023204F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D6B10A772E97F69500CD0A05 /* Sources */ = {
+		D6E045592E9B48260023204F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D6B10A812E97F69500CD0A05 /* Sources */ = {
+		D6E045632E9B48260023204F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -279,20 +278,20 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		D6B10A7D2E97F69500CD0A05 /* PBXTargetDependency */ = {
+		D6E0455F2E9B48260023204F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D6B10A6A2E97F69400CD0A05 /* GuionDocumentApp */;
-			targetProxy = D6B10A7C2E97F69500CD0A05 /* PBXContainerItemProxy */;
+			target = D6E0454C2E9B48250023204F /* GuionDocumentApp */;
+			targetProxy = D6E0455E2E9B48260023204F /* PBXContainerItemProxy */;
 		};
-		D6B10A872E97F69500CD0A05 /* PBXTargetDependency */ = {
+		D6E045692E9B48260023204F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D6B10A6A2E97F69400CD0A05 /* GuionDocumentApp */;
-			targetProxy = D6B10A862E97F69500CD0A05 /* PBXContainerItemProxy */;
+			target = D6E0454C2E9B48250023204F /* GuionDocumentApp */;
+			targetProxy = D6E045682E9B48260023204F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		D6B10A8F2E97F69500CD0A05 /* Debug */ = {
+		D6E045712E9B48260023204F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -339,7 +338,7 @@
 			};
 			name = Debug;
 		};
-		D6B10A902E97F69500CD0A05 /* Release */ = {
+		D6E045722E9B48260023204F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -386,7 +385,7 @@
 			};
 			name = Release;
 		};
-		D6B10A912E97F69500CD0A05 /* Debug */ = {
+		D6E045732E9B48260023204F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -448,7 +447,7 @@
 			};
 			name = Debug;
 		};
-		D6B10A922E97F69500CD0A05 /* Release */ = {
+		D6E045742E9B48260023204F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -502,7 +501,7 @@
 			};
 			name = Release;
 		};
-		D6B10A942E97F69500CD0A05 /* Debug */ = {
+		D6E045762E9B48260023204F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -528,7 +527,7 @@
 			};
 			name = Debug;
 		};
-		D6B10A952E97F69500CD0A05 /* Release */ = {
+		D6E045772E9B48260023204F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -554,7 +553,7 @@
 			};
 			name = Release;
 		};
-		D6B10A972E97F69500CD0A05 /* Debug */ = {
+		D6E045792E9B48260023204F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -579,7 +578,7 @@
 			};
 			name = Debug;
 		};
-		D6B10A982E97F69500CD0A05 /* Release */ = {
+		D6E0457A2E9B48260023204F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -607,38 +606,38 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		D6B10A662E97F69400CD0A05 /* Build configuration list for PBXProject "GuionDocumentApp" */ = {
+		D6E045482E9B48250023204F /* Build configuration list for PBXProject "GuionDocumentApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				D6B10A912E97F69500CD0A05 /* Debug */,
-				D6B10A922E97F69500CD0A05 /* Release */,
+				D6E045732E9B48260023204F /* Debug */,
+				D6E045742E9B48260023204F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D6B10A8E2E97F69500CD0A05 /* Build configuration list for PBXNativeTarget "GuionDocumentApp" */ = {
+		D6E045702E9B48260023204F /* Build configuration list for PBXNativeTarget "GuionDocumentApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				D6B10A8F2E97F69500CD0A05 /* Debug */,
-				D6B10A902E97F69500CD0A05 /* Release */,
+				D6E045712E9B48260023204F /* Debug */,
+				D6E045722E9B48260023204F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D6B10A932E97F69500CD0A05 /* Build configuration list for PBXNativeTarget "GuionDocumentAppTests" */ = {
+		D6E045752E9B48260023204F /* Build configuration list for PBXNativeTarget "GuionDocumentAppTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				D6B10A942E97F69500CD0A05 /* Debug */,
-				D6B10A952E97F69500CD0A05 /* Release */,
+				D6E045762E9B48260023204F /* Debug */,
+				D6E045772E9B48260023204F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D6B10A962E97F69500CD0A05 /* Build configuration list for PBXNativeTarget "GuionDocumentAppUITests" */ = {
+		D6E045782E9B48260023204F /* Build configuration list for PBXNativeTarget "GuionDocumentAppUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				D6B10A972E97F69500CD0A05 /* Debug */,
-				D6B10A982E97F69500CD0A05 /* Release */,
+				D6E045792E9B48260023204F /* Debug */,
+				D6E0457A2E9B48260023204F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -646,29 +645,18 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		D63C5A492E9826FE00DC623E /* XCLocalSwiftPackageReference "../../../SwiftGuion" */ = {
+		D6E0458F2E9B4C270023204F /* XCLocalSwiftPackageReference "../../../SwiftGuion" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../../SwiftGuion;
 		};
 /* End XCLocalSwiftPackageReference section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		D6A3930E2E97F74E00838412 /* XCRemoteSwiftPackageReference "SwiftFijos" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/stovak/SwiftFijos";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.1;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
 /* Begin XCSwiftPackageProductDependency section */
-		D63C5A4A2E9826FE00DC623E /* SwiftGuion */ = {
+		D6E045902E9B4C270023204F /* SwiftGuion */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = SwiftGuion;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
-	rootObject = D6B10A632E97F69400CD0A05 /* Project object */;
+	rootObject = D6E045452E9B48250023204F /* Project object */;
 }

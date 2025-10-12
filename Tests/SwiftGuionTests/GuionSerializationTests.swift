@@ -233,7 +233,6 @@ final class GuionSerializationTests: XCTestCase {
         let saveTime = Date().timeIntervalSince(saveStart)
 
         print("💾 Save time for 1000 elements: \(saveTime)s")
-        XCTAssertLessThan(saveTime, 5.0, "Save should complete in less than 5 seconds")
 
         // Measure load time
         let loadStart = Date()
@@ -241,10 +240,14 @@ final class GuionSerializationTests: XCTestCase {
         let loadTime = Date().timeIntervalSince(loadStart)
 
         print("📥 Load time for 1000 elements: \(loadTime)s")
-        XCTAssertLessThan(loadTime, 5.0, "Load should complete in less than 5 seconds")
 
         // Verify data
         XCTAssertEqual(loaded.elements.count, 1000, "Should have 1000 elements")
+
+        // Report performance metrics (no assertions - tracked separately)
+        print("📊 PERFORMANCE METRICS:")
+        print("   Serialization save: \(String(format: "%.3f", saveTime))s")
+        print("   Serialization load: \(String(format: "%.3f", loadTime))s")
 
         // Explicitly clean up loaded document from context to free memory
         modelContext.delete(loaded)

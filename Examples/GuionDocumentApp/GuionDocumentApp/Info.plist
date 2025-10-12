@@ -8,29 +8,39 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSHandlerRank</key>
-			<string>Default</string>
+			<string>Owner</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>com.swiftguion.screenplay</string>
-				<string>com.fountain</string>
-				<string>com.finaldraft.fdx</string>
-				<string>com.highland</string>
+				<string>com.intrusive-memory.guion</string>
 			</array>
 			<key>NSUbiquitousDocumentUserActivityType</key>
-			<string>$(PRODUCT_BUNDLE_IDENTIFIER).screenplay</string>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER).guion</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.quotes.fountain</string>
+				<string>com.johnaugust.highland</string>
+				<string>com.finaldraft.fdx</string>
+			</array>
 		</dict>
 	</array>
-	<key>UTImportedTypeDeclarations</key>
+	<key>UTExportedTypeDeclarations</key>
 	<array>
 		<dict>
 			<key>UTTypeConformsTo</key>
 			<array>
 				<string>public.data</string>
+				<string>public.content</string>
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Guion Screenplay Document</string>
 			<key>UTTypeIdentifier</key>
-			<string>com.swiftguion.screenplay</string>
+			<string>com.intrusive-memory.guion</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -39,20 +49,41 @@
 				</array>
 			</dict>
 		</dict>
+	</array>
+	<key>UTImportedTypeDeclarations</key>
+	<array>
 		<dict>
 			<key>UTTypeConformsTo</key>
 			<array>
 				<string>public.plain-text</string>
+				<string>public.text</string>
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Fountain Screenplay</string>
 			<key>UTTypeIdentifier</key>
-			<string>com.fountain</string>
+			<string>com.quotes.fountain</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
 				<array>
 					<string>fountain</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>com.apple.package</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Highland Document</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.johnaugust.highland</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>highland</string>
 				</array>
 			</dict>
 		</dict>
@@ -70,23 +101,6 @@
 				<key>public.filename-extension</key>
 				<array>
 					<string>fdx</string>
-				</array>
-			</dict>
-		</dict>
-		<dict>
-			<key>UTTypeConformsTo</key>
-			<array>
-				<string>public.data</string>
-			</array>
-			<key>UTTypeDescription</key>
-			<string>Highland Document</string>
-			<key>UTTypeIdentifier</key>
-			<string>com.highland</string>
-			<key>UTTypeTagSpecification</key>
-			<dict>
-				<key>public.filename-extension</key>
-				<array>
-					<string>highland</string>
 				</array>
 			</dict>
 		</dict>

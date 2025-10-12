@@ -27,8 +27,17 @@ jobs:
       - name: Run tests with coverage
         run: |
           # Run tests and capture output
+          # Skip performance tests - those run in separate workflow
           set +e  # Don't exit on error
-          swift test --enable-code-coverage 2>&1 | tee test-output.log
+          swift test --enable-code-coverage \
+            --skip IntegrationTests.testLargeDocumentPerformance \
+            --skip IntegrationTests.testRapidSaveLoad \
+            --skip IntegrationTests.testSceneLocationCachingPerformance \
+            --skip DocumentExportTests.testExportPerformance \
+            --skip DocumentImportTests.testImportVsNativePerformance \
+            --skip GuionSerializationTests.testLargeDocumentPerformance \
+            --skip SceneBrowserUITests.testLargeScriptPerformance \
+            2>&1 | tee test-output.log
           TEST_EXIT_CODE=${PIPESTATUS[0]}
           set -e  # Re-enable exit on error
 

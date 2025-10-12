@@ -1,6 +1,6 @@
 //
 //  SceneWidget.swift
-//  GuionDocumentApp
+//  SwiftGuion
 //
 //  Copyright (c) 2025
 //
@@ -8,14 +8,25 @@
 //
 
 import SwiftUI
-import SwiftGuion
 
-struct SceneWidget: View {
+/// A widget displaying an individual scene with optional pre-scene content
+public struct SceneWidget: View {
     let scene: SceneData
     @Binding var isExpanded: Bool
     @Binding var preSceneExpanded: Bool
 
-    var body: some View {
+    /// Creates a SceneWidget
+    /// - Parameters:
+    ///   - scene: The scene data to display
+    ///   - isExpanded: Binding to control the scene's expanded/collapsed state
+    ///   - preSceneExpanded: Binding to control the pre-scene content's expanded/collapsed state
+    public init(scene: SceneData, isExpanded: Binding<Bool>, preSceneExpanded: Binding<Bool>) {
+        self.scene = scene
+        self._isExpanded = isExpanded
+        self._preSceneExpanded = preSceneExpanded
+    }
+
+    public var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // PreScene box (if exists)
             if scene.hasPreScene, let preSceneElements = scene.preSceneElements {
@@ -73,6 +84,7 @@ struct SceneWidget: View {
 
 // MARK: - Scene Element View
 
+/// Internal view for rendering individual scene elements
 struct SceneElementView: View {
     let element: GuionElement
 
