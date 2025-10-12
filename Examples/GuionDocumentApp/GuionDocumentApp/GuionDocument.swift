@@ -194,15 +194,13 @@ struct GuionDocument: FileDocument {
     }
 
     nonisolated func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
-        // We need to encode the current state
-        // Use documentData if available, otherwise we need to encode from script
-        if let data = documentData {
-            return FileWrapper(regularFileWithContents: data)
-        } else {
-            // This requires MainActor access, so we throw an error
-            // The actual save will happen through a different mechanism
-            throw CocoaError(.fileWriteUnknown)
+        // Encode the current model state
+        // Must use assumeIsolated since fileWrapper is nonisolated but we need MainActor
+        let data = try MainActor.assumeIsolated {
+            try documentModel.encodeToBinaryData()
         }
+
+        return FileWrapper(regularFileWithContents: data)
     }
 
     // MARK: - Export Methods
@@ -224,16 +222,6 @@ struct GuionDocument: FileDocument {
     @MainActor
     func exportToHighland() -> String {
         return exportToFountain()
-    }
-
-    // MARK: - Save Support
-
-    /// Update the internal data representation for saving
-    @MainActor
-    mutating func updateForSave() throws {
-        let data = try documentModel.encodeToBinaryData()
-        self.documentData = data
-        self.script = nil
     }
 
     // MARK: - Helper Methods
