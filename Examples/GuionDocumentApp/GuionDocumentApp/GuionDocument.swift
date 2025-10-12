@@ -2,244 +2,261 @@
 //  GuionDocument.swift
 //  GuionDocumentApp
 //
-//  Created by TOM STOVALL on 10/9/25.
+//  Copyright (c) 2025
 //
 
 import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
 import SwiftGuion
-import ZIPFoundation
 
-/// Document configuration for GuionDocumentModel
-struct GuionDocumentConfiguration: FileDocument {
-    static var readableContentTypes: [UTType] {
-        [.guionDocument, .fountainDocument, .fdxDocument, .highlandDocument]
-    }
-
-    var document: GuionDocumentModel
-
-    init(document: GuionDocumentModel = GuionDocumentModel()) {
-        self.document = document
-    }
-
-    @MainActor
-    init(configuration: ReadConfiguration) throws {
-        // Check if this is a native .guion file or an import format
-        if configuration.contentType == .guionDocument {
-            // Load native .guion file directly
-            print("📥 Loading native .guion file: \(configuration.file.filename ?? "unknown")")
-            guard let data = configuration.file.regularFileContents else {
-                throw GuionSerializationError.missingData
-            }
-
-            // Create temporary model context for deserialization
-            let schema = Schema([
-                GuionDocumentModel.self,
-                GuionElementModel.self,
-                TitlePageEntryModel.self,
-            ])
-            let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
-            let modelContainer = try ModelContainer(for: schema, configurations: [modelConfiguration])
-            let modelContext = modelContainer.mainContext
-
-            // Deserialize from binary data
-            self.document = try GuionDocumentModel.decodeFromBinaryData(data, in: modelContext)
-            print("✅ Loaded .guion file with \(document.elements.count) elements")
-        } else {
-            // Import workflow - create temporary document and store raw content
-            print("📥 Importing file: \(configuration.file.filename ?? "unknown")")
-            self.document = GuionDocumentModel()
-
-            // Store the file wrapper for later processing
-            let content = Self.extractContent(from: configuration.file, filename: configuration.file.filename)
-            print("📥 Extracted content length: \(content?.count ?? 0)")
-            document.rawContent = content
-
-            // Transform filename to .guion extension
-            document.filename = Self.transformFilenameForImport(configuration.file.filename)
-            print("📄 Import filename transformed to: \(document.filename ?? "unknown")")
-        }
-    }
-
-    /// Transform imported filename to .guion extension
-    private static func transformFilenameForImport(_ originalFilename: String?) -> String? {
-        guard let original = originalFilename else { return nil }
-
-        // Strip original extension, add .guion
-        let baseName = (original as NSString).deletingPathExtension
-        return "\(baseName).guion"
-    }
-
-    /// Extract content from FileWrapper, handling both regular files and packages
-    private static func extractContent(from fileWrapper: FileWrapper, filename: String?) -> String? {
-        guard let data = fileWrapper.regularFileContents else {
-            print("⚠️ No regular file contents")
-            return nil
-        }
-
-        // Check if it's a Highland file (ZIP archive)
-        let ext = (filename as NSString?)?.pathExtension.lowercased()
-        if ext == "highland" {
-            print("📦 Highland ZIP file detected, extracting...")
-            return extractHighlandContent(from: data)
-        }
-
-        // For other files, try to decode as UTF-8
-        if let content = String(data: data, encoding: .utf8) {
-            return content
-        }
-
-        print("⚠️ Could not decode file as UTF-8")
-        return nil
-    }
-
-    /// Extract Fountain content from Highland ZIP data
-    private static func extractHighlandContent(from zipData: Data) -> String? {
-        let fileManager = FileManager.default
-        let tempDir = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-
-        do {
-            // Write ZIP data to temp file
-            let tempZipURL = tempDir.appendingPathComponent("highland.zip")
-            try fileManager.createDirectory(at: tempDir, withIntermediateDirectories: true)
-            try zipData.write(to: tempZipURL)
-
-            // Extract ZIP
-            let extractDir = tempDir.appendingPathComponent("extracted")
-            try fileManager.unzipItem(at: tempZipURL, to: extractDir)
-
-            // Find .textbundle directory
-            let contents = try fileManager.contentsOfDirectory(at: extractDir, includingPropertiesForKeys: nil)
-            guard let textBundleURL = contents.first(where: { $0.pathExtension == "textbundle" }) else {
-                print("⚠️ No .textbundle found in Highland file")
-                return nil
-            }
-
-            print("✅ Found textbundle: \(textBundleURL.lastPathComponent)")
-
-            // Look for content files in priority order
-            let textBundleContents = try fileManager.contentsOfDirectory(at: textBundleURL, includingPropertiesForKeys: nil)
-
-            // 1. Try text.md (Highland 2 standard)
-            if let textMdURL = textBundleContents.first(where: { $0.lastPathComponent == "text.md" }) {
-                print("✅ Found text.md")
-                let content = try String(contentsOf: textMdURL, encoding: .utf8)
-                try? fileManager.removeItem(at: tempDir)
-                return content
-            }
-
-            // 2. Try any .fountain file
-            if let fountainURL = textBundleContents.first(where: { $0.pathExtension.lowercased() == "fountain" }) {
-                print("✅ Found fountain file: \(fountainURL.lastPathComponent)")
-                let content = try String(contentsOf: fountainURL, encoding: .utf8)
-                try? fileManager.removeItem(at: tempDir)
-                return content
-            }
-
-            // 3. Try any .md file
-            if let mdURL = textBundleContents.first(where: { $0.pathExtension.lowercased() == "md" }) {
-                print("✅ Found markdown file: \(mdURL.lastPathComponent)")
-                let content = try String(contentsOf: mdURL, encoding: .utf8)
-                try? fileManager.removeItem(at: tempDir)
-                return content
-            }
-
-            print("⚠️ No content files found in textbundle")
-            try? fileManager.removeItem(at: tempDir)
-            return nil
-
-        } catch {
-            print("❌ Error extracting Highland content: \(error)")
-            try? fileManager.removeItem(at: tempDir)
-            return nil
-        }
-    }
-
-    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
-        let data: Data
-
-        // Determine output format based on content type
-        if configuration.contentType == .guionDocument {
-            // Save as native .guion binary format
-            print("💾 Saving as native .guion format")
-            data = try document.encodeToBinaryData()
-        } else if configuration.contentType == .fdxDocument {
-            // Export as FDX
-            print("💾 Exporting as FDX format")
-            data = GuionDocumentParserSwiftData.toFDXData(from: document)
-        } else {
-            // Export as Fountain format
-            print("💾 Exporting as Fountain format")
-            let script = GuionDocumentParserSwiftData.toFountainScript(from: document)
-            let fountainText = script.stringFromDocument()
-            data = Data(fountainText.utf8)
-        }
-
-        return FileWrapper(regularFileWithContents: data)
+extension UTType {
+    static var guionDocument: UTType {
+        UTType(exportedAs: "com.intrusive-memory.guion")
     }
 }
 
-/// Helper to parse screenplay data into SwiftData models
-extension GuionDocumentModel {
-    /// Parse screenplay from raw content and file type
-    /// Returns a new parsed document instead of modifying self
+struct GuionDocument: FileDocument {
+    static var readableContentTypes: [UTType] {
+        [.guionDocument, .fountain, .highland, .fdx]
+    }
+
+    static var writableContentTypes: [UTType] {
+        [.guionDocument]
+    }
+
+    // Store data representation instead of live SwiftData models
+    private var documentData: Data?
+    private var script: FountainScript?
+
+    // Computed property to get/create the model on demand
     @MainActor
-    static func parseContent(
-        rawContent: String,
-        filename: String?,
-        contentType: UTType,
-        modelContext: ModelContext
-    ) async throws -> GuionDocumentModel {
-        // Create temporary file for parsing
-        let tempDir = FileManager.default.temporaryDirectory
+    var documentModel: GuionDocumentModel {
+        get {
+            if let data = documentData {
+                // Decode from stored data
+                let schema = Schema([
+                    GuionDocumentModel.self,
+                    GuionElementModel.self,
+                    TitlePageEntryModel.self,
+                ])
+                let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
 
-        // For Highland files, the rawContent is already extracted Fountain text
-        // So we should parse it as a .fountain file, not .highland
-        let ext: String
-        if contentType == .highlandDocument {
-            ext = "fountain"
-        } else {
-            ext = fileExtension(for: contentType)
+                do {
+                    let container = try ModelContainer(for: schema, configurations: [config])
+                    let context = container.mainContext
+                    return try GuionDocumentModel.decodeFromBinaryData(data, in: context)
+                } catch {
+                    // Fallback to empty document
+                    return createEmptyModel()
+                }
+            } else if let script = script {
+                // Create from script
+                return createModelFromScript(script)
+            } else {
+                // Create empty
+                return createEmptyModel()
+            }
+        }
+    }
+
+    @MainActor
+    private func createEmptyModel() -> GuionDocumentModel {
+        let schema = Schema([
+            GuionDocumentModel.self,
+            GuionElementModel.self,
+            TitlePageEntryModel.self,
+        ])
+        let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+
+        do {
+            let container = try ModelContainer(for: schema, configurations: [config])
+            let context = container.mainContext
+            let model = GuionDocumentModel(filename: "Untitled.guion")
+            context.insert(model)
+            return model
+        } catch {
+            fatalError("Could not create ModelContainer: \(error)")
+        }
+    }
+
+    @MainActor
+    private func createModelFromScript(_ script: FountainScript) -> GuionDocumentModel {
+        let schema = Schema([
+            GuionDocumentModel.self,
+            GuionElementModel.self,
+            TitlePageEntryModel.self,
+        ])
+        let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+
+        do {
+            let container = try ModelContainer(for: schema, configurations: [config])
+            let context = container.mainContext
+
+            let model = GuionDocumentModel(
+                filename: script.filename,
+                rawContent: script.stringFromDocument(),
+                suppressSceneNumbers: script.suppressSceneNumbers
+            )
+
+            // Convert title page
+            for dictionary in script.titlePage {
+                for (key, values) in dictionary {
+                    let entry = TitlePageEntryModel(key: key, values: values)
+                    entry.document = model
+                    model.titlePage.append(entry)
+                }
+            }
+
+            // Convert elements
+            for element in script.elements {
+                let elementModel = GuionElementModel(from: element)
+                elementModel.document = model
+                model.elements.append(elementModel)
+            }
+
+            context.insert(model)
+            return model
+        } catch {
+            fatalError("Could not create ModelContainer: \(error)")
+        }
+    }
+
+    nonisolated init() {
+        self.documentData = nil
+        self.script = nil
+    }
+
+    nonisolated init(configuration: ReadConfiguration) throws {
+        guard let data = configuration.file.regularFileContents else {
+            throw CocoaError(.fileReadCorruptFile)
         }
 
-        let tempURL = tempDir.appendingPathComponent("temp_screenplay.\(ext)")
+        let fileExtension = configuration.file.filename?.split(separator: ".").last?.lowercased() ?? ""
 
-        try rawContent.write(to: tempURL, atomically: true, encoding: .utf8)
+        switch fileExtension {
+        case "guion":
+            // Store the binary data for lazy decoding
+            self.documentData = data
+            self.script = nil
 
-        defer {
+        case "fountain", "highland", "fdx":
+            // Parse screenplay formats into FountainScript
+            let parsedScript = FountainScript()
+
+            // Create temp file for parsing
+            let tempURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent(configuration.file.filename ?? "import.\(fileExtension)")
+            try data.write(to: tempURL)
+
+            switch fileExtension {
+            case "fountain":
+                try parsedScript.loadFile(tempURL.path)
+            case "highland":
+                try parsedScript.loadHighland(tempURL)
+            case "fdx":
+                let parser = FDXDocumentParser()
+                let parsed = try parser.parse(data: data, filename: configuration.file.filename ?? "Untitled.fdx")
+
+                // Convert FDX to FountainScript
+                parsedScript.filename = parsed.filename
+                parsedScript.suppressSceneNumbers = parsed.suppressSceneNumbers
+
+                // Convert title page
+                var titlePageArray: [[String: [String]]] = []
+                for entry in parsed.titlePageEntries {
+                    titlePageArray.append([entry.key: entry.values])
+                }
+                parsedScript.titlePage = titlePageArray
+
+                // Convert elements
+                parsedScript.elements = parsed.elements.map { GuionElement(from: $0) }
+
+            default:
+                throw CocoaError(.fileReadUnknown)
+            }
+
+            // Clean up temp file
             try? FileManager.default.removeItem(at: tempURL)
-        }
 
-        // Use the unified parser
-        let parsedDocument = try await GuionDocumentParserSwiftData.loadAndParse(
-            from: tempURL,
-            in: modelContext,
-            generateSummaries: false
-        )
+            // Update filename
+            if let filename = configuration.file.filename {
+                parsedScript.filename = transformFilename(filename)
+            }
 
-        // Store original raw content
-        parsedDocument.rawContent = rawContent
+            // Store the script for lazy model creation
+            self.documentData = nil
+            self.script = parsedScript
 
-        return parsedDocument
-    }
-
-    private static func fileExtension(for contentType: UTType) -> String {
-        switch contentType {
-        case .fdxDocument:
-            return "fdx"
-        case .fountainDocument:
-            return "fountain"
         default:
-            return "fountain"
+            throw CocoaError(.fileReadUnknown)
         }
     }
 
-    /// Extract character information from the document
-    /// - Returns: A dictionary mapping character names to their information
-    func extractCharacters() -> CharacterList {
-        // Convert to FountainScript and use its character extraction
-        let script = GuionDocumentParserSwiftData.toFountainScript(from: self)
-        return script.extractCharacters()
+    nonisolated func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        // We need to encode the current state
+        // Use documentData if available, otherwise we need to encode from script
+        if let data = documentData {
+            return FileWrapper(regularFileWithContents: data)
+        } else {
+            // This requires MainActor access, so we throw an error
+            // The actual save will happen through a different mechanism
+            throw CocoaError(.fileWriteUnknown)
+        }
+    }
+
+    // MARK: - Export Methods
+
+    /// Export to Fountain format
+    @MainActor
+    func exportToFountain() -> String {
+        let script = GuionDocumentParserSwiftData.toFountainScript(from: documentModel)
+        return script.stringFromDocument()
+    }
+
+    /// Export to FDX format
+    @MainActor
+    func exportToFDX() -> Data {
+        return GuionDocumentParserSwiftData.toFDXData(from: documentModel)
+    }
+
+    /// Export to Highland format (uses Fountain format)
+    @MainActor
+    func exportToHighland() -> String {
+        return exportToFountain()
+    }
+
+    // MARK: - Save Support
+
+    /// Update the internal data representation for saving
+    @MainActor
+    mutating func updateForSave() throws {
+        let data = try documentModel.encodeToBinaryData()
+        self.documentData = data
+        self.script = nil
+    }
+
+    // MARK: - Helper Methods
+
+    /// Transform imported filenames to .guion extension
+    private func transformFilename(_ filename: String?) -> String? {
+        guard let original = filename else { return nil }
+        let baseName = (original as NSString).deletingPathExtension
+        return "\(baseName).guion"
+    }
+}
+
+// UTType extensions for screenplay formats
+extension UTType {
+    static var fountain: UTType {
+        UTType(importedAs: "com.quotes.fountain")
+    }
+
+    static var highland: UTType {
+        UTType(importedAs: "com.johnaugust.highland")
+    }
+
+    static var fdx: UTType {
+        UTType(importedAs: "com.finaldraft.fdx")
     }
 }

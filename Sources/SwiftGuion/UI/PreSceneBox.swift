@@ -1,6 +1,6 @@
 //
 //  PreSceneBox.swift
-//  GuionDocumentApp
+//  SwiftGuion
 //
 //  Copyright (c) 2025
 //
@@ -8,13 +8,22 @@
 //
 
 import SwiftUI
-import SwiftGuion
 
-struct PreSceneBox: View {
+/// A collapsible box displaying pre-scene content (OVER BLACK) with an expandable disclosure
+public struct PreSceneBox: View {
     let content: [GuionElement]
     @Binding var isExpanded: Bool
 
-    var body: some View {
+    /// Creates a PreSceneBox with the given content and expansion state
+    /// - Parameters:
+    ///   - content: Array of GuionElements representing the pre-scene content
+    ///   - isExpanded: Binding to control the expanded/collapsed state
+    public init(content: [GuionElement], isExpanded: Binding<Bool>) {
+        self.content = content
+        self._isExpanded = isExpanded
+    }
+
+    public var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Header with chevron
             Button(action: {

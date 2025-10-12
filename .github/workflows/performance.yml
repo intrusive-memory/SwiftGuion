@@ -1,0 +1,206 @@
+name: Performance Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  performance:
+    name: Run Performance Benchmarks
+    runs-on: macos-26
+    permissions:
+      contents: write
+      deployments: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+      - name: Show Swift version
+        run: swift --version
+
+      - name: Build
+        run: swift build
+
+      - name: Run performance tests
+        run: |
+          # Run only performance tests and capture timing output
+          # Run each test suite individually to ensure all run even if one fails
+          swift test --filter IntegrationTests.testLargeDocumentPerformance 2>&1 | tee -a performance-output.log || true
+          swift test --filter IntegrationTests.testRapidSaveLoad 2>&1 | tee -a performance-output.log || true
+          swift test --filter IntegrationTests.testSceneLocationCachingPerformance 2>&1 | tee -a performance-output.log || true
+          swift test --filter DocumentExportTests.testExportPerformance 2>&1 | tee -a performance-output.log || true
+          swift test --filter DocumentImportTests.testImportVsNativePerformance 2>&1 | tee -a performance-output.log || true
+          swift test --filter GuionSerializationTests.testLargeDocumentPerformance 2>&1 | tee -a performance-output.log || true
+          swift test --filter SceneBrowserUITests.testLargeScriptPerformance 2>&1 | tee -a performance-output.log || true
+
+          # Always exit successfully - we're measuring, not testing
+          exit 0
+
+      - name: Extract performance metrics
+        run: |
+          # Create JSON output for github-action-benchmark
+          # Format: [{"name": "test name", "unit": "seconds", "value": X.XXX}]
+
+          cat > performance-results.json << 'EOF'
+          [
+          EOF
+
+          # Parse performance output and extract timing information
+          # Look for our custom print statements in the tests
+
+          # Large document save time
+          if grep -q "Saved in" performance-output.log; then
+            SAVE_TIME=$(grep "Saved in" performance-output.log | grep -oE '[0-9]+\.[0-9]+' | head -1)
+            echo "  {\"name\": \"Large Document Save (5000 elements)\", \"unit\": \"seconds\", \"value\": $SAVE_TIME}," >> performance-results.json
+          fi
+
+          # Large document load time
+          if grep -q "Loaded in" performance-output.log; then
+            LOAD_TIME=$(grep "Loaded in" performance-output.log | grep -oE '[0-9]+\.[0-9]+' | head -1)
+            echo "  {\"name\": \"Large Document Load (5000 elements)\", \"unit\": \"seconds\", \"value\": $LOAD_TIME}," >> performance-results.json
+          fi
+
+          # Rapid save/load cycle average
+          if grep -q "Avg per cycle:" performance-output.log; then
+            AVG_CYCLE=$(grep "Avg per cycle:" performance-output.log | grep -oE '[0-9]+\.[0-9]+')
+            echo "  {\"name\": \"Rapid Save/Load Cycle Average\", \"unit\": \"seconds\", \"value\": $AVG_CYCLE}," >> performance-results.json
+          fi
+
+          # Scene location caching load time
+          if grep -q "Scene location caching test" performance-output.log; then
+            CACHE_LOAD=$(grep "Load time:" performance-output.log | tail -1 | grep -oE '[0-9]+\.[0-9]+')
+            if [ -n "$CACHE_LOAD" ]; then
+              echo "  {\"name\": \"Scene Location Cache Load (200 scenes)\", \"unit\": \"seconds\", \"value\": $CACHE_LOAD}," >> performance-results.json
+            fi
+          fi
+
+          # Export performance metrics
+          if grep -q "Fountain export:" performance-output.log; then
+            FOUNTAIN_EXPORT=$(grep "Fountain export:" performance-output.log | grep -oE '[0-9]+\.[0-9]+')
+            if [ -n "$FOUNTAIN_EXPORT" ]; then
+              echo "  {\"name\": \"Fountain Export (1000 elements)\", \"unit\": \"seconds\", \"value\": $FOUNTAIN_EXPORT}," >> performance-results.json
+            fi
+          fi
+
+          if grep -q "FDX export:" performance-output.log; then
+            FDX_EXPORT=$(grep "FDX export:" performance-output.log | grep -oE '[0-9]+\.[0-9]+')
+            if [ -n "$FDX_EXPORT" ]; then
+              echo "  {\"name\": \"FDX Export (1000 elements)\", \"unit\": \"seconds\", \"value\": $FDX_EXPORT}," >> performance-results.json
+            fi
+          fi
+
+          # Import/Native load performance
+          if grep -q "Native load:" performance-output.log; then
+            NATIVE_LOAD=$(grep "Native load:" performance-output.log | grep -oE '[0-9]+\.[0-9]+')
+            if [ -n "$NATIVE_LOAD" ]; then
+              echo "  {\"name\": \"Native .guion Load (500 elements)\", \"unit\": \"seconds\", \"value\": $NATIVE_LOAD}," >> performance-results.json
+            fi
+          fi
+
+          # Serialization performance
+          if grep -q "Serialization save:" performance-output.log; then
+            SERIAL_SAVE=$(grep "Serialization save:" performance-output.log | grep -oE '[0-9]+\.[0-9]+')
+            if [ -n "$SERIAL_SAVE" ]; then
+              echo "  {\"name\": \"Serialization Save (1000 elements)\", \"unit\": \"seconds\", \"value\": $SERIAL_SAVE}," >> performance-results.json
+            fi
+          fi
+
+          if grep -q "Serialization load:" performance-output.log; then
+            SERIAL_LOAD=$(grep "Serialization load:" performance-output.log | grep -oE '[0-9]+\.[0-9]+')
+            if [ -n "$SERIAL_LOAD" ]; then
+              echo "  {\"name\": \"Serialization Load (1000 elements)\", \"unit\": \"seconds\", \"value\": $SERIAL_LOAD}," >> performance-results.json
+            fi
+          fi
+
+          # BigFish extraction performance
+          if grep -q "BigFish extraction:" performance-output.log; then
+            BIGFISH=$(grep "BigFish extraction:" performance-output.log | grep -oE '[0-9]+\.[0-9]+')
+            if [ -n "$BIGFISH" ]; then
+              echo "  {\"name\": \"BigFish Scene Browser Extraction\", \"unit\": \"seconds\", \"value\": $BIGFISH}," >> performance-results.json
+            fi
+          fi
+
+          # Remove trailing comma from last entry
+          sed -i '' '$ s/,$//' performance-results.json
+
+          cat >> performance-results.json << 'EOF'
+          ]
+          EOF
+
+          echo "Performance metrics extracted:"
+          cat performance-results.json
+
+      - name: Store benchmark result
+        uses: benchmark-action/github-action-benchmark@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          name: SwiftGuion Performance Benchmarks
+          tool: 'customBiggerIsBetter'
+          output-file-path: performance-results.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+          # Alert if performance degrades by more than 50%
+          alert-threshold: '150%'
+          comment-on-alert: true
+          fail-on-alert: false
+          # Store results in gh-pages branch
+          gh-pages-branch: gh-pages
+          benchmark-data-dir-path: dev/bench
+
+      - name: Store benchmark result (PR)
+        uses: benchmark-action/github-action-benchmark@v1
+        if: github.event_name == 'pull_request'
+        with:
+          name: SwiftGuion Performance Benchmarks
+          tool: 'customBiggerIsBetter'
+          output-file-path: performance-results.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: false
+          alert-threshold: '150%'
+          comment-on-alert: true
+          fail-on-alert: false
+
+      - name: Add performance summary
+        if: always()
+        run: |
+          echo "## Performance Benchmarks" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Performance metrics are tracked over time and visualized on GitHub Pages." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f performance-results.json ]; then
+            echo "### Current Run Results" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Benchmark | Time |" >> $GITHUB_STEP_SUMMARY
+            echo "|-----------|------|" >> $GITHUB_STEP_SUMMARY
+
+            # Parse JSON and create table
+            cat performance-results.json | grep -o '"name": "[^"]*"' | sed 's/"name": "//;s/"$//' > /tmp/names.txt
+            cat performance-results.json | grep -o '"value": [0-9.]*' | sed 's/"value": //' > /tmp/values.txt
+
+            paste /tmp/names.txt /tmp/values.txt | while IFS=$'\t' read -r name value; do
+              echo "| $name | ${value}s |" >> $GITHUB_STEP_SUMMARY
+            done
+          fi
+
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "📊 [View Historical Performance Trends](https://intrusive-memory.github.io/SwiftGuion/dev/bench/)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload performance artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-results
+          path: |
+            performance-output.log
+            performance-results.json
+          retention-days: 90
