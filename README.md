@@ -52,6 +52,36 @@ dependencies: [
 ]
 ```
 
+## Quick Start: GuionViewer
+
+The fastest way to add screenplay viewing to your SwiftUI app:
+
+```swift
+import SwiftUI
+import SwiftGuion
+
+struct ContentView: View {
+    let document: GuionDocumentModel  // or FountainScript, or URL
+
+    var body: some View {
+        GuionViewer(document: document)
+            .frame(minWidth: 600, minHeight: 800)
+    }
+}
+```
+
+**GuionViewer** is a complete, drop-in SwiftUI component that provides:
+- ✅ Support for all file formats (.guion, .fountain, .highland, .fdx)
+- ✅ Hierarchical scene browser with chapters and scene groups
+- ✅ Async file loading with progress indicators
+- ✅ Built-in error handling and empty states
+- ✅ Full accessibility support (VoiceOver, keyboard navigation)
+- ✅ Optimized for large screenplays (200+ pages)
+
+**See:** [GuionViewer API Documentation](Docs/GUION_VIEWER_API.md) for complete API reference.
+
+**See:** [UI Components README](Sources/SwiftGuion/UI/README.md) for component details.
+
 ## Examples
 
 ### FountainDocumentApp - Document-Based macOS App with SwiftData
@@ -451,6 +481,35 @@ try script.writeOutlineJSON(to: URL(fileURLWithPath: "/path/to/outline.json"))
 - END markers (`## END ...`) do not participate in the parent-child hierarchy
 
 ## API Reference
+
+### GuionViewer
+
+Complete drop-in SwiftUI component for viewing screenplay documents.
+
+**Platform:** macOS 14.0+, iOS 17.0+
+
+**Initializers:**
+- `init(document: GuionDocumentModel)`: Create from SwiftData document
+- `init(script: FountainScript)`: Create from pre-parsed script
+- `init(fileURL: URL)`: Async load from file (.fountain, .highland, .fdx)
+- `init(browserData: SceneBrowserData)`: Create from pre-extracted data
+
+**Example:**
+```swift
+// From SwiftData document
+GuionViewer(document: document)
+
+// From file URL (async loading)
+GuionViewer(fileURL: URL(fileURLWithPath: "screenplay.fountain"))
+
+// From pre-parsed script
+let script = try FountainScript(file: "screenplay.fountain")
+GuionViewer(script: script)
+```
+
+**See:** [GuionViewer API Documentation](Docs/GUION_VIEWER_API.md) for complete reference.
+
+---
 
 ### FountainDocument
 
