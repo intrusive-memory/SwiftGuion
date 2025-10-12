@@ -1,6 +1,6 @@
 # SwiftGuion Sample App Requirements
 
-**Document Version:** 1.3
+**Document Version:** 1.4
 **Date:** October 12, 2025
 **Status:** Draft
 
@@ -523,6 +523,119 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 - Title bar shows document name
 - Proxy icon in title bar supports drag-and-drop
 - Dirty document indicator (dot in close button) when unsaved
+
+---
+
+**REQ-WIN-004**: Window State Persistence
+**Priority**: P1 (High)
+**Description**: Window state shall persist across application launches for improved user experience.
+
+**Acceptance Criteria:**
+- Window state stored per-document (by file path) in local preferences
+- Window state includes:
+  - Window size (width and height in points)
+  - Window position (x, y coordinates)
+  - Scroll position (vertical offset)
+  - Expanded/collapsed chapter IDs
+  - Expanded/collapsed scene group IDs
+- On document reopen, window restores to previous state
+- If window position is off-screen (external monitor disconnected), window centered on main screen
+- Default window state for new documents: 800×1000 points, centered on main screen
+- State stored in: `~/Library/Application Support/GuionView/window-state.plist`
+- State cleared for documents not opened in 90 days (automatic cleanup)
+- Preference toggle in Preferences → General → "Restore window positions" (on by default)
+- State migration handled gracefully if file moved/renamed
+
+---
+
+**REQ-WIN-005**: Window Management Commands
+**Priority**: P1 (High)
+**Description**: Users shall be able to manage multiple document windows efficiently.
+
+**Acceptance Criteria:**
+- Window menu includes management commands:
+  - **Minimize** (Cmd+M): Minimizes current window
+  - **Minimize All** (Cmd+Option+M): Minimizes all windows
+  - **Zoom** (no shortcut): Toggles current window zoom
+  - **Zoom All**: Zooms all windows
+  - **Bring All to Front**: Brings all windows forward
+  - Separator
+  - List of open documents (up to 10 visible)
+  - "More Windows..." submenu if > 10 documents open
+- Current window indicated with checkmark (✓) in window list
+- Clicking window menu item brings that window to front and focuses it
+- Window titles in menu abbreviated if > 40 characters with ellipsis
+- Dirty documents shown with • prefix in window list
+- Keyboard shortcut Cmd+` cycles through windows in MRU order
+- All window management respects Focus/Stage Manager state
+
+---
+
+#### 2.2.3 User Feedback
+
+**REQ-UI-005**: Operation Success Feedback
+**Priority**: P1 (High)
+**Description**: Successful operations shall provide clear, non-intrusive feedback to users.
+
+**Acceptance Criteria:**
+- Success notifications use native macOS user notification style (banner, top-right)
+- Import success:
+  - Notification: "Imported [filename]"
+  - Subtitle: "[N] scenes, [M] elements"
+  - Duration: 3 seconds auto-dismiss
+- Export success:
+  - Notification: "Exported to [filename]"
+  - Action button: "Reveal in Finder"
+  - Duration: 5 seconds auto-dismiss (longer for action button)
+- Save success:
+  - No notification (dirty indicator cleared is sufficient feedback)
+  - Exception: First save shows "Saved as [filename]" for 2 seconds
+- Notifications stack vertically if multiple operations complete
+- Clicking notification brings relevant window to front
+- Preference toggle in Preferences → General → "Show success notifications" (on by default)
+- Notifications respect Do Not Disturb system setting
+- Screen reader announces success (VoiceOver: "Import completed successfully")
+
+---
+
+**REQ-UI-006**: Operation Progress Feedback
+**Priority**: P1 (High)
+**Description**: Long-running operations shall show detailed progress information.
+
+**Acceptance Criteria:**
+- Progress sheet appears for operations expected to take > 2 seconds
+- Progress sheet is modeless (attached to document window, not app-modal)
+- Progress sheet content:
+  - **Title**: Operation type (e.g., "Importing Screenplay", "Exporting to Fountain")
+  - **Filename**: Full filename with icon
+  - **Progress bar**: Determinate (0-100%) with smooth animation
+  - **Status text**: Current operation (e.g., "Parsing scene headings...", "Writing elements...")
+  - **Details**: "N of M [units] processed" (e.g., "450 of 2,750 elements")
+  - **Time remaining**: Estimated time or "A few seconds remaining"
+  - **Cancel button**: Always visible and functional
+- Progress updates throttled to 60 FPS (smooth but not excessive)
+- For import operations, status shows element type being parsed:
+  - "Parsing title page..."
+  - "Parsing scene headings... (N of M)"
+  - "Parsing dialogue... (N of M)"
+  - "Building hierarchy..."
+- For export operations, status shows section being written:
+  - "Writing title page..."
+  - "Writing elements... (N of M)"
+  - "Creating archive..." (for .highland)
+  - "Validating export..."
+- Progress persists if user switches to another window
+- On completion:
+  - Progress bar fills to 100%
+  - Checkmark icon (✓) displayed
+  - Sheet dismisses after 0.5 seconds
+- On cancellation:
+  - Immediate dismiss
+  - Rollback to previous state
+  - Status notification: "Import cancelled" (2 seconds)
+- On error:
+  - Progress sheet replaced with error dialog
+  - No automatic dismiss (user must acknowledge)
 
 ---
 
@@ -1129,6 +1242,7 @@ Items out of scope for initial release but worth considering:
 | 1.1 | 2025-10-12 | Claude Code | Updated to use GuionViewer component, added drag-and-drop support (REQ-UI-004), restructured File menu with Import submenu (REQ-IMP-006), updated keyboard shortcuts |
 | 1.2 | 2025-10-12 | Claude Code | Named app "GuionView" (REQ-APP-001), added app icon requirements inspired by Preview.app (REQ-APP-002), added bundle configuration requirement (REQ-PLAT-003), updated application structure |
 | 1.3 | 2025-10-12 | Claude Code | Added critical requirements from analysis: crash recovery (REQ-DOC-004), version browsing (REQ-DOC-005), close unsaved (REQ-DOC-006), import failure recovery (REQ-IMP-005), export validation (REQ-EXP-005), format migration (REQ-EXP-006). Enhanced REQ-IMP-004 with specific progress calculation details. |
+| 1.4 | 2025-10-12 | Claude Code | Added high-priority UX and window management requirements: window state persistence (REQ-WIN-004), window management commands (REQ-WIN-005), operation success feedback (REQ-UI-005), operation progress feedback (REQ-UI-006). Total requirements now: 41 (was 35). |
 
 ---
 
