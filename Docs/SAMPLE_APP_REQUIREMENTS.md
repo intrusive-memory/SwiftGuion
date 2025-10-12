@@ -1,6 +1,6 @@
 # SwiftGuion Sample App Requirements
 
-**Document Version:** 1.4
+**Document Version:** 1.5
 **Date:** October 12, 2025
 **Status:** Draft
 
@@ -157,7 +157,47 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 
 ---
 
-#### 2.1.2 Import Capabilities
+#### 2.1.2 Document Editing
+
+**REQ-EDIT-001**: Undo/Redo Operations
+**Priority**: P1 (High)
+**Description**: Users shall be able to undo and redo document-modifying operations.
+
+**Acceptance Criteria:**
+- Undo and Redo commands available in Edit menu
+- Edit → Undo (Cmd+Z): Reverses last operation
+- Edit → Redo (Cmd+Shift+Z): Re-applies last undone operation
+- Menu items show descriptive action names:
+  - "Undo Import Fountain" (not generic "Undo")
+  - "Redo Export to FDX"
+  - "Undo Title Page Change"
+- Undoable operations include:
+  - Import from any format
+  - Element modifications (when editing implemented)
+  - Title page changes
+  - Scene number modifications
+  - Bulk operations (delete, move)
+- Undo stack maximum depth configurable in Preferences (default: 50 levels)
+- Undo stack cleared when:
+  - Document closed
+  - Document saved and preference "Clear undo after save" enabled (default: off)
+  - Explicit "Clear History" command (Edit → Clear History)
+- Undo/Redo state persists across auto-save (not cleared)
+- Memory-efficient: Stores diffs when possible, not full document copies
+- Undo grouping: Related operations grouped into single undo action
+  - Example: Import creates single undo group even if multiple internal operations
+- Menu items disabled when no undo/redo available (grayed out)
+- Keyboard shortcuts work throughout application
+- VoiceOver announces undo/redo action descriptions
+- Undo/Redo triggers dirty document indicator appropriately:
+  - Undo to last saved state clears dirty indicator
+  - Redo from last saved state sets dirty indicator
+- Performance: Undo operations complete in < 100ms for typical changes
+- If undo stack exceeds maximum, oldest actions removed (FIFO)
+
+---
+
+#### 2.1.3 Import Capabilities
 
 **REQ-IMP-001**: Import .fountain Files
 **Priority**: P0 (Critical)
@@ -890,6 +930,61 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 
 ---
 
+### 3.6 Preferences
+
+**REQ-PREF-001**: User Preferences
+**Priority**: P1 (High)
+**Description**: Users shall be able to configure application behavior through a Preferences window.
+
+**Acceptance Criteria:**
+- GuionView → Preferences... (Cmd+,) opens Preferences window
+- Preferences window uses native macOS tabbed interface
+- Preferences window is singleton (only one instance, reuses existing if open)
+- Window size: 600×400 points, not resizable
+- Three tabs: **General**, **Appearance**, **Advanced**
+- **General Tab:**
+  - **Auto-save interval**: Slider with values 1, 2, 5, 10, 15, 30 minutes (default: 5)
+    - Label: "Auto-save documents every: [N] minutes"
+    - Tooltip: "How often unsaved changes are automatically backed up"
+  - **Window state persistence**: Checkbox (default: on)
+    - Label: "Restore window positions"
+    - Description: "Remember window size and position for each document"
+  - **Success notifications**: Checkbox (default: on)
+    - Label: "Show success notifications"
+    - Description: "Display notifications for completed imports and exports"
+- **Appearance Tab:**
+  - **Font size**: Slider with percentage 80%, 90%, 100%, 110%, 125%, 150% (default: 100%)
+    - Label: "Scene browser text size: [N]%"
+    - Live preview of sample text at selected size
+  - **Spacing mode**: Radio buttons (default: Comfortable)
+    - Options: "Compact", "Comfortable", "Spacious"
+    - Description: "Vertical spacing between scene elements"
+  - **Show element counts**: Checkbox (default: on)
+    - Label: "Show scene element counts"
+    - Description: "Display number of elements in each scene group"
+- **Advanced Tab:**
+  - **Validation settings**:
+    - "Validate exports" checkbox (default: on)
+    - "Validate imports" checkbox (default: on)
+    - Description: "Verify file integrity after import/export operations"
+  - **Performance**:
+    - "Maximum undo levels": Stepper with range 10-100 (default: 50)
+    - Label: "Maximum undo levels: [N]"
+    - Description: "More levels use more memory"
+  - **Developer**:
+    - "Enable debug logging" checkbox (default: off)
+    - Button: "Show Logs Folder"
+    - Button: "Clear Import/Export Logs"
+- All preferences persist to UserDefaults immediately on change
+- No "Apply" or "OK" button needed (changes are immediate)
+- Preferences apply to all open documents and future launches
+- Preferences reset available: "Restore Defaults" button on each tab
+- Keyboard navigation works throughout (Tab, Space, Arrow keys)
+- VoiceOver announces all controls and their current values
+- Help button (?) opens help book to Preferences section
+
+---
+
 ## 4. Technical Architecture
 
 ### 4.1 Application Structure
@@ -1108,13 +1203,124 @@ var documentModel: GuionDocumentModel {
 - Concurrency patterns noted
 - Example usage in documentation
 
-### 6.3 User Documentation
+### 6.3 In-App Help System
 
-**Optional (for full product):**
-- User guide with screenshots
-- Tutorial for first-time users
-- FAQ section
-- Troubleshooting guide
+**REQ-HELP-001**: In-App Help System
+**Priority**: P1 (High)
+**Description**: The app shall provide comprehensive built-in help documentation accessible from the Help menu.
+
+**Acceptance Criteria:**
+- Help → GuionView Help (Cmd+?) opens macOS Help Book
+- Help Book bundled with application (not web-based)
+- Help content searchable via Spotlight Help search
+- Help Book sections:
+  - **Getting Started**: Overview, first steps, opening files
+  - **Working with Documents**: Creating, saving, importing, exporting
+  - **File Formats**: Detailed format explanations (.guion, .fountain, .highland, .fdx)
+  - **Importing Screenplays**: Step-by-step import instructions for each format
+  - **Exporting Screenplays**: Export process and format recommendations
+  - **Scene Browser**: Understanding hierarchical structure, navigation
+  - **Keyboard Shortcuts**: Complete reference table (Appendix B reproduced)
+  - **Troubleshooting**: Common issues and solutions
+  - **Preferences**: All preference explanations
+- Help content written in clear, non-technical language
+- Screenshots included for key workflows (import, export, preferences)
+- Context-sensitive help available:
+  - Help button (?) in Preferences opens relevant help section
+  - Help → Search allows searching help content
+  - Related help topics linked within pages
+- Help menu also includes:
+  - **GuionView Help** (Cmd+?)
+  - Separator
+  - **Send Feedback...**: Opens email or web form
+  - **View Import Logs...**: Opens Finder to log directory
+  - **Recent Import Errors...**: Shows recent error summary
+  - **Release Notes**: Opens notes for current version
+- Help Book indexed for macOS Help search (appears in menu bar search)
+- Help content maintained in `.help` bundle format
+- Help accessible without internet connection
+
+---
+
+**REQ-HELP-002**: Sample Screenplay
+**Priority**: P1 (High)
+**Description**: The app shall include a bundled sample screenplay demonstrating all features.
+
+**Acceptance Criteria:**
+- File → Open Sample Screenplay menu item available at all times
+- Sample screenplay opens in new window (read-only until Save As)
+- Sample screenplay demonstrates:
+  - Title page with all fields
+  - Chapter markers (##) at Level 2
+  - Scene groups (###) at Level 3
+  - Multiple scene headings (INT/EXT)
+  - Action, dialogue, character names
+  - Scene numbers
+  - Transitions
+  - Formatting variety (centered text, page breaks)
+  - OVER BLACK pre-scene content
+- Sample screenplay length: 10-15 pages (optimal for demonstration)
+- Sample screenplay content: Original content or public domain
+- Sample included in all supported formats:
+  - `Sample.guion` (primary)
+  - `Sample.fountain`
+  - `Sample.highland`
+  - `Sample.fdx`
+- Sample files bundled in `GuionView.app/Contents/Resources/Samples/`
+- Opening sample shows info banner: "This is a read-only sample. Use File → Save As... to create an editable copy."
+- Save command disabled (grayed out) for sample documents
+- Save As works normally, creates new editable document
+- Sample demonstrates best practices for screenplay structure
+- Sample credits displayed in Help → About Sample
+- Sample remains available even if user deletes ~/.guion files
+- Multiple opens of sample create independent windows
+
+---
+
+### 6.4 Search and Navigation
+
+**REQ-FIND-001**: Find in Document
+**Priority**: P2 (Medium)
+**Description**: Users shall be able to search for text within screenplay documents.
+
+**Acceptance Criteria:**
+- Edit → Find → Find... (Cmd+F) shows find bar
+- Find bar appears at bottom of document window (non-modal)
+- Find bar contains:
+  - **Search field**: Text input with placeholder "Find"
+  - **Match case checkbox**: Case-insensitive by default
+  - **Previous button** (Cmd+Shift+G or up arrow in field)
+  - **Next button** (Cmd+G or down arrow in field)
+  - **Done button**: Closes find bar (Escape also closes)
+- Search behavior:
+  - Searches all text content: scene headings, action, dialogue, character names
+  - Does not search: title page, section headers (unless preference enabled)
+  - Incremental search: Results update as user types
+  - Highlights all matches in yellow background
+  - Current match highlighted in orange background
+  - Scrolls to center current match in viewport
+- Match counter: "3 of 47 matches" displayed in find bar
+- No matches: "No matches found" displayed in red text
+- Find bar state:
+  - Find bar hidden by default
+  - Find bar state per-window (not global)
+  - Search term preserved when find bar reopened
+  - Recent searches accessible via search field dropdown (last 10)
+- Keyboard navigation:
+  - Return/Enter in search field: Find next
+  - Shift+Return: Find previous
+  - Escape: Close find bar
+  - Cmd+G: Find next (even when find bar closed)
+  - Cmd+Shift+G: Find previous (even when find bar closed)
+- Find bar respects VoiceOver:
+  - Announces match count
+  - Announces current match text
+  - Accessible via keyboard navigation
+- Preference available: "Search in section headers" (default: off)
+- Preference available: "Wrap around when reaching end" (default: on)
+- Find operations do not modify document (view-only)
+- Performance: Search completes in < 100ms for typical screenplay
+- Large screenplays (> 500 pages): Search shows progress for > 1s
 
 ---
 
@@ -1218,19 +1424,32 @@ Items out of scope for initial release but worth considering:
 
 | Action | Shortcut |
 |--------|----------|
+| **File Menu** | |
 | New Document | Cmd+N |
 | Open... | Cmd+O |
 | Save | Cmd+S |
 | Save As... | Cmd+Shift+S |
 | Close Window | Cmd+W |
-| **Import Fountain...** | Cmd+Shift+I, F |
-| **Import Highland...** | Cmd+Shift+I, H |
-| **Import Final Draft...** | Cmd+Shift+I, D |
+| Import Fountain... | Cmd+Shift+I, F |
+| Import Highland... | Cmd+Shift+I, H |
+| Import Final Draft... | Cmd+Shift+I, D |
 | Export to Fountain... | Cmd+Shift+E, F |
 | Export to Highland... | Cmd+Shift+E, H |
 | Export to Final Draft... | Cmd+Shift+E, D |
+| **Edit Menu** | |
+| Undo | Cmd+Z |
+| Redo | Cmd+Shift+Z |
+| Find... | Cmd+F |
+| Find Next | Cmd+G |
+| Find Previous | Cmd+Shift+G |
+| **Window Menu** | |
 | Minimize | Cmd+M |
+| Minimize All | Cmd+Option+M |
 | Cycle Windows | Cmd+` |
+| **Help Menu** | |
+| GuionView Help | Cmd+? |
+| **Application** | |
+| Preferences... | Cmd+, |
 
 ---
 
@@ -1243,6 +1462,7 @@ Items out of scope for initial release but worth considering:
 | 1.2 | 2025-10-12 | Claude Code | Named app "GuionView" (REQ-APP-001), added app icon requirements inspired by Preview.app (REQ-APP-002), added bundle configuration requirement (REQ-PLAT-003), updated application structure |
 | 1.3 | 2025-10-12 | Claude Code | Added critical requirements from analysis: crash recovery (REQ-DOC-004), version browsing (REQ-DOC-005), close unsaved (REQ-DOC-006), import failure recovery (REQ-IMP-005), export validation (REQ-EXP-005), format migration (REQ-EXP-006). Enhanced REQ-IMP-004 with specific progress calculation details. |
 | 1.4 | 2025-10-12 | Claude Code | Added high-priority UX and window management requirements: window state persistence (REQ-WIN-004), window management commands (REQ-WIN-005), operation success feedback (REQ-UI-005), operation progress feedback (REQ-UI-006). Total requirements now: 41 (was 35). |
+| 1.5 | 2025-10-12 | Claude Code | Added Phase 2B high-priority requirements: user preferences (REQ-PREF-001), undo/redo operations (REQ-EDIT-001), in-app help system (REQ-HELP-001), sample screenplay (REQ-HELP-002), find in document (REQ-FIND-001). Enhanced keyboard shortcuts table. Total requirements now: 46 (was 41). |
 
 ---
 
