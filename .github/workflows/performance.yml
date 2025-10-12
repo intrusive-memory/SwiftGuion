@@ -127,8 +127,11 @@ jobs:
             fi
           fi
 
-          # Remove trailing comma from last entry
-          sed -i '' '$ s/,$//' performance-results.json
+          # Remove trailing comma from last entry (macOS sed syntax)
+          # Check if file has content before the closing bracket
+          if [ $(wc -l < performance-results.json) -gt 1 ]; then
+            sed -i.bak '$ s/,$//' performance-results.json && rm -f performance-results.json.bak
+          fi
 
           cat >> performance-results.json << 'EOF'
           ]
@@ -137,12 +140,17 @@ jobs:
           echo "Performance metrics extracted:"
           cat performance-results.json
 
+          # Validate JSON format
+          if command -v python3 &> /dev/null; then
+            python3 -c "import json; json.load(open('performance-results.json'))" || echo "Warning: Invalid JSON generated"
+          fi
+
       - name: Store benchmark result
         uses: benchmark-action/github-action-benchmark@v1
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           name: SwiftGuion Performance Benchmarks
-          tool: 'customBiggerIsBetter'
+          tool: 'customSmallerIsBetter'
           output-file-path: performance-results.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: true
@@ -159,7 +167,7 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           name: SwiftGuion Performance Benchmarks
-          tool: 'customBiggerIsBetter'
+          tool: 'customSmallerIsBetter'
           output-file-path: performance-results.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
           auto-push: false
