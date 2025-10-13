@@ -1,42 +1,193 @@
 # SwiftGuion Migration Guide
 
-**Version:** 1.0
-**Last Updated:** October 10, 2025
+**Version:** 2.0
+**Last Updated:** October 13, 2025
 
 ---
 
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Migration Scenarios](#migration-scenarios)
-3. [Single File Conversion](#single-file-conversion)
-4. [Batch Conversion](#batch-conversion)
-5. [Fountain to .guion](#fountain-to-guion)
-6. [Final Draft to .guion](#final-draft-to-guion)
-7. [Highland to .guion](#highland-to-guion)
-8. [Batch Conversion Script](#batch-conversion-script)
-9. [Preserving Metadata](#preserving-metadata)
-10. [Troubleshooting Migration](#troubleshooting-migration)
+2. [API Migration (Architecture Redesign)](#api-migration-architecture-redesign)
+3. [File Format Migration](#file-format-migration)
+4. [Single File Conversion](#single-file-conversion)
+5. [Batch Conversion](#batch-conversion)
+6. [Fountain to .guion](#fountain-to-guion)
+7. [Final Draft to .guion](#final-draft-to-guion)
+8. [Highland to .guion](#highland-to-guion)
+9. [Batch Conversion Script](#batch-conversion-script)
+10. [Preserving Metadata](#preserving-metadata)
+11. [Troubleshooting Migration](#troubleshooting-migration)
 
 ---
 
 ## Overview
 
-This guide helps you migrate your existing screenplays to SwiftGuion's native `.guion` format from:
-- Fountain (`.fountain`)
-- Final Draft (`.fdx`)
-- Highland (`.highland`)
-- TextBundle (`.textbundle`)
+This guide covers two types of migration:
 
-### Why Migrate to .guion?
+1. **API Migration**: Updating code to use the new architecture (immutable GuionParsedScreenplay, renamed parsers)
+2. **File Format Migration**: Converting screenplays to SwiftGuion's native `.guion` TextPack format
+
+---
+
+## API Migration (Architecture Redesign)
+
+SwiftGuion underwent a major architecture redesign introducing immutable, thread-safe types and renamed parsers.
+
+### Breaking Changes Summary
+
+| Old API | New API | Change Type |
+|---------|---------|-------------|
+| `FountainScript` | `GuionParsedScreenplay` | **Renamed** |
+| `FastFountainParser` | `FountainParser` | **Renamed** |
+| `FDXDocumentParser` | `FDXParser` | **Renamed** |
+| `script.loadFile()` | `init(file:)` | **Removed** (use init) |
+| `script.loadString()` | `init(string:)` | **Removed** (use init) |
+| `var elements` | `let elements` | **Immutable** |
+
+### Migration Steps
+
+#### Step 1: Update Type Names
+
+**Before:**
+```swift
+import SwiftGuion
+
+let script = FountainScript()
+try script.loadFile("screenplay.fountain")
+```
+
+**After:**
+```swift
+import SwiftGuion
+
+let screenplay = try GuionParsedScreenplay(file: "screenplay.fountain")
+```
+
+#### Step 2: Update Parser References
+
+**Before:**
+```swift
+let parser = FastFountainParser(file: "screenplay.fountain")
+let fdxParser = FDXDocumentParser()
+```
+
+**After:**
+```swift
+let parser = FountainParser(file: "screenplay.fountain")
+let fdxParser = FDXParser()
+```
+
+#### Step 3: Handle Immutability
+
+**Before (mutable):**
+```swift
+let script = FountainScript()
+script.loadFile("screenplay.fountain")
+script.elements.append(newElement)  // This was possible before
+```
+
+**After (immutable):**
+```swift
+let screenplay = try GuionParsedScreenplay(file: "screenplay.fountain")
+// To modify, create a new instance
+var newElements = screenplay.elements
+newElements.append(newElement)
+let newScreenplay = GuionParsedScreenplay(
+    filename: screenplay.filename,
+    elements: newElements,
+    titlePage: screenplay.titlePage
+)
+```
+
+#### Step 4: Use SwiftData Conversion Methods
+
+**Before (manual conversion):**
+```swift
+let document = GuionDocumentModel()
+document.filename = screenplay.filename
+for element in screenplay.elements {
+    let model = GuionElementModel()
+    model.elementType = element.elementType
+    // ... manual property copying
+}
+```
+
+**After (explicit conversion):**
+```swift
+// Immutable → Mutable (for persistence)
+let document = await GuionDocumentModel.from(screenplay, in: context)
+
+// Mutable → Immutable (for processing)
+let screenplay = document.toGuionParsedScreenplay()
+```
+
+### Quick Find & Replace
+
+Use these patterns to update your code:
+
+```bash
+# In your project directory
+find . -name "*.swift" -exec sed -i '' 's/FountainScript/GuionParsedScreenplay/g' {} +
+find . -name "*.swift" -exec sed -i '' 's/FastFountainParser/FountainParser/g' {} +
+find . -name "*.swift" -exec sed -i '' 's/FDXDocumentParser/FDXParser/g' {} +
+```
+
+**⚠️ Warning:** Review changes before committing!
+
+### Thread Safety Benefits
+
+The new immutable architecture is fully thread-safe:
+
+```swift
+// Safe to pass between threads
+let screenplay = try GuionParsedScreenplay(file: "screenplay.fountain")
+
+Task.detached {
+    // No data races possible - screenplay is Sendable
+    let characters = screenplay.extractCharacters()
+    await processCharacters(characters)
+}
+
+Task.detached {
+    // Can access same screenplay safely from multiple threads
+    let outline = screenplay.extractOutline()
+    await processOutline(outline)
+}
+```
+
+### Testing Your Migration
+
+After updating your code, verify:
+
+1. **Compilation**: `swift build` succeeds without warnings
+2. **Tests**: All tests pass
+3. **Runtime**: No concurrency warnings in Xcode
+4. **Functionality**: All features work as before
+
+```bash
+# Run tests
+swift test
+
+# Check for concurrency issues
+# In Xcode: Product → Scheme → Edit Scheme → Diagnostics
+# Enable: Thread Sanitizer, Main Thread Checker
+```
+
+---
+
+## File Format Migration
+
+This section helps you convert existing screenplays to SwiftGuion's native `.guion` TextPack format.
+
+### Why Migrate to .guion TextPack?
 
 Benefits of using `.guion` format:
-- **Faster loading** (10x faster than parsing Fountain)
-- **Cached scene locations** for instant navigation
-- **Native SwiftData storage** with automatic persistence
-- **Optimized for SwiftGuion** features
-- **Smaller file sizes** compared to FDX
-- **iCloud sync support**
+- **Structured data**: JSON exports for characters, locations, elements
+- **Faster loading**: Pre-parsed screenplay data
+- **Cached metadata**: Scene locations, character info
+- **Extensible**: Easy to add new resources
+- **Interoperability**: JSON enables external tool integration
 
 ### When NOT to Migrate
 
