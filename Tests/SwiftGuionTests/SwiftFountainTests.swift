@@ -39,7 +39,7 @@ import SwiftFijos
 @Test func testOverBlackSceneHeading() async throws {
     // Test that scene headings are properly recognized
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
-    let script = try FountainScript(file: fountainURL.path)
+    let script = try GuionParsedScreenplay(file: fountainURL.path)
 
     // Check that we have scene headings
     let sceneHeadings = script.elements.filter { $0.elementType == "Scene Heading" }
@@ -47,7 +47,7 @@ import SwiftFijos
 }
 
 @Test func testGetContent() async throws {
-    let script = FountainScript()
+    let script = GuionParsedScreenplay()
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
 
     let content = try script.getContent(from: fountainURL)
@@ -58,7 +58,7 @@ import SwiftFijos
 
 @Test func testWriteToTextBundle() async throws {
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
-    let script = try FountainScript(file: fountainURL.path)
+    let script = try GuionParsedScreenplay(file: fountainURL.path)
 
     let tempDir = FileManager.default.temporaryDirectory
     let testFileName = "test-\(UUID().uuidString).fountain"
@@ -82,7 +82,7 @@ import SwiftFijos
 
 @Test func testExtractCharacters() async throws {
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
-    let script = try FountainScript(file: fountainURL.path)
+    let script = try GuionParsedScreenplay(file: fountainURL.path)
 
     let characters = script.extractCharacters()
 
@@ -101,7 +101,7 @@ import SwiftFijos
 
 @Test func testWriteCharactersJSON() async throws {
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
-    let script = try FountainScript(file: fountainURL.path)
+    let script = try GuionParsedScreenplay(file: fountainURL.path)
 
     let tempDir = FileManager.default.temporaryDirectory
     let outputPath = tempDir.appendingPathComponent("bigfish-characters.json")
@@ -128,8 +128,7 @@ import SwiftFijos
 
 @Test func testExtractOutline() async throws {
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
-    let script = try FountainScript(file: fountainURL.path)
-    script.filename = "bigfish.fountain"
+    let script = try GuionParsedScreenplay(file: fountainURL.path)
 
     let outline = script.extractOutline()
 
@@ -164,7 +163,7 @@ import SwiftFijos
 
 @Test func testWriteOutlineJSON() async throws {
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
-    let script = try FountainScript(file: fountainURL.path)
+    let script = try GuionParsedScreenplay(file: fountainURL.path)
 
     let tempDir = FileManager.default.temporaryDirectory
     let outputPath = tempDir.appendingPathComponent("bigfish-outline.json")
@@ -193,7 +192,7 @@ import SwiftFijos
 
 @Test func testWriteToTextBundleWithResources() async throws {
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
-    let script = try FountainScript(file: fountainURL.path)
+    let script = try GuionParsedScreenplay(file: fountainURL.path)
 
     let tempDir = FileManager.default.temporaryDirectory
     let outputURL = try script.writeToTextBundleWithResources(
@@ -236,7 +235,7 @@ import SwiftFijos
 @Test func testLoadFromHighland() async throws {
     let highlandURL = try Fijos.getFixture("bigfish", extension: "highland")
 
-    let script = try FountainScript(highlandURL: highlandURL)
+    let script = try GuionParsedScreenplay(highland: highlandURL)
 
     #expect(!script.elements.isEmpty, "Highland file should contain elements")
     // Highland files may use text.md instead of .fountain extension
@@ -245,7 +244,7 @@ import SwiftFijos
 
 @Test func testWriteToHighland() async throws {
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
-    let script = try FountainScript(file: fountainURL.path)
+    let script = try GuionParsedScreenplay(file: fountainURL.path)
 
     let tempDir = FileManager.default.temporaryDirectory
     let highlandURL = try script.writeToHighland(
@@ -259,7 +258,7 @@ import SwiftFijos
     #expect(highlandURL.pathExtension == "highland")
 
     // Verify we can load it back
-    let loadedScript = try FountainScript(highlandURL: highlandURL)
+    let loadedScript = try GuionParsedScreenplay(highland: highlandURL)
     #expect(!loadedScript.elements.isEmpty, "Loaded script should have elements")
 
     // Clean up
@@ -268,7 +267,7 @@ import SwiftFijos
 
 @Test func testHighlandRoundTrip() async throws {
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
-    let originalScript = try FountainScript(file: fountainURL.path)
+    let originalScript = try GuionParsedScreenplay(file: fountainURL.path)
 
     let tempDir = FileManager.default.temporaryDirectory
 
@@ -280,7 +279,7 @@ import SwiftFijos
     )
 
     // Load it back
-    let loadedScript = try FountainScript(highlandURL: highlandURL)
+    let loadedScript = try GuionParsedScreenplay(highland: highlandURL)
 
     // Verify the content is reasonable (element count may differ slightly due to formatting)
     #expect(loadedScript.elements.count > 0, "Loaded script should have elements")
@@ -300,7 +299,7 @@ import SwiftFijos
 // MARK: - Functional Tests
 
 @Test func testUnifiedGetContentUrl() async throws {
-    let script = FountainScript()
+    let script = GuionParsedScreenplay()
 
     // Test 1: .fountain file - should return the URL as-is
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
@@ -318,7 +317,7 @@ import SwiftFijos
 }
 
 @Test func testUnifiedGetContent() async throws {
-    let script = FountainScript()
+    let script = GuionParsedScreenplay()
 
     // Test 1: .fountain file - should return complete content
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
@@ -335,23 +334,16 @@ import SwiftFijos
 @Test func testGetGuionElements() async throws {
     // Test 1: Script loaded from file should have elements
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
-    let script = try FountainScript(file: fountainURL.path)
+    let script = try GuionParsedScreenplay(file: fountainURL.path)
 
-    let elements = try script.getGuionElements()
+    let elements = script.getGuionElements()
     #expect(!elements.isEmpty, "Should have screenplay elements")
     #expect(elements.contains { $0.elementType == "Scene Heading" }, "Should have scene headings")
 
-    // Test 2: Empty script should throw error
-    let emptyScript = FountainScript()
-    do {
-        _ = try emptyScript.getGuionElements()
-        #expect(Bool(false), "Should throw error for empty script")
-    } catch FountainScriptError.noContentToParse {
-        // Expected error
-        #expect(Bool(true))
-    } catch {
-        throw error
-    }
+    // Test 2: Empty script should return empty array
+    let emptyScript = GuionParsedScreenplay()
+    let emptyElements = emptyScript.getGuionElements()
+    #expect(emptyElements.isEmpty, "Empty script should return empty array")
 }
 
 @Test func testFirstDialogue() async throws {
@@ -372,12 +364,12 @@ import SwiftFijos
             continue
         }
 
-        let script: FountainScript
+        let script: GuionParsedScreenplay
         switch ext {
         case "fountain":
-            script = try FountainScript(file: fileURL.path)
+            script = try GuionParsedScreenplay(file: fileURL.path)
         case "highland":
-            script = try FountainScript(highlandURL: fileURL)
+            script = try GuionParsedScreenplay(highland: fileURL)
         default:
             continue
         }
@@ -424,17 +416,16 @@ struct OutlineHierarchyFunctionalTests {
             }
 
             // Load script using appropriate method
-            let script: FountainScript
+            let script: GuionParsedScreenplay
             switch ext {
             case "fountain":
-                script = try FountainScript(file: fileURL.path)
+                script = try GuionParsedScreenplay(file: fileURL.path)
             case "highland":
-                script = try FountainScript(highlandURL: fileURL)
+                script = try GuionParsedScreenplay(highland: fileURL)
             default:
                 continue
             }
-            script.filename = "\(name).fountain"
-            
+
             // Extract outline and tree for hierarchical analysis
             let outline = script.extractOutline()
             let tree = script.extractOutlineTree()

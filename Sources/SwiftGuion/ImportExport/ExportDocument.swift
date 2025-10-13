@@ -26,7 +26,7 @@ struct FountainExportDocument: FileDocument {
     }
 
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
-        // Convert to FountainScript and serialize
+        // Convert to GuionParsedScreenplay and serialize
         let script = GuionDocumentParserSwiftData.toFountainScript(from: sourceDocument)
         let fountainText = script.stringFromDocument()
         let data = Data(fountainText.utf8)

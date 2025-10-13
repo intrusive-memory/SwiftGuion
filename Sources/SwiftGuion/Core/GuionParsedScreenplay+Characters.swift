@@ -25,7 +25,7 @@
 
 import Foundation
 
-extension FountainScript {
+extension GuionParsedScreenplay {
 
     /// Extract character information from the script
     /// - Returns: A dictionary mapping character names to their information

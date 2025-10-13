@@ -32,50 +32,61 @@ public enum ParserType {
     case regex
 }
 
-public class FountainScript {
-    public var filename: String?
-    public var elements: [GuionElement] = []
-    public var titlePage: [[String: [String]]] = []
-    public var suppressSceneNumbers: Bool = false
-    private var cachedContent: String?
+public final class GuionParsedScreenplay {
+    public let filename: String?
+    public let elements: [GuionElement]
+    public let titlePage: [[String: [String]]]
+    public let suppressSceneNumbers: Bool
 
-    public init() {}
+    /// Initialize with parsed screenplay data
+    /// - Parameters:
+    ///   - filename: Optional filename for the screenplay
+    ///   - elements: Array of GuionElements
+    ///   - titlePage: Title page metadata
+    ///   - suppressSceneNumbers: Whether to suppress scene numbers
+    public init(
+        filename: String? = nil,
+        elements: [GuionElement] = [],
+        titlePage: [[String: [String]]] = [],
+        suppressSceneNumbers: Bool = false
+    ) {
+        self.filename = filename
+        self.elements = elements
+        self.titlePage = titlePage
+        self.suppressSceneNumbers = suppressSceneNumbers
+    }
 
+    /// Convenience initializer that parses from a file
+    /// - Parameters:
+    ///   - path: File path to parse
+    ///   - parser: Parser type to use (default: .fast)
     public convenience init(file path: String, parser: ParserType = .fast) throws {
-        self.init()
-        try loadFile(path, parser: parser)
-    }
-
-    public convenience init(string: String, parser: ParserType = .fast) throws {
-        self.init()
-        try loadString(string, parser: parser)
-    }
-
-    public func loadFile(_ path: String, parser: ParserType = .fast) throws {
-        filename = URL(fileURLWithPath: path).lastPathComponent
-
-        // Cache the file content for potential re-parsing
-        cachedContent = try String(contentsOfFile: path, encoding: .utf8)
+        let filename = URL(fileURLWithPath: path).lastPathComponent
 
         switch parser {
         case .fast, .regex:
             let fountainParser = try FastFountainParser(file: path)
-            elements = fountainParser.elements
-            titlePage = fountainParser.titlePage
+            self.init(
+                filename: filename,
+                elements: fountainParser.elements,
+                titlePage: fountainParser.titlePage
+            )
         }
     }
 
-    public func loadString(_ string: String, parser: ParserType = .fast) throws {
-        filename = nil
-
-        // Cache the string content for potential re-parsing
-        cachedContent = string
-
+    /// Convenience initializer that parses from a string
+    /// - Parameters:
+    ///   - string: Fountain screenplay text
+    ///   - parser: Parser type to use (default: .fast)
+    public convenience init(string: String, parser: ParserType = .fast) throws {
         switch parser {
         case .fast, .regex:
             let fountainParser = FastFountainParser(string: string)
-            elements = fountainParser.elements
-            titlePage = fountainParser.titlePage
+            self.init(
+                filename: nil,
+                elements: fountainParser.elements,
+                titlePage: fountainParser.titlePage
+            )
         }
     }
 
@@ -101,40 +112,11 @@ public class FountainScript {
         try document.write(to: url, atomically: true, encoding: .utf8)
     }
 
-    /// Get guión elements, parsing the document if needed
-    /// - Parameters:
-    ///   - fileURL: URL to a .fountain, .highland, or .textbundle file (optional)
-    ///   - parser: The parser type to use if parsing is needed (default: .fast)
+    /// Get guión elements from this screenplay
     /// - Returns: Array of GuionElement objects
-    /// - Throws: Errors if the document needs to be parsed but contains no content
-    public func getGuionElements(from fileURL: URL? = nil, parser: ParserType = .fast) throws -> [GuionElement] {
-        // If we already have elements, return them
-        if !elements.isEmpty {
-            return elements
-        }
-
-        // If a URL is provided, use getContent to retrieve the content
-        if let url = fileURL {
-            let content = try getContent(from: url)
-            try loadString(content, parser: parser)
-            return elements
-        }
-
-        // If no URL but we have cached content, re-parse it
-        if let content = cachedContent, !content.isEmpty {
-            try loadString(content, parser: parser)
-            return elements
-        }
-
-        // Try to get content from the current state (title page + elements)
-        let documentString = stringFromDocument()
-        if !documentString.isEmpty {
-            try loadString(documentString, parser: parser)
-            return elements
-        }
-
-        // No elements and no content to parse
-        throw FountainScriptError.noContentToParse
+    /// - Note: This method simply returns the elements array. For parsing from files, use the init methods.
+    public func getGuionElements() -> [GuionElement] {
+        return elements
     }
 
     /// Get the content URL for a Fountain file
@@ -155,7 +137,7 @@ public class FountainScript {
 
         case "textbundle":
             // For .textbundle files, find the content file in the bundle
-            return try getContentURL(from: fileURL)
+            return try Self.getContentURL(from: fileURL)
 
         default:
             throw FountainScriptError.unsupportedFileType
@@ -177,7 +159,7 @@ public class FountainScript {
 
         case "textbundle":
             // For .textbundle, get the content file URL and read it
-            let contentURL = try getContentURL(from: fileURL)
+            let contentURL = try Self.getContentURL(from: fileURL)
             return try String(contentsOf: contentURL, encoding: .utf8)
 
         case "highland":
@@ -247,7 +229,7 @@ public class FountainScript {
         }
 
         // Use the shared getContentURL logic to find .fountain or .md files
-        return try getContentURL(from: textBundleURL)
+        return try Self.getContentURL(from: textBundleURL)
     }
 
     private func getContentFromHighland(_ highlandURL: URL) throws -> String {
@@ -283,16 +265,16 @@ public class FountainScript {
         }
 
         // Use the shared getContentURL logic to find .fountain or .md files
-        let contentURL = try getContentURL(from: textBundleURL)
+        let contentURL = try Self.getContentURL(from: textBundleURL)
 
         // Read the content before the temp directory is cleaned up
         return try String(contentsOf: contentURL, encoding: .utf8)
     }
 }
 
-extension FountainScript: @unchecked Sendable {}
+extension GuionParsedScreenplay: Sendable {}
 
-extension FountainScript: CustomStringConvertible {
+extension GuionParsedScreenplay: CustomStringConvertible {
     public var description: String {
         return FountainWriter.document(from: self)
     }

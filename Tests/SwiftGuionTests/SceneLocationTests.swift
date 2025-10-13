@@ -155,7 +155,7 @@ import SwiftFijos
 
 @Test func testExtractSceneLocations() async throws {
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
-    let script = try FountainScript(file: fountainURL.path)
+    let script = try GuionParsedScreenplay(file: fountainURL.path)
 
     let scenes = script.extractSceneLocations()
 
@@ -178,7 +178,7 @@ import SwiftFijos
 
 @Test func testGroupScenesByLocation() async throws {
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
-    let script = try FountainScript(file: fountainURL.path)
+    let script = try GuionParsedScreenplay(file: fountainURL.path)
 
     let groups = script.groupScenesByLocation()
 
@@ -206,7 +206,7 @@ import SwiftFijos
 
 @Test func testGetLocationsByFrequency() async throws {
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
-    let script = try FountainScript(file: fountainURL.path)
+    let script = try GuionParsedScreenplay(file: fountainURL.path)
 
     let locationsByFrequency = script.getLocationsByFrequency()
 
@@ -230,7 +230,7 @@ import SwiftFijos
 
 @Test func testGetLocationsByAppearance() async throws {
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
-    let script = try FountainScript(file: fountainURL.path)
+    let script = try GuionParsedScreenplay(file: fountainURL.path)
 
     let locationsByAppearance = script.getLocationsByAppearance()
 
@@ -252,7 +252,7 @@ import SwiftFijos
 
 @Test func testLightingAndTimeAnalysis() async throws {
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
-    let script = try FountainScript(file: fountainURL.path)
+    let script = try GuionParsedScreenplay(file: fountainURL.path)
 
     let groups = script.groupScenesByLocation()
 
@@ -282,7 +282,7 @@ import SwiftFijos
 
 @Test func testScenesAtLocation() async throws {
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
-    let script = try FountainScript(file: fountainURL.path)
+    let script = try GuionParsedScreenplay(file: fountainURL.path)
 
     let allGroups = script.groupScenesByLocation()
 
@@ -302,7 +302,7 @@ import SwiftFijos
 
 @Test func testAllLocations() async throws {
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
-    let script = try FountainScript(file: fountainURL.path)
+    let script = try GuionParsedScreenplay(file: fountainURL.path)
 
     let locations = script.allLocations()
 
@@ -314,7 +314,7 @@ import SwiftFijos
 
 @Test func testWriteLocationBreakdownJSON() async throws {
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
-    let script = try FountainScript(file: fountainURL.path)
+    let script = try GuionParsedScreenplay(file: fountainURL.path)
 
     let tempDir = FileManager.default.temporaryDirectory
     let outputPath = tempDir.appendingPathComponent("bigfish-locations.json")
@@ -365,17 +365,18 @@ import SwiftFijos
 @Test func testProductionScenario() async throws {
     // Simulate a production scenario where we need to schedule scenes by location
 
-    let script = FountainScript()
-    script.elements = [
-        GuionElement(elementType: "Scene Heading", elementText: "INT. COFFEE SHOP - DAY"),
-        GuionElement(elementType: "Action", elementText: "Alice enters."),
-        GuionElement(elementType: "Scene Heading", elementText: "EXT. PARK - DAY"),
-        GuionElement(elementType: "Action", elementText: "Bob walks."),
-        GuionElement(elementType: "Scene Heading", elementText: "INT. COFFEE SHOP - NIGHT"),
-        GuionElement(elementType: "Action", elementText: "Alice returns."),
-        GuionElement(elementType: "Scene Heading", elementText: "INT. COFFEE SHOP - DAY"),
-        GuionElement(elementType: "Action", elementText: "Alice meets Charlie."),
-    ]
+    let script = GuionParsedScreenplay(
+        elements: [
+            GuionElement(elementType: "Scene Heading", elementText: "INT. COFFEE SHOP - DAY"),
+            GuionElement(elementType: "Action", elementText: "Alice enters."),
+            GuionElement(elementType: "Scene Heading", elementText: "EXT. PARK - DAY"),
+            GuionElement(elementType: "Action", elementText: "Bob walks."),
+            GuionElement(elementType: "Scene Heading", elementText: "INT. COFFEE SHOP - NIGHT"),
+            GuionElement(elementType: "Action", elementText: "Alice returns."),
+            GuionElement(elementType: "Scene Heading", elementText: "INT. COFFEE SHOP - DAY"),
+            GuionElement(elementType: "Action", elementText: "Alice meets Charlie."),
+        ]
+    )
 
     let groups = script.groupScenesByLocation()
 

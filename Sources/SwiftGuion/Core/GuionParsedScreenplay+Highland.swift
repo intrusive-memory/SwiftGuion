@@ -26,30 +26,20 @@
 import Foundation
 import ZIPFoundation
 
-extension FountainScript {
+extension GuionParsedScreenplay {
 
-    /// Initialize FountainScript from a Highland file (.highland)
+    /// Initialize GuionParsedScreenplay from a Highland file (.highland)
     /// Highland files are ZIP archives containing a TextBundle
     /// - Parameters:
-    ///   - highlandURL: URL to the .highland file
+    ///   - highland: URL to the .highland file
     ///   - parser: The parser type to use (default: .fast)
     /// - Throws: Highland import errors
-    public convenience init(highlandURL: URL, parser: ParserType = .fast) throws {
-        self.init()
-        try loadHighland(highlandURL, parser: parser)
-    }
-
-    /// Load a FountainScript from a Highland file
-    /// - Parameters:
-    ///   - highlandURL: URL to the .highland file
-    ///   - parser: The parser type to use (default: .fast)
-    /// - Throws: Highland import errors
-    public func loadHighland(_ highlandURL: URL, parser: ParserType = .fast) throws {
+    public convenience init(highland url: URL, parser: ParserType = .fast) throws {
         let fileManager = FileManager.default
 
         // First, check if this is actually a plain Fountain file with .highland extension
         // by reading the first few bytes to see if it's a ZIP archive
-        let fileHandle = try FileHandle(forReadingFrom: highlandURL)
+        let fileHandle = try FileHandle(forReadingFrom: url)
         defer { try? fileHandle.close() }
 
         let headerData = fileHandle.readData(ofLength: 4)
@@ -58,10 +48,7 @@ extension FountainScript {
         if !isZipFile {
             // This is a plain text Fountain file with .highland extension
             // Treat it as a regular Fountain file
-            try loadFile(highlandURL.path, parser: parser)
-            // Use .fountain extension since this is a plain Fountain file
-            let baseName = highlandURL.deletingPathExtension().lastPathComponent
-            filename = "\(baseName).fountain"
+            try self.init(file: url.path, parser: parser)
             return
         }
 
@@ -74,7 +61,7 @@ extension FountainScript {
         }
 
         // Extract the highland (zip) file
-        try fileManager.unzipItem(at: highlandURL, to: tempDir)
+        try fileManager.unzipItem(at: url, to: tempDir)
 
         // Find the .textbundle directory inside
         let contents = try fileManager.contentsOfDirectory(at: tempDir, includingPropertiesForKeys: nil)
@@ -83,20 +70,13 @@ extension FountainScript {
         }
 
         // Use the shared getContentURL logic to find .fountain or .md files
-        let contentURL = try getContentURL(from: textBundleURL)
-        try loadFile(contentURL.path, parser: parser)
+        let contentURL = try GuionParsedScreenplay.getContentURL(from: textBundleURL)
 
-        let derivedName = highlandURL.deletingPathExtension().lastPathComponent
-        let contentName = contentURL.deletingPathExtension().lastPathComponent.lowercased()
-
-        if contentName == "text" || contentName == "text.markdown" || contentName == "textbundle" {
-            filename = "\(derivedName).fountain"
-        } else {
-            filename = contentURL.lastPathComponent
-        }
+        // Parse the content
+        try self.init(file: contentURL.path, parser: parser)
     }
 
-    /// Write the current FountainScript to a Highland file (.highland)
+    /// Write the current GuionParsedScreenplay to a Highland file (.highland)
     /// Highland files are ZIP archives containing a TextBundle with resources
     /// - Parameters:
     ///   - destinationURL: The directory where the Highland file should be created

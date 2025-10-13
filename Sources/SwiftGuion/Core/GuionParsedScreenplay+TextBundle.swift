@@ -26,28 +26,17 @@
 import Foundation
 import TextBundle
 
-extension FountainScript {
+extension GuionParsedScreenplay {
 
 
-    /// Initialize FountainScript from a TextBundle file URL
+    /// Initialize GuionParsedScreenplay from a TextBundle file URL
     /// - Parameters:
-    ///   - textBundleURL: URL to the .textbundle or .textpack file
+    ///   - textBundle: URL to the .textbundle or .textpack file
     ///   - parser: The parser type to use (default: .fast)
     /// - Throws: FountainTextBundleError or TextBundle errors
-    public convenience init(textBundleURL: URL, parser: ParserType = .fast) throws {
-        self.init()
-        try loadTextBundle(textBundleURL, parser: parser)
-    }
-
-    /// Load a FountainScript from a TextBundle URL
-    /// - Parameters:
-    ///   - textBundleURL: URL to the .textbundle or .textpack file
-    ///   - parser: The parser type to use (default: .fast)
-    /// - Throws: FountainTextBundleError if no .fountain or .md file is found
-    public func loadTextBundle(_ textBundleURL: URL, parser: ParserType = .fast) throws {
-        let contentURL = try getContentURL(from: textBundleURL)
-        try loadFile(contentURL.path, parser: parser)
-        filename = contentURL.lastPathComponent
+    public convenience init(textBundle url: URL, parser: ParserType = .fast) throws {
+        let contentURL = try Self.getContentURL(from: url)
+        try self.init(file: contentURL.path, parser: parser)
     }
 
     /// Get the content file URL from a TextBundle
@@ -55,7 +44,7 @@ extension FountainScript {
     /// - Parameter bundleURL: URL to the .textbundle or .textpack file
     /// - Returns: URL to the content file (.fountain or .md)
     /// - Throws: FountainTextBundleError if no valid content file is found
-    internal func getContentURL(from bundleURL: URL) throws -> URL {
+    internal static func getContentURL(from bundleURL: URL) throws -> URL {
         let fileManager = FileManager.default
 
         let contents = try fileManager.contentsOfDirectory(
@@ -81,7 +70,7 @@ extension FountainScript {
         throw FountainTextBundleError.noContentFileFound
     }
 
-    /// Write the current FountainScript to a TextBundle
+    /// Write the current GuionParsedScreenplay to a TextBundle
     /// - Parameters:
     ///   - destinationURL: The URL where the TextBundle should be created
     ///   - fountainFilename: Optional custom filename for the .fountain file (default: uses script's filename or "script.fountain")
@@ -117,7 +106,7 @@ extension FountainScript {
         return finalURL
     }
 
-    /// Write the current FountainScript to a TextBundle with resources (characters.json, outline.json)
+    /// Write the current GuionParsedScreenplay to a TextBundle with resources (characters.json, outline.json)
     /// - Parameters:
     ///   - destinationURL: The URL where the TextBundle should be created
     ///   - name: The base name for the TextBundle (without extension)

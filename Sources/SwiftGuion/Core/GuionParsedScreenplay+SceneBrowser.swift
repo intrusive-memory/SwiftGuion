@@ -4,12 +4,12 @@
 //
 //  Copyright (c) 2025
 //
-//  Extension to extract hierarchical scene browser data from FountainScript
+//  Extension to extract hierarchical scene browser data from GuionParsedScreenplay
 //
 
 import Foundation
 
-extension FountainScript {
+extension GuionParsedScreenplay {
     /// Extract hierarchical scene browser data
     ///
     /// This method builds a hierarchical structure from the outline:

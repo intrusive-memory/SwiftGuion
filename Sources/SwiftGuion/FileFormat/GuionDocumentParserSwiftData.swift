@@ -26,14 +26,14 @@ public enum GuionDocumentParserError: Error {
 
 public class GuionDocumentParserSwiftData {
 
-    /// Parse a FountainScript into SwiftData models
+    /// Parse a GuionParsedScreenplay into SwiftData models
     /// - Parameters:
-    ///   - script: The FountainScript to parse
+    ///   - script: The GuionParsedScreenplay to parse
     ///   - modelContext: The ModelContext to use
     ///   - generateSummaries: Whether to generate AI summaries for scene headings (default: false)
     /// - Returns: The created GuionDocumentModel
     @MainActor
-    public static func parse(script: FountainScript, in modelContext: ModelContext, generateSummaries: Bool = false) async -> GuionDocumentModel {
+    public static func parse(script: GuionParsedScreenplay, in modelContext: ModelContext, generateSummaries: Bool = false) async -> GuionDocumentModel {
         let titlePageEntries = script.titlePage.flatMap { dictionary in
             dictionary.map { GuionTitleEntrySnapshot(key: $0.key, values: $0.value) }
         }
@@ -85,16 +85,13 @@ public class GuionDocumentParserSwiftData {
 
         switch pathExtension {
         case "highland":
-            let script = FountainScript()
-            try script.loadHighland(url)
+            let script = try GuionParsedScreenplay(highland: url)
             return await parse(script: script, in: modelContext, generateSummaries: generateSummaries)
         case "textbundle":
-            let script = FountainScript()
-            try script.loadTextBundle(url)
+            let script = try GuionParsedScreenplay(textBundle: url)
             return await parse(script: script, in: modelContext, generateSummaries: generateSummaries)
         case "fountain":
-            let script = FountainScript()
-            try script.loadFile(url.path)
+            let script = try GuionParsedScreenplay(file: url.path)
             return await parse(script: script, in: modelContext, generateSummaries: generateSummaries)
         case "fdx":
             let data = try Data(contentsOf: url)
@@ -120,26 +117,25 @@ public class GuionDocumentParserSwiftData {
         }
     }
 
-    /// Convert a SwiftData model back to a FountainScript
+    /// Convert a SwiftData model back to a GuionParsedScreenplay
     /// - Parameter model: The GuionDocumentModel to convert
-    /// - Returns: A FountainScript instance
-    public static func toFountainScript(from model: GuionDocumentModel) -> FountainScript {
-        let script = FountainScript()
-
-        // Set basic properties
-        script.filename = model.filename
-        script.suppressSceneNumbers = model.suppressSceneNumbers
-
+    /// - Returns: A GuionParsedScreenplay instance
+    public static func toFountainScript(from model: GuionDocumentModel) -> GuionParsedScreenplay {
         // Convert title page
         let titlePageArray: [[String: [String]]] = model.titlePage.map { entry in
             [entry.key: entry.values]
         }
-        script.titlePage = titlePageArray
 
         // Convert elements using protocol-based conversion
-        script.elements = model.elements.map { GuionElement(from: $0) }
+        let elements = model.elements.map { GuionElement(from: $0) }
 
-        return script
+        // Create screenplay with all properties
+        return GuionParsedScreenplay(
+            filename: model.filename,
+            elements: elements,
+            titlePage: titlePageArray,
+            suppressSceneNumbers: model.suppressSceneNumbers
+        )
     }
 
     /// Convert a SwiftData model into FDX data

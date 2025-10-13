@@ -25,7 +25,7 @@
 
 import Foundation
 
-extension FountainScript {
+extension GuionParsedScreenplay {
 
     /// Extract outline elements from the script
     /// - Returns: An array of outline elements representing the script structure

@@ -21,7 +21,7 @@ final class OutlineLevelParsingTests: XCTestCase {
         Action.
         """
 
-        let script = try FountainScript(string: content)
+        let script = try GuionParsedScreenplay(string: content)
         let outline = script.extractOutline()
 
         let level1Elements = outline.filter { $0.level == 1 }
@@ -40,7 +40,7 @@ final class OutlineLevelParsingTests: XCTestCase {
         More action.
         """
 
-        let script = try FountainScript(string: content)
+        let script = try GuionParsedScreenplay(string: content)
         let outline = script.extractOutline()
 
         let level1Elements = outline.filter { $0.level == 1 }
@@ -61,7 +61,7 @@ final class OutlineLevelParsingTests: XCTestCase {
         Action.
         """
 
-        let script = try FountainScript(string: content)
+        let script = try GuionParsedScreenplay(string: content)
         let outline = script.extractOutline()
 
         let level1Elements = outline.filter { $0.level == 1 }
@@ -88,7 +88,7 @@ final class OutlineLevelParsingTests: XCTestCase {
         More action.
         """
 
-        let script = try FountainScript(string: content)
+        let script = try GuionParsedScreenplay(string: content)
         let outline = script.extractOutline()
 
         let chapters = outline.filter { $0.isChapter }
@@ -114,7 +114,7 @@ final class OutlineLevelParsingTests: XCTestCase {
         ## END CHAPTER 2
         """
 
-        let script = try FountainScript(string: content)
+        let script = try GuionParsedScreenplay(string: content)
         let outline = script.extractOutline()
 
         let chapters = outline.filter { $0.isChapter }
@@ -138,7 +138,7 @@ final class OutlineLevelParsingTests: XCTestCase {
         The door opens.
         """
 
-        let script = try FountainScript(string: content)
+        let script = try GuionParsedScreenplay(string: content)
         let outline = script.extractOutline()
 
         let chapters = outline.filter { $0.isChapter }
@@ -168,7 +168,7 @@ final class OutlineLevelParsingTests: XCTestCase {
         More action.
         """
 
-        let script = try FountainScript(string: content)
+        let script = try GuionParsedScreenplay(string: content)
         let outline = script.extractOutline()
 
         let sceneGroups = outline.filter { $0.level == 3 && $0.type == "sectionHeader" }
@@ -194,7 +194,7 @@ final class OutlineLevelParsingTests: XCTestCase {
         More action.
         """
 
-        let script = try FountainScript(string: content)
+        let script = try GuionParsedScreenplay(string: content)
         let outline = script.extractOutline()
 
         let sceneGroups = outline.filter { $0.level == 3 && $0.type == "sectionHeader" }
@@ -237,7 +237,7 @@ final class OutlineLevelParsingTests: XCTestCase {
         Even more action.
         """
 
-        let script = try FountainScript(string: content)
+        let script = try GuionParsedScreenplay(string: content)
         let outline = script.extractOutline()
 
         let chapters = outline.filter { $0.isChapter }
@@ -269,7 +269,7 @@ final class OutlineLevelParsingTests: XCTestCase {
         Action two.
         """
 
-        let script = try FountainScript(string: content)
+        let script = try GuionParsedScreenplay(string: content)
         let outline = script.extractOutline()
 
         let sceneGroup = outline.first { $0.level == 3 && $0.type == "sectionHeader" }
@@ -284,7 +284,7 @@ final class OutlineLevelParsingTests: XCTestCase {
     // MARK: - Edge Cases
 
     func testEmptyScript() {
-        let script = FountainScript()
+        let script = GuionParsedScreenplay()
         let outline = script.extractOutline()
 
         // Empty script creates a synthetic title + blank element
@@ -304,7 +304,7 @@ final class OutlineLevelParsingTests: XCTestCase {
         More action.
         """
 
-        let script = try FountainScript(string: content)
+        let script = try GuionParsedScreenplay(string: content)
         let outline = script.extractOutline()
 
         // Should create synthetic title
@@ -334,7 +334,7 @@ final class OutlineLevelParsingTests: XCTestCase {
         Direct scene without scene group.
         """
 
-        let script = try FountainScript(string: content)
+        let script = try GuionParsedScreenplay(string: content)
         let outline = script.extractOutline()
 
         let level1 = outline.filter { $0.level == 1 }
@@ -369,7 +369,7 @@ final class OutlineLevelParsingTests: XCTestCase {
         More action.
         """
 
-        let script = try FountainScript(string: content)
+        let script = try GuionParsedScreenplay(string: content)
         let browserData = script.extractSceneBrowserData()
 
         XCTAssertEqual(browserData.chapters.count, 2, "Should extract 2 chapters")
