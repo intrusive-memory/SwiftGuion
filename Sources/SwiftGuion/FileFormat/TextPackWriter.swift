@@ -40,6 +40,7 @@ public struct TextPackWriter {
 
         // 3. Create Resources directory
         let resources = try createResourcesDirectory(from: screenplay)
+        resources.preferredFilename = "Resources"
         bundle.addFileWrapper(resources)
 
         return bundle
