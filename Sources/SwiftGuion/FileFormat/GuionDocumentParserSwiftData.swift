@@ -8,16 +8,7 @@ import Foundation
 import SwiftData
 
 // GuionElementSnapshot is now obsolete - use GuionElement directly with protocol-based conversion
-
-public struct GuionTitleEntrySnapshot {
-    public let key: String
-    public let values: [String]
-
-    public init(key: String, values: [String]) {
-        self.key = key
-        self.values = values
-    }
-}
+// GuionTitleEntrySnapshot is now obsolete - use TitlePageEntryModel directly
 
 public enum GuionDocumentParserError: Error {
     case unsupportedFileType(String)
@@ -34,42 +25,8 @@ public class GuionDocumentParserSwiftData {
     /// - Returns: The created GuionDocumentModel
     @MainActor
     public static func parse(script: GuionParsedScreenplay, in modelContext: ModelContext, generateSummaries: Bool = false) async -> GuionDocumentModel {
-        let titlePageEntries = script.titlePage.flatMap { dictionary in
-            dictionary.map { GuionTitleEntrySnapshot(key: $0.key, values: $0.value) }
-        }
-
-        // Generate summaries for scene headings if requested
-        var elementsWithSummaries: [(element: GuionElement, summary: String?)] = []
-
-        if generateSummaries {
-            let outline = script.extractOutline()
-
-            for element in script.elements {
-                var summary: String? = nil
-
-                // Generate summary only for Scene Heading elements
-                if element.elementType == "Scene Heading" {
-                    // Find the corresponding outline element by UUID (handles duplicate headings)
-                    if let sceneId = element.sceneId,
-                       let scene = outline.first(where: { $0.sceneId == sceneId }) {
-                        summary = await SceneSummarizer.summarizeScene(scene, from: script, outline: outline)
-                    }
-                }
-
-                elementsWithSummaries.append((element, summary))
-            }
-        } else {
-            elementsWithSummaries = script.elements.map { ($0, nil) }
-        }
-
-        return buildModel(
-            filename: script.filename,
-            rawContent: script.stringFromDocument(),
-            suppressSceneNumbers: script.suppressSceneNumbers,
-            titlePageEntries: titlePageEntries,
-            elementsWithSummaries: elementsWithSummaries,
-            in: modelContext
-        )
+        // Use the new conversion method from GuionDocumentModel
+        return await GuionDocumentModel.from(script, in: modelContext, generateSummaries: generateSummaries)
     }
 
     /// Load a guion document from URL and parse into SwiftData
@@ -98,17 +55,26 @@ public class GuionDocumentParserSwiftData {
             let parser = FDXParser()
             do {
                 let parsed = try parser.parse(data: data, filename: url.lastPathComponent)
+
+                // Convert FDX parsed document to GuionParsedScreenplay
                 let elements = parsed.elements.map { GuionElement(from: $0) }
-                return buildModel(
+
+                // Convert title page entries to the expected format
+                var titlePageDict: [String: [String]] = [:]
+                for entry in parsed.titlePageEntries {
+                    titlePageDict[entry.key] = entry.values
+                }
+                let titlePage = titlePageDict.isEmpty ? [] : [titlePageDict]
+
+                let screenplay = GuionParsedScreenplay(
                     filename: parsed.filename,
-                    rawContent: parsed.rawXML,
-                    suppressSceneNumbers: parsed.suppressSceneNumbers,
-                    titlePageEntries: parsed.titlePageEntries.map { entry in
-                        GuionTitleEntrySnapshot(key: entry.key, values: entry.values)
-                    },
-                    elementsWithSummaries: elements.map { ($0, nil) },
-                    in: modelContext
+                    elements: elements,
+                    titlePage: titlePage,
+                    suppressSceneNumbers: parsed.suppressSceneNumbers
                 )
+
+                // Use the new conversion method
+                return await GuionDocumentModel.from(screenplay, in: modelContext, generateSummaries: generateSummaries)
             } catch {
                 throw GuionDocumentParserError.invalidFDX
             }
@@ -121,21 +87,8 @@ public class GuionDocumentParserSwiftData {
     /// - Parameter model: The GuionDocumentModel to convert
     /// - Returns: A GuionParsedScreenplay instance
     public static func toFountainScript(from model: GuionDocumentModel) -> GuionParsedScreenplay {
-        // Convert title page
-        let titlePageArray: [[String: [String]]] = model.titlePage.map { entry in
-            [entry.key: entry.values]
-        }
-
-        // Convert elements using protocol-based conversion
-        let elements = model.elements.map { GuionElement(from: $0) }
-
-        // Create screenplay with all properties
-        return GuionParsedScreenplay(
-            filename: model.filename,
-            elements: elements,
-            titlePage: titlePageArray,
-            suppressSceneNumbers: model.suppressSceneNumbers
-        )
+        // Use the new conversion method from GuionDocumentModel
+        return model.toGuionParsedScreenplay()
     }
 
     /// Convert a SwiftData model into FDX data
@@ -143,38 +96,6 @@ public class GuionDocumentParserSwiftData {
     /// - Returns: XML data representing the guion in FDX format
     public static func toFDXData(from model: GuionDocumentModel) -> Data {
         return FDXDocumentWriter.makeFDX(from: model)
-    }
-
-    @MainActor
-    private static func buildModel(
-        filename: String?,
-        rawContent: String?,
-        suppressSceneNumbers: Bool,
-        titlePageEntries: [GuionTitleEntrySnapshot],
-        elementsWithSummaries: [(element: GuionElement, summary: String?)],
-        in modelContext: ModelContext
-    ) -> GuionDocumentModel {
-        let documentModel = GuionDocumentModel(
-            filename: filename,
-            rawContent: rawContent,
-            suppressSceneNumbers: suppressSceneNumbers
-        )
-
-        for entry in titlePageEntries {
-            let titlePageEntry = TitlePageEntryModel(key: entry.key, values: entry.values)
-            titlePageEntry.document = documentModel
-            documentModel.titlePage.append(titlePageEntry)
-        }
-
-        for (element, summary) in elementsWithSummaries {
-            // Use protocol-based conversion with summary
-            let elementModel = GuionElementModel(from: element, summary: summary)
-            elementModel.document = documentModel
-            documentModel.elements.append(elementModel)
-        }
-
-        modelContext.insert(documentModel)
-        return documentModel
     }
 }
 #endif

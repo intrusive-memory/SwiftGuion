@@ -386,23 +386,8 @@ extension GuionDocumentModel {
     /// Convert GuionDocumentModel to GuionParsedScreenplay for viewing
     /// - Returns: GuionParsedScreenplay instance containing the document data
     func toFountainScript() -> GuionParsedScreenplay {
-        // Convert GuionElementModel array to GuionElement array using the protocol initializer
-        let convertedElements = elements.map { GuionElement(from: $0) }
-
-        // Convert TitlePageEntryModel array to title page dictionary array
-        var titlePageDict: [String: [String]] = [:]
-        for entry in titlePage {
-            titlePageDict[entry.key] = entry.values
-        }
-
-        let titlePageArray = titlePageDict.isEmpty ? [] : [titlePageDict]
-
-        return GuionParsedScreenplay(
-            filename: filename,
-            elements: convertedElements,
-            titlePage: titlePageArray,
-            suppressSceneNumbers: suppressSceneNumbers
-        )
+        // Use the new conversion method
+        return toGuionParsedScreenplay()
     }
 }
 
