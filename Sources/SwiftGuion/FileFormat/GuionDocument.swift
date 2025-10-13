@@ -23,6 +23,23 @@ struct GuionDocumentConfiguration: FileDocument {
     }
 
     init(configuration: ReadConfiguration) throws {
+        // Check if this is a .guion TextPack bundle
+        if configuration.file.isDirectory,
+           configuration.contentType == .guionDocument || configuration.file.filename?.hasSuffix(".guion") == true {
+            // Load as TextPack bundle
+            // For now, extract the screenplay.fountain content for later parsing
+            // (Full TextPack loading happens in parseContent with ModelContext)
+            if let resourceWrapper = configuration.file.fileWrappers?["screenplay.fountain"],
+               let data = resourceWrapper.regularFileContents,
+               let content = String(data: data, encoding: .utf8) {
+                self.document = GuionDocumentModel()
+                document.rawContent = content
+                document.filename = configuration.file.filename
+                print("📦 TextPack bundle loaded: \(configuration.file.filename ?? "unknown")")
+                return
+            }
+        }
+
         // Create a temporary document - will be populated in the view
         self.document = GuionDocumentModel()
 
@@ -120,20 +137,21 @@ struct GuionDocumentConfiguration: FileDocument {
     }
 
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
-        let data: Data
-
         // Determine output format based on content type
-        if configuration.contentType == .fdxDocument {
+        if configuration.contentType == .guionDocument {
+            // Export as .guion TextPack bundle
+            return try TextPackWriter.createTextPack(from: document)
+        } else if configuration.contentType == .fdxDocument {
             // Export as FDX
-            data = GuionDocumentParserSwiftData.toFDXData(from: document)
+            let data = GuionDocumentParserSwiftData.toFDXData(from: document)
+            return FileWrapper(regularFileWithContents: data)
         } else {
             // Default to Fountain format
             let script = GuionDocumentParserSwiftData.toFountainScript(from: document)
             let fountainText = script.stringFromDocument()
-            data = Data(fountainText.utf8)
+            let data = Data(fountainText.utf8)
+            return FileWrapper(regularFileWithContents: data)
         }
-
-        return FileWrapper(regularFileWithContents: data)
     }
 }
 
