@@ -1,8 +1,8 @@
 # SwiftGuion Sample App Requirements
 
-**Document Version:** 1.5
-**Date:** October 12, 2025
-**Status:** Draft
+**Document Version:** 2.0
+**Date:** October 13, 2025
+**Status:** Draft - Aligned with Architecture Redesign
 
 ---
 
@@ -71,14 +71,20 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 
 **REQ-DOC-002**: Save .guion Files
 **Priority**: P0 (Critical)
-**Description**: The app shall save documents to .guion format, preserving all screenplay data and metadata.
+**Description**: The app shall save documents to .guion TextPack format, preserving all screenplay data and metadata.
 
 **Acceptance Criteria:**
 - User can select File → Save or press Cmd+S to save current document
 - File → Save As... or Cmd+Shift+S prompts for file location
-- All screenplay elements saved to binary property list format
-- Location cache data preserved
-- Title page metadata preserved
+- All screenplay elements saved to TextPack bundle format
+- TextPack structure includes:
+  - info.json (metadata: version, dates, filename)
+  - screenplay.fountain (complete screenplay)
+  - Resources/ directory with JSON exports:
+    - characters.json (character dialogue counts, scene appearances)
+    - locations.json (location data with INT/EXT, time-of-day)
+    - elements.json (all screenplay elements with IDs)
+    - titlepage.json (title page entries)
 - Unsaved changes tracked with standard macOS dirty document indicator
 - Auto-save functionality works as per macOS standards
 
@@ -206,11 +212,12 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 **Acceptance Criteria:**
 - File → Import → Fountain... or Cmd+I prompts file selection dialog filtered to .fountain
 - Drag-and-drop .fountain files directly onto GuionViewer window
-- Parser successfully reads Fountain syntax
+- Uses FountainParser (state machine parser) for parsing
 - All element types imported (scene headings, action, dialogue, etc.)
 - Title page metadata preserved
 - Scene numbers preserved (if present)
 - Section headers preserved with correct hierarchy
+- Import creates immutable GuionParsedScreenplay first, then converts to GuionDocumentModel
 - Import progress indicated for large files
 - Success/failure message shown after import
 - Imported content displayed in GuionViewer
@@ -241,11 +248,12 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 **Acceptance Criteria:**
 - File → Import → Final Draft... prompts file selection dialog filtered to .fdx
 - Drag-and-drop .fdx files directly onto GuionViewer window
-- XML structure parsed using FDXDocumentParser
+- XML structure parsed using FDXParser (renamed from FDXDocumentParser)
 - All paragraph types mapped to GuionElement types
 - Scene properties (numbers, etc.) preserved
 - Title page content extracted and preserved
 - Character formatting handled (bold, italic, underline)
+- Creates GuionParsedScreenplay from FDX elements, then converts to GuionDocumentModel
 - Import errors logged with diagnostic information
 - Partial import supported (continues on non-critical errors)
 - Imported content displayed in GuionViewer
@@ -368,6 +376,8 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 
 **Acceptance Criteria:**
 - File → Export → Final Draft... or Cmd+Shift+E,D prompts save dialog
+- Converts GuionDocumentModel to GuionParsedScreenplay, then to FDX
+- Uses FDXDocumentWriter for XML generation
 - Valid FDX XML structure generated
 - All element types mapped to appropriate Paragraph types
 - Scene numbers included in SceneProperties (if present)
@@ -1009,16 +1019,60 @@ GuionView/
 **Purpose**: Implements FileDocument protocol for document-based architecture.
 
 **Responsibilities:**
-- Read/write .guion files via GuionDocumentModel serialization
+- Read/write .guion TextPack files using TextPackReader/TextPackWriter
 - Import from .fountain, .highland, .fdx formats
 - Lazy-load document data to avoid MainActor conflicts
+- Store immutable GuionParsedScreenplay (Sendable)
 - Provide GuionDocumentModel to views via @MainActor accessor
+- Convert between immutable (GuionParsedScreenplay) and mutable (GuionDocumentModel) representations
 
 **Key Methods:**
 ```swift
-init(configuration: ReadConfiguration)
-func fileWrapper(configuration: WriteConfiguration) -> FileWrapper
-@MainActor var documentModel: GuionDocumentModel
+// Nonisolated initializer - reads file, creates GuionParsedScreenplay
+init(configuration: ReadConfiguration) throws
+
+// Nonisolated write - converts model to GuionParsedScreenplay, then to TextPack
+func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper
+
+// MainActor accessor - converts GuionParsedScreenplay to GuionDocumentModel
+@MainActor var documentModel: GuionDocumentModel { get }
+```
+
+**Architecture:**
+```swift
+final class GuionDocument: FileDocument {
+    static var readableContentTypes: [UTType] = [.guionDocument, .fountain, .highland, .fdx]
+
+    // Immutable, Sendable screenplay (safe to store in nonisolated context)
+    private var screenplay: GuionParsedScreenplay?
+
+    // Cache for converted model (MainActor-isolated)
+    @MainActor private var cachedModel: GuionDocumentModel?
+
+    init(configuration: ReadConfiguration) throws {
+        // Parse file to GuionParsedScreenplay (nonisolated, Sendable)
+        if configuration.contentType == .guionDocument {
+            self.screenplay = try TextPackReader.readTextPack(from: configuration.file)
+        } else if configuration.contentType == .fountain {
+            let data = try configuration.file.regularFileContents ?? Data()
+            let content = String(data: data, encoding: .utf8) ?? ""
+            self.screenplay = try GuionParsedScreenplay(string: content)
+        }
+        // ... other formats
+    }
+
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        // Convert model back to screenplay, then to TextPack
+        let screenplay = await documentModel.toGuionParsedScreenplay()
+        return try TextPackWriter.createTextPack(from: screenplay)
+    }
+
+    @MainActor
+    var documentModel: GuionDocumentModel {
+        // Convert and cache on first access
+        // ...
+    }
+}
 ```
 
 #### 4.2.2 ContentView
@@ -1092,58 +1146,91 @@ File
 1. User: File → Import → [Format]
 2. Show NSOpenPanel filtered to format
 3. Read file data
-4. Parse using appropriate parser (FastFountainParser/FDXDocumentParser)
-5. Create GuionDocumentModel from parsed data
-6. Set as current document
-7. Update SceneBrowserWidget display
+4. Parse using appropriate parser:
+   - .fountain: FountainParser (state machine)
+   - .fdx: FDXParser (XML)
+   - .highland: Extract ZIP, parse TextBundle → Fountain
+5. Create immutable GuionParsedScreenplay from parsed data
+6. Convert to GuionDocumentModel using GuionDocumentModel.from(_:in:)
+7. Set as current document
+8. Update GuionViewer display
 ```
 
-#### Save Flow:
+#### Save Flow (TextPack):
 ```
 1. User: File → Save (Cmd+S)
 2. GuionDocument.fileWrapper() called
-3. GuionDocumentModel.encodeToBinaryData() creates snapshot
-4. PropertyListEncoder encodes to binary plist
-5. FileWrapper created from data
-6. System writes to disk atomically
+3. Convert GuionDocumentModel to GuionParsedScreenplay using toGuionParsedScreenplay()
+4. Use TextPackWriter.createTextPack(from:) to create bundle
+5. TextPack bundle structure created:
+   - info.json (metadata)
+   - screenplay.fountain (complete screenplay)
+   - Resources/ directory:
+     - characters.json
+     - locations.json
+     - elements.json
+     - titlepage.json
+6. FileWrapper returned with directory bundle
+7. System writes to disk atomically
 ```
 
 #### Export Flow:
 ```
 1. User: File → Export → [Format]
 2. Show NSSavePanel with suggested filename
-3. Convert GuionDocumentModel to FountainScript
+3. Convert GuionDocumentModel to GuionParsedScreenplay using toGuionParsedScreenplay()
 4. Call appropriate writer method:
-   - .fountain: script.write(to:)
-   - .highland: script.writeToHighland()
-   - .fdx: FDXDocumentWriter.makeFDX()
+   - .fountain: screenplay.write(to:)
+   - .highland: Use TextPackWriter (similar to .guion but in ZIP)
+   - .fdx: FDXDocumentWriter.write() with GuionParsedScreenplay elements
 5. Write data to selected location
-6. Show success/error message
+6. Validate exported file (parse back to verify)
+7. Show success/error message
 ```
 
 ### 4.4 Concurrency Strategy
 
 **Challenge**: SwiftData's @MainActor requirements conflict with FileDocument's nonisolated initializers.
 
-**Solution**: Lazy Loading Pattern
+**Solution**: Lazy Loading with Immutable Types
 
 ```swift
-// Store Sendable data in nonisolated context
-private var documentData: Data?
-private var script: FountainScript?
+// Store Sendable, immutable data in nonisolated context
+private var screenplay: GuionParsedScreenplay?  // Sendable, thread-safe
 
 // Compute model on-demand in MainActor context
 @MainActor
 var documentModel: GuionDocumentModel {
-    // Creates model from stored data when accessed
+    guard let screenplay = screenplay else {
+        return GuionDocumentModel()  // Empty document
+    }
+
+    // Convert immutable → mutable on first access
+    // Cache the result to avoid repeated conversions
+    if let cached = cachedModel {
+        return cached
+    }
+
+    let model = await GuionDocumentModel.from(screenplay, in: modelContext)
+    cachedModel = model
+    return model
 }
 ```
 
 **Benefits:**
 - No MainActor isolation conflicts
-- Maintains proper concurrency safety
-- Allows FileDocument to work with SwiftData
-- Performance impact minimal (one-time conversion)
+- GuionParsedScreenplay is Sendable (truly thread-safe, no @unchecked)
+- Explicit conversion between immutable and mutable representations
+- Clear separation of concerns (parsing vs persistence)
+- Performance: Conversion cached after first access
+- Thread safety: GuionParsedScreenplay can be passed between threads safely
+
+**Architecture Pattern:**
+1. **Read**: FileDocument reads file → creates GuionParsedScreenplay (nonisolated)
+2. **Store**: Screenplay stored as private property (Sendable, safe)
+3. **Convert**: On first access, convert to GuionDocumentModel (@MainActor)
+4. **Cache**: Cache converted model to avoid repeated work
+5. **Write**: Convert GuionDocumentModel back to GuionParsedScreenplay → TextPack
 
 ---
 
@@ -1412,11 +1499,23 @@ Items out of scope for initial release but worth considering:
 
 | Format | Extension | Import | Export | Native | Notes |
 |--------|-----------|--------|--------|--------|-------|
-| Guion | .guion | ✅ | ✅ | ✅ | Binary property list format |
+| Guion TextPack | .guion | ✅ | ✅ | ✅ | Directory bundle with JSON exports |
 | Fountain | .fountain | ✅ | ✅ | ❌ | Plain text, universal |
 | Highland | .highland | ✅ | ✅ | ❌ | ZIP archive with TextBundle |
 | Final Draft | .fdx | ✅ | ✅ | ❌ | XML format |
 | TextBundle | .textbundle | ❌* | ❌ | ❌ | *Supported via .highland |
+
+**TextPack Bundle Structure:**
+```
+MyScript.guion/
+├── info.json              # Metadata (version, dates, filename)
+├── screenplay.fountain    # Complete screenplay in Fountain format
+└── Resources/
+    ├── characters.json    # Character data (dialogue counts, scenes)
+    ├── locations.json     # Location data (INT/EXT, time-of-day)
+    ├── elements.json      # All screenplay elements with IDs
+    └── titlepage.json     # Title page entries
+```
 
 ---
 
@@ -1463,6 +1562,7 @@ Items out of scope for initial release but worth considering:
 | 1.3 | 2025-10-12 | Claude Code | Added critical requirements from analysis: crash recovery (REQ-DOC-004), version browsing (REQ-DOC-005), close unsaved (REQ-DOC-006), import failure recovery (REQ-IMP-005), export validation (REQ-EXP-005), format migration (REQ-EXP-006). Enhanced REQ-IMP-004 with specific progress calculation details. |
 | 1.4 | 2025-10-12 | Claude Code | Added high-priority UX and window management requirements: window state persistence (REQ-WIN-004), window management commands (REQ-WIN-005), operation success feedback (REQ-UI-005), operation progress feedback (REQ-UI-006). Total requirements now: 41 (was 35). |
 | 1.5 | 2025-10-12 | Claude Code | Added Phase 2B high-priority requirements: user preferences (REQ-PREF-001), undo/redo operations (REQ-EDIT-001), in-app help system (REQ-HELP-001), sample screenplay (REQ-HELP-002), find in document (REQ-FIND-001). Enhanced keyboard shortcuts table. Total requirements now: 46 (was 41). |
+| 2.0 | 2025-10-13 | Claude Code | **ARCHITECTURE ALIGNMENT**: Updated all requirements to reflect SwiftGuion architecture redesign. Key changes: (1) Updated REQ-DOC-002 for TextPack bundle format with JSON exports. (2) Updated REQ-IMP-001/003 to use FountainParser/FDXParser (renamed). (3) Added immutable GuionParsedScreenplay → GuionDocumentModel conversion flow. (4) Updated REQ-EXP-003 to use new conversion pattern. (5) Completely rewrote Section 4.3 (Data Flow) with TextPack save flow. (6) Rewrote Section 4.4 (Concurrency Strategy) to explain lazy loading with Sendable types. (7) Expanded Section 4.2.1 (GuionDocument) with full architecture example. (8) Updated Appendix A with TextPack bundle structure. All parser references updated to current names. |
 
 ---
 
