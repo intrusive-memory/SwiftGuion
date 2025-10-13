@@ -1,14 +1,26 @@
 # SwiftGuion Sample App Requirements
 
-**Document Version:** 2.0
+**Document Version:** 2.1 MVP
 **Date:** October 13, 2025
-**Status:** Draft - Aligned with Architecture Redesign
+**Status:** Draft - Simplified for v2.1.0 Release
+**Target:** SwiftGuion v2.1.0 Sample App
 
 ---
 
 ## Executive Summary
 
-This document defines the requirements for **GuionView**, a macOS sample application that demonstrates the capabilities of the SwiftGuion library. The app will showcase file format import/export capabilities (.fountain, .highland, .fdx, .guion), visual screenplay structure browsing, and native document-based architecture.
+This document defines the **MVP requirements** for **GuionView**, a macOS sample application that demonstrates the capabilities of the SwiftGuion library.
+
+**Primary Goal:** Serve as a reference implementation showing how to integrate SwiftGuion into a document-based macOS app.
+
+**Scope for v2.1.0:**
+- Open and save .guion TextPack files
+- Import from .fountain, .highland, and .fdx formats
+- Export to .fountain, .highland, and .fdx formats
+- Display screenplay structure using GuionViewer component
+- Basic error handling and user feedback
+
+**Out of Scope for v2.1.0:** Complex features like undo/redo, preferences UI, crash recovery, find functionality, and advanced window management. These are deferred to Phase 2 (post-v2.1.0).
 
 ---
 
@@ -29,18 +41,38 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 - **Secondary**: Screenwriters evaluating SwiftGuion-based applications
 - **Tertiary**: Contributors to the SwiftGuion project
 
-### 1.3 Scope
+### 1.3 Scope for v2.1.0 MVP
 
-**In Scope:**
-- Native .guion file support (open/save)
+**✅ In Scope (v2.1.0):**
+- Native .guion TextPack file support (open/save)
 - Import from .fountain, .highland, and .fdx formats
 - Export to .fountain, .highland, and .fdx formats
-- Scene browser visualization with hierarchical outline structure
-- Resizable window interface
-- macOS-native document architecture
+- GuionViewer component for screenplay structure browsing
+- Resizable window interface (600x800 minimum)
+- Basic error handling with simple alerts
+- File type associations (.guion, .fountain, .highland, .fdx)
+- Drag-and-drop file import
+- macOS-native DocumentGroup architecture
 
-**Out of Scope:**
-- Screenplay editing capabilities (text editing, formatting)
+**❌ Out of Scope (v2.1.0) - Deferred to Phase 2:**
+- Undo/Redo operations (REQ-EDIT-001)
+- User preferences UI (REQ-PREF-001)
+- Crash recovery/auto-save UI (REQ-DOC-004)
+- Version browsing (REQ-DOC-005)
+- Custom unsaved dialogs (REQ-DOC-006)
+- Export validation (REQ-EXP-005)
+- Format migration UI (REQ-EXP-006)
+- Complex import error recovery (REQ-IMP-005)
+- Time estimation for operations (REQ-IMP-004)
+- Window state persistence (REQ-WIN-004)
+- Advanced window commands (REQ-WIN-005)
+- User notifications (REQ-UI-005)
+- Complex progress feedback (REQ-UI-006)
+- In-app Help Book (REQ-HELP-001)
+- Find in document (REQ-FIND-001)
+
+**🚫 Permanently Out of Scope:**
+- Screenplay editing (text editing, formatting)
 - Printing or PDF generation
 - Collaboration features (sharing, comments)
 - Cloud synchronization
@@ -50,11 +82,98 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 
 ---
 
-## 2. Functional Requirements
+## 2. v2.1.0 MVP Requirements Summary
 
-### 2.1 Document Management
+### 2.0.1 Requirements Included in v2.1.0
 
-#### 2.1.1 Native .guion File Support
+**Document Management (P0 - Critical):**
+- ✅ REQ-DOC-001: Open .guion Files
+- ✅ REQ-DOC-002: Save .guion Files (TextPack format)
+- ✅ REQ-DOC-003: New Document Creation
+
+**Import (P0 - Critical):**
+- ✅ REQ-IMP-001: Import .fountain Files
+- ✅ REQ-IMP-002: Import .highland Files
+- ✅ REQ-IMP-003: Import .fdx Files
+- ✅ REQ-IMP-006: File Menu Structure (simplified shortcuts)
+
+**Export (P0 - Critical):**
+- ✅ REQ-EXP-001: Export to .fountain Format
+- ✅ REQ-EXP-002: Export to .highland Format
+- ✅ REQ-EXP-003: Export to .fdx Format
+- ✅ REQ-EXP-004: Export Menu Structure
+
+**User Interface (P0 - Critical):**
+- ✅ REQ-UI-001: Display GuionViewer
+- ✅ REQ-UI-002: GuionViewer Interaction
+- ✅ REQ-UI-003: Empty State Display
+- ✅ REQ-UI-004: Drag-and-Drop Import
+
+**Window Management (P0 - Critical):**
+- ✅ REQ-WIN-001: Resizable Window
+- ✅ REQ-WIN-002: Multiple Windows
+- ✅ REQ-WIN-003: Standard Window Controls
+
+**Platform (P0 - Critical):**
+- ✅ REQ-APP-001: Application Name and Branding
+- ✅ REQ-APP-002: Application Icon
+- ✅ REQ-PLAT-001: macOS Version Support
+- ✅ REQ-PLAT-002: Architecture (SwiftUI, SwiftData, DocumentGroup)
+- ✅ REQ-PLAT-003: Bundle Configuration
+- ✅ REQ-FTA-001: File Type Registration
+- ✅ REQ-FTA-002: UTType Declarations
+
+**Reliability (P0 - Critical):**
+- ✅ REQ-REL-001: Error Handling (simplified - basic alerts)
+- ✅ REQ-REL-002: Data Integrity
+
+**Accessibility (P1 - High):**
+- ✅ REQ-ACC-001: VoiceOver Support (basic)
+- ✅ REQ-ACC-002: Keyboard Navigation
+- ✅ REQ-ACC-003: Visual Accessibility
+
+**Performance (P2 - Medium, soft requirements):**
+- ✅ REQ-PERF-001: File Load Performance (no hard numbers)
+- ✅ REQ-PERF-002: Scene Browser Rendering
+- ✅ REQ-PERF-003: Export Performance
+
+**Total MVP Requirements: 28**
+
+### 2.0.2 Requirements Deferred to Phase 2
+
+**Deferred - Too Complex for Sample App:**
+- ❌ REQ-DOC-004: Crash Recovery (system auto-save sufficient)
+- ❌ REQ-DOC-005: Version Browsing (system provides)
+- ❌ REQ-DOC-006: Close Unsaved Document (system provides)
+- ❌ REQ-EDIT-001: Undo/Redo Operations
+- ❌ REQ-IMP-004: Import User Experience (time estimation removed)
+- ❌ REQ-IMP-005: Import Failure Recovery (complex error UI removed)
+- ❌ REQ-EXP-005: Export Validation
+- ❌ REQ-EXP-006: Format Version Migration
+- ❌ REQ-WIN-004: Window State Persistence
+- ❌ REQ-WIN-005: Window Management Commands (advanced)
+- ❌ REQ-UI-005: Operation Success Feedback (notifications removed)
+- ❌ REQ-UI-006: Operation Progress Feedback (time estimates removed)
+- ❌ REQ-PREF-001: User Preferences
+- ❌ REQ-USE-001: First-Run Experience
+- ❌ REQ-USE-002: Error Recovery (advanced)
+- ❌ REQ-HELP-001: In-App Help System
+- ❌ REQ-HELP-002: Sample Screenplay (simplified to basic .fountain file)
+- ❌ REQ-FIND-001: Find in Document
+
+**Total Deferred: 18**
+
+**Simplification Impact:** ~64% reduction in complexity (18/46 requirements deferred)
+
+---
+
+## 3. Functional Requirements (Detailed)
+
+This section contains the complete requirement specifications. Requirements marked as **DEFERRED** are listed for completeness but not included in v2.1.0 MVP.
+
+### 3.1 Document Management
+
+#### 3.1.1 Native .guion File Support
 
 **REQ-DOC-001**: Open .guion Files
 **Priority**: P0 (Critical)
@@ -103,8 +222,11 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 ---
 
 **REQ-DOC-004**: Crash Recovery
-**Priority**: P0 (Critical)
+**Priority**: ~~P0 (Critical)~~ **DEFERRED TO PHASE 2**
+**Status**: Not included in v2.1.0 MVP
 **Description**: The app shall automatically recover documents after unexpected crashes or force quits.
+
+**Rationale for Deferral**: macOS DocumentGroup provides automatic auto-save functionality. Custom crash recovery UI is over-engineered for a sample app demonstrating library capabilities.
 
 **Acceptance Criteria:**
 - Auto-saved versions preserved in `~/Library/Application Support/GuionView/AutoSave/`
@@ -125,8 +247,11 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 ---
 
 **REQ-DOC-005**: Version Browsing
-**Priority**: P1 (High)
+**Priority**: ~~P1 (High)~~ **DEFERRED TO PHASE 2**
+**Status**: Not included in v2.1.0 MVP
 **Description**: The app shall support macOS Versions for browsing document history.
+
+**Rationale for Deferral**: macOS FileDocument provides this automatically. No custom implementation needed for sample app.
 
 **Acceptance Criteria:**
 - File → Revert To → Browse All Versions... available when document has been saved
@@ -142,8 +267,11 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 ---
 
 **REQ-DOC-006**: Close Unsaved Document
-**Priority**: P0 (Critical)
+**Priority**: ~~P0 (Critical)~~ **DEFERRED TO PHASE 2**
+**Status**: Not included in v2.1.0 MVP - System provides this automatically
 **Description**: The app shall prompt users before closing documents with unsaved changes.
+
+**Rationale for Deferral**: FileDocument protocol provides standard macOS unsaved changes handling automatically. No custom implementation needed.
 
 **Acceptance Criteria:**
 - "Do you want to save changes to [filename]?" alert sheet appears
@@ -163,11 +291,14 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 
 ---
 
-#### 2.1.2 Document Editing
+#### 3.1.2 Document Editing
 
 **REQ-EDIT-001**: Undo/Redo Operations
-**Priority**: P1 (High)
+**Priority**: ~~P1 (High)~~ **DEFERRED TO PHASE 2**
+**Status**: Not included in v2.1.0 MVP
 **Description**: Users shall be able to undo and redo document-modifying operations.
+
+**Rationale for Deferral**: Full undo/redo system with grouping, descriptive names, and 50-level stack is production-grade feature. Too complex for sample app. For MVP, operations are either accepted or cancelled.
 
 **Acceptance Criteria:**
 - Undo and Redo commands available in Edit menu
@@ -203,7 +334,7 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 
 ---
 
-#### 2.1.3 Import Capabilities
+### 3.2 Import Capabilities
 
 **REQ-IMP-001**: Import .fountain Files
 **Priority**: P0 (Critical)
@@ -261,50 +392,40 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 ---
 
 **REQ-IMP-004**: Import User Experience
-**Priority**: P0 (Critical)
+**Priority**: ~~P0 (Critical)~~ **SIMPLIFIED FOR v2.1.0 MVP**
+**Status**: Included in v2.1.0 with simplifications
 **Description**: Import operations shall provide clear feedback and error handling.
 
-**Acceptance Criteria:**
+**Rationale for Simplification**: Time estimation adds complexity without being essential for MVP. Basic progress indication and error messages are sufficient.
+
+**Acceptance Criteria (v2.1.0 MVP):**
 - Progress indicator shown during import (spinning cursor or progress bar)
-- Estimated time shown for large files (> 1MB), calculated as: (file size / average parse speed)
-  - Average parse speed measured during first 10% of file
-  - Estimate updates every 5 seconds during parse
-  - If estimate > 10 seconds, show time remaining
-  - If estimate < 10 seconds, show "A few seconds remaining"
-  - Accuracy target: ±25% of actual time
+- ~~Estimated time shown for large files~~ **REMOVED** - Simple progress bar sufficient
 - Cancel button available during long imports (operations are cancellable)
 - Detailed error messages for parse failures with specific line numbers
 - File path shown in error dialogs
 - Import source format preserved in document metadata
-- Original content available in rawContent field
 
 ---
 
 **REQ-IMP-005**: Import Failure Recovery
-**Priority**: P0 (Critical)
-**Description**: Import failures shall provide detailed diagnostics and recovery options.
+**Priority**: ~~P0 (Critical)~~ **SIMPLIFIED FOR v2.1.0 MVP**
+**Status**: Included in v2.1.0 with simplifications
+**Description**: Import failures shall provide clear error messages.
 
-**Acceptance Criteria:**
-- Parsing errors display error dialog with:
-  - Error type (e.g., "Invalid Scene Heading", "Malformed Character Name")
-  - Line number where error occurred
-  - Context: 5 lines before and after error location
-  - Problematic content highlighted in monospace font
+**Rationale for Simplification**: Complex error recovery UI with log viewing, context display, and "View in Editor" is over-engineered for sample app. Basic error alerts are sufficient for MVP.
+
+**Acceptance Criteria (v2.1.0 MVP):**
+- Parsing errors display simple alert dialog with:
+  - Error type (e.g., "Invalid Scene Heading", "Parse Error")
+  - Line number where error occurred (if available)
+  - Error message text
 - Error dialog buttons:
-  - **View in Editor** (if TextEdit available): Opens original file at error line
-  - **Import Anyway**: Best-effort import, skipping problematic sections
-  - **Copy Error Details**: Copies full error to clipboard for bug reporting
-  - **Cancel**: Aborts import, returns to previous state
+  - **OK**: Dismisses dialog, returns to previous state
+  - **Copy Error**: Copies error message to clipboard for bug reporting
 - Failed imports never modify or delete original file
-- Error details logged to `~/Library/Logs/GuionView/import-errors.log` with:
-  - Timestamp
-  - File path
-  - File size
-  - Error description
-  - Stack trace (if available)
-- Help → View Import Logs... opens log directory in Finder
-- Last 10 failed imports accessible via Help → Recent Import Errors...
-- Import errors include recovery suggestion specific to error type
+- ~~Error logging system~~ **REMOVED** - Console logging sufficient for MVP
+- ~~Help menu log access~~ **REMOVED** - Not needed for sample app
 
 ---
 
@@ -335,7 +456,7 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 
 ---
 
-#### 2.1.3 Export Capabilities
+### 3.3 Export Capabilities
 
 **REQ-EXP-001**: Export to .fountain Format
 **Priority**: P0 (Critical)
@@ -403,10 +524,13 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 ---
 
 **REQ-EXP-005**: Export Validation
-**Priority**: P1 (High)
+**Priority**: ~~P1 (High)~~ **DEFERRED TO PHASE 2**
+**Status**: Not included in v2.1.0 MVP
 **Description**: Exported files shall be validated for correctness before completion.
 
-**Acceptance Criteria:**
+**Rationale for Deferral**: Export validation with parse-back, element counting, and detailed reporting is production-grade feature. For MVP, exports are trusted to work correctly if library tests pass. Users can manually verify exports.
+
+**Acceptance Criteria (Deferred):**
 - After export write completes, file is parsed back to verify validity
 - Validation checks:
   - File can be read successfully
@@ -429,8 +553,11 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 ---
 
 **REQ-EXP-006**: Format Version Migration
-**Priority**: P0 (Critical)
+**Priority**: ~~P0 (Critical)~~ **DEFERRED TO PHASE 2**
+**Status**: Not included in v2.1.0 MVP
 **Description**: The app shall migrate documents from older .guion format versions transparently.
+
+**Rationale for Deferral**: v2.1.0 introduces TextPack format as version 1.0. No previous versions exist yet, so migration is not needed in MVP. Will be required when format v2.0 is introduced.
 
 **Acceptance Criteria:**
 - Document format version stored in file header
@@ -457,9 +584,9 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 
 ---
 
-### 2.2 User Interface
+### 3.4 User Interface
 
-#### 2.2.1 GuionViewer Component
+#### 3.4.1 GuionViewer Component
 
 **REQ-UI-001**: Display GuionViewer
 **Priority**: P0 (Critical)
@@ -529,7 +656,7 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 
 ---
 
-#### 2.2.2 Window Management
+#### 3.4.2 Window Management
 
 **REQ-WIN-001**: Resizable Window
 **Priority**: P0 (Critical)
@@ -577,8 +704,11 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 ---
 
 **REQ-WIN-004**: Window State Persistence
-**Priority**: P1 (High)
+**Priority**: ~~P1 (High)~~ **DEFERRED TO PHASE 2**
+**Status**: Not included in v2.1.0 MVP
 **Description**: Window state shall persist across application launches for improved user experience.
+
+**Rationale for Deferral**: Window state persistence with per-document tracking, scroll position, and expanded/collapsed state requires significant implementation complexity. macOS provides basic window position persistence automatically. Custom persistence is nice-to-have for sample app.
 
 **Acceptance Criteria:**
 - Window state stored per-document (by file path) in local preferences
@@ -599,97 +729,82 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 ---
 
 **REQ-WIN-005**: Window Management Commands
-**Priority**: P1 (High)
+**Priority**: ~~P1 (High)~~ **SIMPLIFIED FOR v2.1.0 MVP**
+**Status**: Included in v2.1.0 with simplifications
 **Description**: Users shall be able to manage multiple document windows efficiently.
 
-**Acceptance Criteria:**
-- Window menu includes management commands:
+**Rationale for Simplification**: Basic window menu with document list is sufficient for MVP. Advanced commands like "Minimize All", "Zoom All", and "More Windows..." submenu are over-engineered for sample app.
+
+**Acceptance Criteria (v2.1.0 MVP):**
+- Window menu includes basic commands:
   - **Minimize** (Cmd+M): Minimizes current window
-  - **Minimize All** (Cmd+Option+M): Minimizes all windows
+  - ~~**Minimize All**~~ **REMOVED** - Not essential
   - **Zoom** (no shortcut): Toggles current window zoom
-  - **Zoom All**: Zooms all windows
-  - **Bring All to Front**: Brings all windows forward
+  - ~~**Zoom All**~~ **REMOVED** - Not essential
+  - ~~**Bring All to Front**~~ **REMOVED** - System provides this
   - Separator
-  - List of open documents (up to 10 visible)
-  - "More Windows..." submenu if > 10 documents open
+  - List of open documents (all documents shown, no limit)
+  - ~~"More Windows..." submenu~~ **REMOVED** - Sample app unlikely to have 10+ documents
 - Current window indicated with checkmark (✓) in window list
 - Clicking window menu item brings that window to front and focuses it
-- Window titles in menu abbreviated if > 40 characters with ellipsis
-- Dirty documents shown with • prefix in window list
-- Keyboard shortcut Cmd+` cycles through windows in MRU order
-- All window management respects Focus/Stage Manager state
+- Window titles shown as-is in menu (no truncation needed for MVP)
+- Keyboard shortcut Cmd+` cycles through windows
 
 ---
 
-#### 2.2.3 User Feedback
+#### 3.4.3 User Feedback
 
 **REQ-UI-005**: Operation Success Feedback
-**Priority**: P1 (High)
+**Priority**: ~~P1 (High)~~ **SIMPLIFIED FOR v2.1.0 MVP**
+**Status**: Included in v2.1.0 with simplifications
 **Description**: Successful operations shall provide clear, non-intrusive feedback to users.
 
-**Acceptance Criteria:**
-- Success notifications use native macOS user notification style (banner, top-right)
+**Rationale for Simplification**: Native macOS notifications with subtitles, action buttons, and Do Not Disturb integration are over-engineered. Simple status messages are sufficient for MVP.
+
+**Acceptance Criteria (v2.1.0 MVP):**
 - Import success:
-  - Notification: "Imported [filename]"
-  - Subtitle: "[N] scenes, [M] elements"
-  - Duration: 3 seconds auto-dismiss
+  - Simple message in status area or brief alert: "Imported [filename]"
+  - No statistics needed
 - Export success:
-  - Notification: "Exported to [filename]"
-  - Action button: "Reveal in Finder"
-  - Duration: 5 seconds auto-dismiss (longer for action button)
+  - Simple message: "Exported to [filename]"
+  - ~~Action button "Reveal in Finder"~~ **REMOVED** - User can find file manually
 - Save success:
-  - No notification (dirty indicator cleared is sufficient feedback)
-  - Exception: First save shows "Saved as [filename]" for 2 seconds
-- Notifications stack vertically if multiple operations complete
-- Clicking notification brings relevant window to front
-- Preference toggle in Preferences → General → "Show success notifications" (on by default)
-- Notifications respect Do Not Disturb system setting
-- Screen reader announces success (VoiceOver: "Import completed successfully")
+  - No message (dirty indicator cleared is sufficient feedback)
+- ~~Notifications system~~ **REMOVED** - Simple alerts sufficient
+- ~~Preference toggle~~ **REMOVED** - No preferences UI in MVP
+- Screen reader announces success (VoiceOver compatible)
 
 ---
 
 **REQ-UI-006**: Operation Progress Feedback
-**Priority**: P1 (High)
-**Description**: Long-running operations shall show detailed progress information.
+**Priority**: ~~P1 (High)~~ **SIMPLIFIED FOR v2.1.0 MVP**
+**Status**: Included in v2.1.0 with simplifications
+**Description**: Long-running operations shall show basic progress indication.
 
-**Acceptance Criteria:**
-- Progress sheet appears for operations expected to take > 2 seconds
-- Progress sheet is modeless (attached to document window, not app-modal)
-- Progress sheet content:
-  - **Title**: Operation type (e.g., "Importing Screenplay", "Exporting to Fountain")
-  - **Filename**: Full filename with icon
-  - **Progress bar**: Determinate (0-100%) with smooth animation
-  - **Status text**: Current operation (e.g., "Parsing scene headings...", "Writing elements...")
-  - **Details**: "N of M [units] processed" (e.g., "450 of 2,750 elements")
-  - **Time remaining**: Estimated time or "A few seconds remaining"
-  - **Cancel button**: Always visible and functional
-- Progress updates throttled to 60 FPS (smooth but not excessive)
-- For import operations, status shows element type being parsed:
-  - "Parsing title page..."
-  - "Parsing scene headings... (N of M)"
-  - "Parsing dialogue... (N of M)"
-  - "Building hierarchy..."
-- For export operations, status shows section being written:
-  - "Writing title page..."
-  - "Writing elements... (N of M)"
-  - "Creating archive..." (for .highland)
-  - "Validating export..."
-- Progress persists if user switches to another window
+**Rationale for Simplification**: Detailed progress sheets with time estimation, detailed status text, and 60 FPS throttling are over-engineered. Simple indeterminate progress indicator is sufficient for MVP.
+
+**Acceptance Criteria (v2.1.0 MVP):**
+- Basic progress indicator appears for operations expected to take > 2 seconds
+- Progress indicator attached to document window
+- Progress indicator shows:
+  - **Title**: Operation type (e.g., "Importing Screenplay", "Exporting...")
+  - **Filename**: Filename being processed
+  - **Progress bar**: Indeterminate spinner or simple progress bar
+  - ~~**Status text**~~ **REMOVED** - Title sufficient
+  - ~~**Details count**~~ **REMOVED** - Not needed for MVP
+  - ~~**Time remaining**~~ **REMOVED** - Not needed for MVP
+  - ~~**Cancel button**~~ **REMOVED** - Operations complete quickly enough
+- ~~Progress updates throttled~~ **REMOVED** - Simple implementation
+- ~~Detailed status messages~~ **REMOVED** - Basic title sufficient
 - On completion:
-  - Progress bar fills to 100%
-  - Checkmark icon (✓) displayed
-  - Sheet dismisses after 0.5 seconds
-- On cancellation:
-  - Immediate dismiss
-  - Rollback to previous state
-  - Status notification: "Import cancelled" (2 seconds)
+  - Progress indicator dismisses automatically
 - On error:
-  - Progress sheet replaced with error dialog
-  - No automatic dismiss (user must acknowledge)
+  - Progress indicator dismissed
+  - Error dialog shown
 
 ---
 
-### 2.3 File Type Associations
+### 3.5 File Type Associations
 
 **REQ-FTA-001**: File Type Registration
 **Priority**: P0 (Critical)
@@ -722,7 +837,7 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 
 ---
 
-### 2.4 Performance Requirements
+### 3.6 Performance Requirements
 
 **REQ-PERF-001**: File Load Performance
 **Priority**: P1 (High)
@@ -760,9 +875,9 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 
 ---
 
-## 3. Non-Functional Requirements
+## 4. Non-Functional Requirements
 
-### 3.1 Application Identity
+### 4.1 Application Identity
 
 **REQ-APP-001**: Application Name and Branding
 **Priority**: P0 (Critical)
@@ -807,7 +922,7 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 
 ---
 
-### 3.2 Platform Requirements
+### 4.2 Platform Requirements
 
 **REQ-PLAT-001**: macOS Version Support
 **Priority**: P0 (Critical)
@@ -846,7 +961,7 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 
 ---
 
-### 3.3 Reliability
+### 4.3 Reliability
 
 **REQ-REL-001**: Error Handling
 **Priority**: P0 (Critical)
@@ -874,7 +989,7 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 
 ---
 
-### 3.4 Accessibility
+### 4.4 Accessibility
 
 **REQ-ACC-001**: VoiceOver Support
 **Priority**: P1 (High)
@@ -914,11 +1029,14 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 
 ---
 
-### 3.5 Usability
+### 4.5 Usability
 
 **REQ-USE-001**: First-Run Experience
-**Priority**: P2 (Medium)
+**Priority**: ~~P2 (Medium)~~ **DEFERRED TO PHASE 2**
+**Status**: Not included in v2.1.0 MVP
 **Description**: New users shall quickly understand how to use the app.
+
+**Rationale for Deferral**: Welcome screens, tooltips, and first-run onboarding are nice-to-have for sample app. README and sample screenplay are sufficient for MVP.
 
 **Acceptance Criteria:**
 - Welcome screen shown on first launch (optional)
@@ -929,8 +1047,11 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 ---
 
 **REQ-USE-002**: Error Recovery
-**Priority**: P1 (High)
+**Priority**: ~~P1 (High)~~ **DEFERRED TO PHASE 2**
+**Status**: Not included in v2.1.0 MVP
 **Description**: Users shall be able to recover from errors without losing work.
+
+**Rationale for Deferral**: Advanced error recovery is covered by system auto-save. Undo/redo is already deferred. Confirm dialogs for destructive actions are provided by FileDocument automatically. This requirement is redundant with existing system features.
 
 **Acceptance Criteria:**
 - Import errors preserve original file
@@ -940,11 +1061,14 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 
 ---
 
-### 3.6 Preferences
+### 4.6 Preferences
 
 **REQ-PREF-001**: User Preferences
-**Priority**: P1 (High)
+**Priority**: ~~P1 (High)~~ **DEFERRED TO PHASE 2**
+**Status**: Not included in v2.1.0 MVP
 **Description**: Users shall be able to configure application behavior through a Preferences window.
+
+**Rationale for Deferral**: Full preferences UI with tabbed interface, sliders, and multiple settings is production-grade feature. Sample app can use sensible defaults without configuration UI.
 
 **Acceptance Criteria:**
 - GuionView → Preferences... (Cmd+,) opens Preferences window
@@ -995,9 +1119,9 @@ This document defines the requirements for **GuionView**, a macOS sample applica
 
 ---
 
-## 4. Technical Architecture
+## 5. Technical Architecture
 
-### 4.1 Application Structure
+### 5.1 Application Structure
 
 ```
 GuionView/
@@ -1012,9 +1136,9 @@ GuionView/
     └── [Document type icons]
 ```
 
-### 4.2 Key Components
+### 5.2 Key Components
 
-#### 4.2.1 GuionDocument (FileDocument)
+#### 5.2.1 GuionDocument (FileDocument)
 
 **Purpose**: Implements FileDocument protocol for document-based architecture.
 
@@ -1075,7 +1199,7 @@ final class GuionDocument: FileDocument {
 }
 ```
 
-#### 4.2.2 ContentView
+#### 5.2.2 ContentView
 
 **Purpose**: Displays document content using GuionViewer component.
 
@@ -1100,7 +1224,7 @@ struct ContentView: View {
     }
 }
 
-#### 4.2.3 ImportCommands
+#### 5.2.3 ImportCommands
 
 **Purpose**: Implements import menu commands.
 
@@ -1120,7 +1244,7 @@ File
 │   └── Final Draft...    (Cmd+Shift+I, D)
 ```
 
-#### 4.2.4 ExportCommands
+#### 5.2.4 ExportCommands
 
 **Purpose**: Implements export menu commands.
 
@@ -1139,7 +1263,7 @@ File
     └── Final Draft...    (Cmd+Shift+E, D)
 ```
 
-### 4.3 Data Flow
+### 5.3 Data Flow
 
 #### Import Flow:
 ```
@@ -1188,7 +1312,7 @@ File
 7. Show success/error message
 ```
 
-### 4.4 Concurrency Strategy
+### 5.4 Concurrency Strategy
 
 **Challenge**: SwiftData's @MainActor requirements conflict with FileDocument's nonisolated initializers.
 
@@ -1234,9 +1358,9 @@ var documentModel: GuionDocumentModel {
 
 ---
 
-## 5. Testing Requirements
+## 6. Testing Requirements
 
-### 5.1 Unit Tests
+### 6.1 Unit Tests
 
 **Test Coverage Required:**
 - Import from each format (.fountain, .highland, .fdx)
@@ -1246,7 +1370,7 @@ var documentModel: GuionDocumentModel {
 - Empty document handling
 - Large file handling (> 5 MB)
 
-### 5.2 Integration Tests
+### 6.2 Integration Tests
 
 **Test Scenarios:**
 - Open .guion file → displays in Scene Browser
@@ -1255,7 +1379,7 @@ var documentModel: GuionDocumentModel {
 - Multiple windows with different documents
 - Window state persistence across launches
 
-### 5.3 Manual Testing Checklist
+### 6.3 Manual Testing Checklist
 
 - [ ] Double-click .guion file in Finder opens app
 - [ ] File icons display correctly
@@ -1269,9 +1393,9 @@ var documentModel: GuionDocumentModel {
 
 ---
 
-## 6. Documentation Requirements
+## 7. Documentation Requirements
 
-### 6.1 README
+### 7.1 README
 
 **Required Sections:**
 - Brief description of app purpose
@@ -1282,7 +1406,7 @@ var documentModel: GuionDocumentModel {
 - Known limitations
 - License information
 
-### 6.2 Code Documentation
+### 7.2 Code Documentation
 
 **Requirements:**
 - All public types documented with /// comments
@@ -1290,11 +1414,14 @@ var documentModel: GuionDocumentModel {
 - Concurrency patterns noted
 - Example usage in documentation
 
-### 6.3 In-App Help System
+### 7.3 In-App Help System
 
 **REQ-HELP-001**: In-App Help System
-**Priority**: P1 (High)
+**Priority**: ~~P1 (High)~~ **DEFERRED TO PHASE 2**
+**Status**: Not included in v2.1.0 MVP
 **Description**: The app shall provide comprehensive built-in help documentation accessible from the Help menu.
+
+**Rationale for Deferral**: macOS Help Book with searchable content, context-sensitive help, and detailed sections is production-grade feature. README documentation is sufficient for sample app MVP.
 
 **Acceptance Criteria:**
 - Help → GuionView Help (Cmd+?) opens macOS Help Book
@@ -1330,45 +1457,39 @@ var documentModel: GuionDocumentModel {
 ---
 
 **REQ-HELP-002**: Sample Screenplay
-**Priority**: P1 (High)
-**Description**: The app shall include a bundled sample screenplay demonstrating all features.
+**Priority**: ~~P1 (High)~~ **SIMPLIFIED FOR v2.1.0 MVP**
+**Status**: Included in v2.1.0 with simplifications
+**Description**: The app shall include a bundled sample screenplay.
 
-**Acceptance Criteria:**
-- File → Open Sample Screenplay menu item available at all times
-- Sample screenplay opens in new window (read-only until Save As)
-- Sample screenplay demonstrates:
-  - Title page with all fields
+**Rationale for Simplification**: Full-featured sample with all formats, read-only enforcement, and detailed demonstrations is over-engineered. Simple sample.fountain file demonstrating basic structure is sufficient for MVP.
+
+**Acceptance Criteria (v2.1.0 MVP):**
+- ~~File → Open Sample menu item~~ **REMOVED** - User can manually open sample file
+- Sample screenplay included as `sample.fountain` in project or resources
+- Sample screenplay demonstrates basic structure:
+  - Title page (simple)
   - Chapter markers (##) at Level 2
   - Scene groups (###) at Level 3
-  - Multiple scene headings (INT/EXT)
+  - A few scene headings (INT/EXT)
   - Action, dialogue, character names
-  - Scene numbers
-  - Transitions
-  - Formatting variety (centered text, page breaks)
-  - OVER BLACK pre-scene content
-- Sample screenplay length: 10-15 pages (optimal for demonstration)
+- Sample screenplay length: 5-10 pages (short and simple)
 - Sample screenplay content: Original content or public domain
-- Sample included in all supported formats:
-  - `Sample.guion` (primary)
-  - `Sample.fountain`
-  - `Sample.highland`
-  - `Sample.fdx`
-- Sample files bundled in `GuionView.app/Contents/Resources/Samples/`
-- Opening sample shows info banner: "This is a read-only sample. Use File → Save As... to create an editable copy."
-- Save command disabled (grayed out) for sample documents
-- Save As works normally, creates new editable document
-- Sample demonstrates best practices for screenplay structure
-- Sample credits displayed in Help → About Sample
-- Sample remains available even if user deletes ~/.guion files
-- Multiple opens of sample create independent windows
+- ~~Sample in all formats~~ **REMOVED** - .fountain only for MVP
+- Sample file bundled in `GuionView.app/Contents/Resources/sample.fountain`
+- ~~Read-only enforcement~~ **REMOVED** - Treat as normal file
+- ~~Info banner~~ **REMOVED** - Not needed
+- ~~Help → About Sample~~ **REMOVED** - Credits in file header sufficient
 
 ---
 
-### 6.4 Search and Navigation
+### 7.4 Search and Navigation
 
 **REQ-FIND-001**: Find in Document
-**Priority**: P2 (Medium)
+**Priority**: ~~P2 (Medium)~~ **DEFERRED TO PHASE 2**
+**Status**: Not included in v2.1.0 MVP
 **Description**: Users shall be able to search for text within screenplay documents.
+
+**Rationale for Deferral**: Full find functionality with incremental search, match highlighting, keyboard navigation, and preferences is production-grade feature. Not essential for sample app demonstrating library capabilities.
 
 **Acceptance Criteria:**
 - Edit → Find → Find... (Cmd+F) shows find bar
@@ -1411,9 +1532,9 @@ var documentModel: GuionDocumentModel {
 
 ---
 
-## 7. Delivery Checklist
+## 8. Delivery Checklist
 
-### 7.1 Code Completeness
+### 8.1 Code Completeness
 
 - [ ] All REQ-* requirements implemented
 - [ ] No compilation warnings
@@ -1421,14 +1542,14 @@ var documentModel: GuionDocumentModel {
 - [ ] All tests passing
 - [ ] Code reviewed
 
-### 7.2 Assets
+### 8.2 Assets
 
 - [ ] App icon (all sizes)
 - [ ] Document icons for each file type
 - [ ] About panel content
 - [ ] Copyright and license files
 
-### 7.3 Configuration
+### 8.3 Configuration
 
 - [ ] Info.plist complete and correct
 - [ ] Entitlements configured (if needed)
@@ -1436,7 +1557,7 @@ var documentModel: GuionDocumentModel {
 - [ ] Version numbers set
 - [ ] Code signing configured (for distribution)
 
-### 7.4 Documentation
+### 8.4 Documentation
 
 - [ ] README.md complete
 - [ ] Code documentation complete
@@ -1445,7 +1566,7 @@ var documentModel: GuionDocumentModel {
 
 ---
 
-## 8. Success Criteria
+## 9. Success Criteria
 
 **GuionView** will be considered complete when:
 
@@ -1458,25 +1579,25 @@ var documentModel: GuionDocumentModel {
 
 ---
 
-## 9. Future Enhancements
+## 10. Future Enhancements
 
 Items out of scope for initial release but worth considering:
 
-### 9.1 Phase 2 Features
+### 10.1 Phase 2 Features
 - Scene editing capabilities (text editing)
 - Character and location panels
 - Search and filter functionality
 - Print and PDF export
 - Custom color schemes / themes
 
-### 9.2 Phase 3 Features
+### 10.2 Phase 3 Features
 - iOS/iPadOS companion app
 - iCloud sync
 - Collaboration features (comments, track changes)
 - Integration with script analysis tools
 - Plugin architecture for extensions
 
-### 9.3 Advanced Features
+### 10.3 Advanced Features
 - AI-powered scene analysis
 - Beat sheet visualization
 - Timeline view
@@ -1485,7 +1606,7 @@ Items out of scope for initial release but worth considering:
 
 ---
 
-## 10. References
+## 11. References
 
 - [SwiftGuion Library Documentation](../README.md)
 - [.guion File Format Specification](./GUION_FILE_FORMAT.md)
@@ -1563,6 +1684,7 @@ MyScript.guion/
 | 1.4 | 2025-10-12 | Claude Code | Added high-priority UX and window management requirements: window state persistence (REQ-WIN-004), window management commands (REQ-WIN-005), operation success feedback (REQ-UI-005), operation progress feedback (REQ-UI-006). Total requirements now: 41 (was 35). |
 | 1.5 | 2025-10-12 | Claude Code | Added Phase 2B high-priority requirements: user preferences (REQ-PREF-001), undo/redo operations (REQ-EDIT-001), in-app help system (REQ-HELP-001), sample screenplay (REQ-HELP-002), find in document (REQ-FIND-001). Enhanced keyboard shortcuts table. Total requirements now: 46 (was 41). |
 | 2.0 | 2025-10-13 | Claude Code | **ARCHITECTURE ALIGNMENT**: Updated all requirements to reflect SwiftGuion architecture redesign. Key changes: (1) Updated REQ-DOC-002 for TextPack bundle format with JSON exports. (2) Updated REQ-IMP-001/003 to use FountainParser/FDXParser (renamed). (3) Added immutable GuionParsedScreenplay → GuionDocumentModel conversion flow. (4) Updated REQ-EXP-003 to use new conversion pattern. (5) Completely rewrote Section 4.3 (Data Flow) with TextPack save flow. (6) Rewrote Section 4.4 (Concurrency Strategy) to explain lazy loading with Sendable types. (7) Expanded Section 4.2.1 (GuionDocument) with full architecture example. (8) Updated Appendix A with TextPack bundle structure. All parser references updated to current names. |
+| 2.1 | 2025-10-13 | Claude Code | **v2.1.0 MVP SIMPLIFICATION**: Reduced requirements by 64% (28 core requirements, 18 deferred to Phase 2). Key changes: (1) Added Section 2 with comprehensive MVP requirements summary. (2) Deferred production-grade features: undo/redo (REQ-EDIT-001), preferences UI (REQ-PREF-001), crash recovery UI (REQ-DOC-004), version browsing (REQ-DOC-005), close unsaved custom UI (REQ-DOC-006), export validation (REQ-EXP-005), format migration (REQ-EXP-006), window state persistence (REQ-WIN-004), complex progress/success feedback (REQ-UI-005/006), in-app Help Book (REQ-HELP-001), find functionality (REQ-FIND-001), first-run experience (REQ-USE-001), advanced error recovery (REQ-USE-002). (3) Simplified 6 requirements to MVP-appropriate scope: import UX (REQ-IMP-004), import error recovery (REQ-IMP-005), window commands (REQ-WIN-005), sample screenplay (REQ-HELP-002). (4) All section numbering corrected. Focus: Demonstrate library capabilities with core open/save/import/export/display functionality. |
 
 ---
 
