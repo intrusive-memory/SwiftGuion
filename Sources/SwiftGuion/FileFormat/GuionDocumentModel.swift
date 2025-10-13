@@ -89,6 +89,88 @@ public final class GuionDocumentModel {
             return (element, location)
         }
     }
+
+    // MARK: - Conversion Methods
+
+    /// Create a GuionDocumentModel from a GuionParsedScreenplay
+    /// - Parameters:
+    ///   - screenplay: The screenplay to convert
+    ///   - context: The ModelContext to use
+    ///   - generateSummaries: Whether to generate AI summaries for scene headings (default: false)
+    /// - Returns: The created GuionDocumentModel
+    @MainActor
+    public static func from(
+        _ screenplay: GuionParsedScreenplay,
+        in context: ModelContext,
+        generateSummaries: Bool = false
+    ) async -> GuionDocumentModel {
+        let document = GuionDocumentModel(
+            filename: screenplay.filename,
+            rawContent: screenplay.stringFromDocument(),
+            suppressSceneNumbers: screenplay.suppressSceneNumbers
+        )
+
+        // Convert title page entries
+        for dictionary in screenplay.titlePage {
+            for (key, values) in dictionary {
+                let entry = TitlePageEntryModel(key: key, values: values)
+                entry.document = document
+                document.titlePage.append(entry)
+            }
+        }
+
+        // Generate summaries for scene headings if requested
+        if generateSummaries {
+            let outline = screenplay.extractOutline()
+
+            for element in screenplay.elements {
+                var summary: String? = nil
+
+                // Generate summary only for Scene Heading elements
+                if element.elementType == "Scene Heading" {
+                    if let sceneId = element.sceneId,
+                       let scene = outline.first(where: { $0.sceneId == sceneId }) {
+                        summary = await SceneSummarizer.summarizeScene(scene, from: screenplay, outline: outline)
+                    }
+                }
+
+                let elementModel = GuionElementModel(from: element, summary: summary)
+                elementModel.document = document
+                document.elements.append(elementModel)
+            }
+        } else {
+            // Convert elements without summaries
+            for element in screenplay.elements {
+                let elementModel = GuionElementModel(from: element)
+                elementModel.document = document
+                document.elements.append(elementModel)
+            }
+        }
+
+        context.insert(document)
+        return document
+    }
+
+    /// Convert this GuionDocumentModel to a GuionParsedScreenplay
+    /// - Returns: GuionParsedScreenplay instance containing the document data
+    public func toGuionParsedScreenplay() -> GuionParsedScreenplay {
+        // Convert title page
+        var titlePageDict: [String: [String]] = [:]
+        for entry in titlePage {
+            titlePageDict[entry.key] = entry.values
+        }
+        let titlePageArray = titlePageDict.isEmpty ? [] : [titlePageDict]
+
+        // Convert elements using protocol-based conversion
+        let convertedElements = elements.map { GuionElement(from: $0) }
+
+        return GuionParsedScreenplay(
+            filename: filename,
+            elements: convertedElements,
+            titlePage: titlePageArray,
+            suppressSceneNumbers: suppressSceneNumbers
+        )
+    }
 }
 
 /// SwiftData model representing a single screenplay element.

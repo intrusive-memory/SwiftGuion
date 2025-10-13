@@ -110,7 +110,7 @@ final class GuionViewerTests: XCTestCase {
     @MainActor
     func testInitWithFountainScript() throws {
         let fountainPath = try Fijos.getFixture("test", extension: "fountain").path
-        let script = try FountainScript(file: fountainPath)
+        let script = try GuionParsedScreenplay(file: fountainPath)
 
         // Create viewer with script
         let viewer = GuionViewer(script: script)
@@ -385,7 +385,7 @@ final class GuionViewerTests: XCTestCase {
     func testEndToEndFountainToViewerFlow() throws {
         // Load fountain file
         let fountainPath = try Fijos.getFixture("test", extension: "fountain").path
-        let script = try FountainScript(file: fountainPath)
+        let script = try GuionParsedScreenplay(file: fountainPath)
 
         // Extract browser data
         let browserData = script.extractSceneBrowserData()
@@ -414,7 +414,7 @@ final class GuionViewerTests: XCTestCase {
     func testLargeDocumentConversionPerformance() throws {
         // Load BigFish fixture
         let fountainPath = try Fijos.getFixture("bigfish", extension: "fountain").path
-        let script = try FountainScript(file: fountainPath)
+        let script = try GuionParsedScreenplay(file: fountainPath)
 
         // Create a document model with all elements
         let document = GuionDocumentModel(filename: "bigfish.guion")
@@ -440,7 +440,7 @@ final class GuionViewerTests: XCTestCase {
 
     func testBrowserDataExtractionPerformance() throws {
         let fountainPath = try Fijos.getFixture("bigfish", extension: "fountain").path
-        let script = try FountainScript(file: fountainPath)
+        let script = try GuionParsedScreenplay(file: fountainPath)
 
         // Create document and convert
         let document = GuionDocumentModel(filename: "bigfish.guion")

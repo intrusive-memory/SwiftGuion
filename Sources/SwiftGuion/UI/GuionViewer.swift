@@ -47,11 +47,11 @@ import SwiftData
 /// }
 /// ```
 ///
-/// ### From FountainScript
+/// ### From GuionParsedScreenplay
 ///
 /// ```swift
 /// struct ContentView: View {
-///     let script: FountainScript
+///     let script: GuionParsedScreenplay
 ///
 ///     var body: some View {
 ///         GuionViewer(script: script)
@@ -142,9 +142,9 @@ public struct GuionViewer: View {
         _viewerState = State(initialValue: .loaded(browserData))
     }
 
-    /// Create a viewer from a FountainScript
+    /// Create a viewer from a GuionParsedScreenplay
     /// - Parameter script: The screenplay script to display
-    public init(script: FountainScript) {
+    public init(script: GuionParsedScreenplay) {
         let browserData = script.extractSceneBrowserData()
         _viewerState = State(initialValue: .loaded(browserData))
     }
@@ -193,8 +193,6 @@ public struct GuionViewer: View {
     private func loadFile(url: URL) async {
         do {
             let script = try await Task.detached {
-                let script = FountainScript()
-
                 // Determine file type and load accordingly
                 let fileExtension = url.pathExtension.lowercased()
 
@@ -206,34 +204,38 @@ public struct GuionViewer: View {
                     )
 
                 case "fountain":
-                    try script.loadFile(url.path, parser: .fast)
+                    return try GuionParsedScreenplay(file: url.path, parser: .fast)
 
                 case "highland":
-                    try script.loadHighland(url)
+                    return try GuionParsedScreenplay(highland: url)
 
                 case "fdx":
                     // Load FDX using parser
                     let data = try Data(contentsOf: url)
-                    let parser = FDXDocumentParser()
+                    let parser = FDXParser()
                     let parsedDoc = try parser.parse(data: data, filename: url.lastPathComponent)
 
                     // Convert FDXParsedElements to GuionElements
-                    script.elements = parsedDoc.elements.map { GuionElement(from: $0) }
+                    let elements = parsedDoc.elements.map { GuionElement(from: $0) }
 
                     // Convert title page entries
                     var titlePageDict: [String: [String]] = [:]
                     for entry in parsedDoc.titlePageEntries {
                         titlePageDict[entry.key] = entry.values
                     }
-                    if !titlePageDict.isEmpty {
-                        script.titlePage = [titlePageDict]
-                    }
+
+                    let titlePage = titlePageDict.isEmpty ? [] : [titlePageDict]
+
+                    return GuionParsedScreenplay(
+                        filename: url.lastPathComponent,
+                        elements: elements,
+                        titlePage: titlePage,
+                        suppressSceneNumbers: parsedDoc.suppressSceneNumbers
+                    )
 
                 default:
                     throw GuionViewerError.unsupportedFileType(url.pathExtension)
                 }
-
-                return script
             }.value
 
             let browserData = script.extractSceneBrowserData()
@@ -381,27 +383,11 @@ struct ErrorView: View {
 // MARK: - GuionDocumentModel Extension
 
 extension GuionDocumentModel {
-    /// Convert GuionDocumentModel to FountainScript for viewing
-    /// - Returns: FountainScript instance containing the document data
-    func toFountainScript() -> FountainScript {
-        let script = FountainScript()
-
-        // Convert GuionElementModel array to GuionElement array using the protocol initializer
-        script.elements = elements.map { GuionElement(from: $0) }
-
-        // Convert TitlePageEntryModel array to title page dictionary array
-        var titlePageDict: [String: [String]] = [:]
-        for entry in titlePage {
-            titlePageDict[entry.key] = entry.values
-        }
-        if !titlePageDict.isEmpty {
-            script.titlePage = [titlePageDict]
-        }
-
-        script.filename = filename
-        script.suppressSceneNumbers = suppressSceneNumbers
-
-        return script
+    /// Convert GuionDocumentModel to GuionParsedScreenplay for viewing
+    /// - Returns: GuionParsedScreenplay instance containing the document data
+    func toFountainScript() -> GuionParsedScreenplay {
+        // Use the new conversion method
+        return toGuionParsedScreenplay()
     }
 }
 

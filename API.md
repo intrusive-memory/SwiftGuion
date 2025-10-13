@@ -6,23 +6,34 @@ This guide lists the main entry points exposed by the SwiftGuion package so that
 
 | Type | Role |
 | --- | --- |
-| `FountainScript` | Primary facade for parsing, inspecting, and exporting Fountain data. |
-| `GuionElement` | Represents a single guión element (scene heading, dialogue, etc.). |
+| `GuionParsedScreenplay` | Immutable parsed screenplay representation (Sendable, thread-safe). |
+| `GuionElement` | Represents a single screenplay element (scene heading, dialogue, etc.). |
 | `CharacterInfo` / `CharacterList` | Aggregated character statistics derived from a script. |
 | `OutlineElement` / `OutlineTree` | Structural outline abstraction with hierarchical helpers. |
-| `FountainWriter` | Recreates Fountain/Highland/TextBundle outputs from a parsed script. |
+| `FountainWriter` | Serializes screenplays back to Fountain format. |
 
-## FountainScript
+## GuionParsedScreenplay
 
-`FountainScript` tracks parsed metadata and provides multiple loaders. Key properties and initializers include:
+`GuionParsedScreenplay` is an immutable, Sendable class representing a parsed screenplay. All properties are `let` constants, making it safe to pass between threads. Key properties and initializers include:
 
-- `init()` – create an empty container.
-- `init(file:parser:)` / `loadFile(_:parser:)` – parse a file path (`.fountain`, `.highland`, `.textbundle`).
-- `init(string:parser:)` / `loadString(_:parser:)` – parse in-memory Fountain text.
-- `init(highlandURL:parser:)` / `loadHighland(_:parser:)` – unpack Highland archives.
-- `init(textBundleURL:parser:)` / `loadTextBundle(_:parser:)` – extract TextBundle content.
+- `init(filename:elements:titlePage:suppressSceneNumbers:)` – create from explicit data.
+- `init(file:parser:)` – parse a `.fountain` file.
+- `init(string:parser:)` – parse Fountain text from memory.
+- `init(highland:)` – parse Highland `.highland` archive.
+- `init(textBundle:)` – parse TextBundle format.
 
-The class stores `filename`, `elements`, `titlePage`, `suppressSceneNumbers`, and caching needed for re-parsing. It also exposes `getGuionElements`, `getContentUrl`, `getContent`, and writing helpers (`write(toFile:)`, `write(to:)`, `writeToTextBundle`, `writeToHighland`). Parser selection is handled by the `ParserType` enum (`.fast` vs `.regex`). 【F:Sources/SwiftGuion/FountainScript.swift†L30-L195】【F:Sources/SwiftGuion/FountainScript+Highland.swift†L31-L123】【F:Sources/SwiftGuion/FountainScript+TextBundle.swift†L32-L179】
+**Properties** (all immutable):
+- `filename: String?` – original filename
+- `elements: [GuionElement]` – ordered screenplay elements
+- `titlePage: [[String: [String]]]` – title page metadata
+- `suppressSceneNumbers: Bool` – whether to hide scene numbers
+
+**Methods**:
+- `stringFromDocument()` – serialize complete screenplay to Fountain
+- `write(to:)` / `write(toFile:)` – save as Fountain file
+- `extractOutline()` – generate hierarchical outline
+- `extractCharacters()` – extract character information
+- `extractSceneLocations()` – extract location data
 
 ## Guion Elements
 
@@ -166,12 +177,13 @@ Each structure includes:
 
 The ImportExport module handles parsing and writing of various screenplay formats:
 
-### FastFountainParser
+### FountainParser
 
 High-performance Fountain parser using hand-optimized state machine:
 
-- `parse(_:)` – parse Fountain text into GuionElements
-- `parseTitlePage(_:)` – extract title page metadata
+- `init(file:)` / `init(string:)` – parse Fountain from file or string
+- `elements: [GuionElement]` – parsed screenplay elements
+- `titlePage: [[String: [String]]]` – extracted title page metadata
 - Significantly faster than regex-based parser
 - Handles all Fountain specification features
 
@@ -184,12 +196,12 @@ Serializes parsed screenplays back to Fountain format:
 - `titlePage(from:)` – render title page front matter
 - Preserves formatting and special markers
 
-### FDXDocumentParser
+### FDXParser
 
 Parses Final Draft XML documents:
 
-- `parse(data:)` – parse FDX XML into GuionElements
-- `parseTitlePage(_:)` – extract FDX metadata
+- `parse(data:filename:)` – parse FDX XML into GuionElements
+- Returns `FDXParsedDocument` with elements and metadata
 - Handles FDX-specific features (scene numbers, revisions)
 - Compatible with Final Draft 8-12
 
@@ -218,15 +230,109 @@ Constants for Fountain regex patterns (legacy regex-based parser):
 - Pattern constants for all Fountain elements (scenes, dialogue, action, etc.)
 - Template strings for regex replacement
 - Styling patterns (bold, italic, underline)
-- Used by legacy regex parser (FastFountainParser is preferred)
+- Used by legacy regex parser (FountainParser is preferred)
+
+## TextPack Format (.guion)
+
+TextPack is Gu's native file format - a bundle directory containing structured screenplay data.
+
+### TextPack Structure
+
+```
+MyScript.guion/
+├── info.json                    # Document metadata
+├── screenplay.fountain          # Complete screenplay
+└── Resources/                   # Additional data
+    ├── characters.json          # Character information
+    ├── locations.json           # Location data
+    ├── elements.json            # All screenplay elements
+    └── titlepage.json           # Title page entries
+```
+
+### TextPackWriter
+
+Creates TextPack bundles from screenplay data:
+
+- `createTextPack(from: GuionParsedScreenplay)` – create bundle from screenplay
+- `createTextPack(from: GuionDocumentModel)` – create bundle from SwiftData model
+- Generates all JSON resources automatically
+- Uses ISO8601 date encoding and pretty-printed JSON
+- Extracts character dialogue counts and scene appearances
+- Parses location data with lighting and time-of-day information
+
+### TextPackReader
+
+Reads TextPack bundles back into screenplay data:
+
+- `readTextPack(from:)` – load as `GuionParsedScreenplay`
+- `readTextPack(from:in:)` – load as `GuionDocumentModel` (SwiftData)
+- `readCharacters(from:)` – extract character JSON
+- `readLocations(from:)` – extract location JSON
+- `readElements(from:)` – extract elements JSON
+- `readTitlePage(from:)` – extract title page JSON
+- Handles missing optional resources gracefully
+
+### TextPack Metadata
+
+**TextPackInfo** (info.json):
+- `version: String` – format version ("1.0")
+- `format: String` – identifier ("guion-textpack")
+- `created/modified: Date` – timestamps
+- `filename: String?` – original filename
+- `suppressSceneNumbers: Bool` – scene number flag
+- `resources: [String]` – list of included resource files
+
+**CharacterData** (characters.json):
+- `name: String` – character name
+- `scenes: [String]` – scene IDs where character appears
+- `dialogueLines: Int` – number of dialogue lines
+- `dialogueWords: Int` – total words spoken
+- `firstAppearance: String?` – scene ID of first appearance
+
+**LocationData** (locations.json):
+- `rawLocation: String` – full scene heading text
+- `lighting: String` – INT/EXT/etc (abbreviated form)
+- `scene: String` – primary location name
+- `setup/timeOfDay: String?` – optional details
+- `modifiers: [String]` – additional tags (FLASHBACK, etc.)
+- `sceneIds: [String]` – scenes using this location
+
+**ElementData** (elements.json):
+- All `GuionElement` properties serialized as JSON
+- Preserves scene IDs for cross-referencing
+
+### GuionDocumentModel Conversion
+
+SwiftData integration with explicit conversion methods:
+
+- `GuionDocumentModel.from(_:in:generateSummaries:)` – create from GuionParsedScreenplay
+- `GuionDocumentModel.toGuionParsedScreenplay()` – convert to immutable screenplay
+- Handles title page, elements, and metadata conversion
+- Optional AI-powered scene summary generation
 
 ## Package Layout
 
 SwiftGuion ships as a single SwiftPM library target organized into functional modules:
 
-- **Core/** – FountainScript and core screenplay model
-- **FileFormat/** – Guion native document format
-- **ImportExport/** – Format parsers and writers
-- **Analysis/** – Scene analysis and UI data structures
+- **Core/** – GuionParsedScreenplay (immutable, Sendable) and core screenplay model
+- **FileFormat/** – Guion native .guion TextPack format and SwiftData models
+- **ImportExport/** – Format parsers (Fountain, FDX, Highland) and writers
+- **Analysis/** – Scene analysis, character extraction, and UI data structures
+- **UI/** – SwiftUI components (GuionViewer, SceneBrowserWidget, etc.)
 
-The package depends on the open-source `TextBundle` package for TextBundle/Highland support. Tests live under `SwiftGuionTests` with fixture bundles for Fountain, Highland, and TextBundle inputs. 【F:Package.swift†L7-L37】
+### Key Dependencies
+
+- **ZIPFoundation** – Highland archive extraction
+- **SwiftData** – Document persistence (macOS 14.0+)
+- **SwiftUI** – User interface components (macOS 14.0+)
+
+### Test Coverage
+
+Tests live under `SwiftGuionTests` with fixture bundles for:
+- Fountain files (`.fountain`)
+- Highland archives (`.highland`)
+- TextBundle formats (`.textbundle`)
+- FDX documents (`.fdx`)
+- TextPack bundles (`.guion`)
+
+**Current Test Count**: 128 tests covering parsing, serialization, analysis, and TextPack format.

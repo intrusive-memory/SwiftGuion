@@ -12,6 +12,14 @@ A performant Swift parser for Fountain, FDX, and Highland files that creates Swi
 
 SwiftGuion is a Swift conversion of the original Objective-C Fountain parser created by Nima Yousefi & John August using Claude Code 4.5 Sonnet. It parses Fountain-formatted screenplays into structured SwiftData objects in a performant, non-mutating way—leaving source files completely untouched while providing full access to screenplay structure, metadata, and analysis.
 
+### Architecture
+
+SwiftGuion uses an **immutable, thread-safe architecture** with clear separation between:
+- **GuionParsedScreenplay**: Immutable, Sendable parsed screenplay (safe to pass between threads)
+- **GuionDocumentModel**: SwiftData-backed mutable model for persistence
+- **Explicit conversion methods** between immutable and mutable representations
+- **TextPack bundle format** (.guion) for structured screenplay data with JSON exports
+
 ## Features
 
 - **Non-mutating parsing**: Read and analyze screenplays without modifying source files
@@ -36,11 +44,19 @@ SwiftGuion is a Swift conversion of the original Objective-C Fountain parser cre
   - Scene Numbers
   - Centered text
 
-- Two parser implementations:
-  - **FastFountainParser**: Line-by-line parser (recommended)
-  - **FountainParser**: Regex-based parser
+- **Format Support**:
+  - **.fountain**: Native Fountain screenplay format
+  - **.fdx**: Final Draft XML documents
+  - **.highland**: Highland 2 ZIP archives
+  - **.guion**: TextPack bundles with structured JSON exports
 
-- Write parsed scripts back to Fountain format
+- **Two parser implementations**:
+  - **FountainParser**: High-performance state machine parser (recommended)
+  - **FDXParser**: Final Draft XML parser
+
+- **Export capabilities**:
+  - Write to Fountain, FDX, or TextPack formats
+  - Export character data, locations, and outline structure as JSON
 
 ## Installation
 
@@ -101,6 +117,43 @@ A complete example application demonstrating how to build a document-based macOS
 
 **See:** [FountainDocumentApp README](Examples/FountainDocumentApp/README.md) for detailed documentation.
 
+## Core Concepts
+
+### Immutable vs Mutable Models
+
+SwiftGuion separates **immutable parsing** from **mutable persistence**:
+
+```swift
+// Immutable, thread-safe screenplay (can pass between threads)
+let screenplay = try GuionParsedScreenplay(file: "screenplay.fountain")
+
+// Convert to SwiftData model for persistence
+let document = await GuionDocumentModel.from(screenplay, in: context)
+
+// Convert back to immutable form
+let screenplay2 = document.toGuionParsedScreenplay()
+```
+
+### Supported File Formats
+
+```swift
+// Parse Fountain files
+let fountain = try GuionParsedScreenplay(file: "screenplay.fountain")
+
+// Parse Final Draft FDX files
+let parser = FDXParser()
+let fdxDoc = try parser.parse(data: fdxData, filename: "screenplay.fdx")
+let screenplay = GuionParsedScreenplay(filename: "screenplay.fdx",
+                                       elements: fdxDoc.elements,
+                                       titlePage: fdxDoc.titlePage)
+
+// Parse Highland archives
+let highland = try GuionParsedScreenplay(highland: highlandURL)
+
+// Parse TextPack bundles (.guion)
+let textpack = try GuionParsedScreenplay(textBundle: textpackURL)
+```
+
 ## Usage
 
 ### Parsing a Fountain file
@@ -108,14 +161,16 @@ A complete example application demonstrating how to build a document-based macOS
 ```swift
 import SwiftGuion
 
-// Using the fast parser (default) - source file is not modified
-let script = try FountainScript(file: "/path/to/screenplay.fountain")
+// Parse using immutable GuionParsedScreenplay (thread-safe)
+let screenplay = try GuionParsedScreenplay(file: "/path/to/screenplay.fountain")
 
-// Using the regex parser
-let script = try FountainScript(file: "/path/to/screenplay.fountain", parser: .regex)
+// Access elements
+for element in screenplay.elements {
+    print("\(element.elementType): \(element.elementText)")
+}
 
 // The original file remains completely untouched
-// All data is parsed into SwiftData-compatible objects in memory
+// All data is parsed into immutable, Sendable objects in memory
 ```
 
 ### Parsing a Fountain string
@@ -133,18 +188,18 @@ SCREENWRITER
 This is going to be great!
 """
 
-let script = try FountainScript(string: fountainText)
+let screenplay = try GuionParsedScreenplay(string: fountainText)
 ```
 
 ### Accessing parsed guión elements
 
 ```swift
-for element in script.elements {
+for element in screenplay.elements {
     print("\(element.elementType): \(element.elementText)")
 }
 
 // Access title page
-for page in script.titlePage {
+for page in screenplay.titlePage {
     for (key, values) in page {
         print("\(key): \(values.joined(separator: ", "))")
     }
@@ -155,14 +210,49 @@ for page in script.titlePage {
 
 ```swift
 // Get the full document as a string
-let fountainOutput = script.stringFromDocument()
+let fountainOutput = screenplay.stringFromDocument()
 
 // Write to file
-try script.write(toFile: "/path/to/output.fountain")
+try screenplay.write(toFile: "/path/to/output.fountain")
 
 // Write to URL
 let url = URL(fileURLWithPath: "/path/to/output.fountain")
-try script.write(to: url)
+try screenplay.write(to: url)
+```
+
+### Working with TextPack Format (.guion)
+
+TextPack is SwiftGuion's native bundle format with structured JSON exports:
+
+```swift
+// Create a TextPack bundle
+let textPack = try TextPackWriter.createTextPack(from: screenplay)
+
+// TextPack structure:
+// MyScript.guion/
+//   ├── info.json              # Metadata (version, dates, filename)
+//   ├── screenplay.fountain    # Complete screenplay
+//   └── Resources/
+//       ├── characters.json    # Character dialogue counts, scene appearances
+//       ├── locations.json     # Location data with INT/EXT, time-of-day
+//       ├── elements.json      # All screenplay elements with IDs
+//       └── titlepage.json     # Title page entries
+
+// Read a TextPack bundle
+let screenplay = try TextPackReader.readTextPack(from: fileWrapper)
+
+// Access structured resources
+if let characters = TextPackReader.readCharacters(from: textPack) {
+    for char in characters.characters {
+        print("\(char.name): \(char.dialogueLines) lines in \(char.scenes.count) scenes")
+    }
+}
+
+if let locations = TextPackReader.readLocations(from: textPack) {
+    for loc in locations.locations {
+        print("\(loc.lighting) \(loc.scene) - \(loc.timeOfDay ?? "")")
+    }
+}
 ```
 
 ### Getting Content from Any Format
@@ -490,8 +580,8 @@ Complete drop-in SwiftUI component for viewing screenplay documents.
 
 **Initializers:**
 - `init(document: GuionDocumentModel)`: Create from SwiftData document
-- `init(script: FountainScript)`: Create from pre-parsed script
-- `init(fileURL: URL)`: Async load from file (.fountain, .highland, .fdx)
+- `init(script: GuionParsedScreenplay)`: Create from pre-parsed screenplay
+- `init(fileURL: URL)`: Async load from file (.fountain, .highland, .fdx, .guion)
 - `init(browserData: SceneBrowserData)`: Create from pre-extracted data
 
 **Example:**
@@ -502,9 +592,9 @@ GuionViewer(document: document)
 // From file URL (async loading)
 GuionViewer(fileURL: URL(fileURLWithPath: "screenplay.fountain"))
 
-// From pre-parsed script
-let script = try FountainScript(file: "screenplay.fountain")
-GuionViewer(script: script)
+// From pre-parsed screenplay
+let screenplay = try GuionParsedScreenplay(file: "screenplay.fountain")
+GuionViewer(script: screenplay)
 ```
 
 **See:** [GuionViewer API Documentation](Docs/GUION_VIEWER_API.md) for complete reference.
@@ -531,22 +621,16 @@ DocumentGroup(newDocument: { FountainDocument() }) { file in
 }
 ```
 
-### FountainScript
+### GuionParsedScreenplay
 
-The main class for working with Fountain scripts.
+The main immutable, thread-safe class for working with parsed screenplays.
 
 **Initialization:**
-- `init()`: Create an empty script
-- `init(file:parser:)`: Load a script from a file
-- `init(string:parser:)`: Load a script from a string
-- `init(textBundleURL:parser:)`: Load from a TextBundle containing a .fountain file
-- `init(highlandURL:parser:)`: Load from a Highland (.highland) file
-
-**Loading:**
-- `loadFile(_:parser:)`: Load a file into an existing script
-- `loadString(_:parser:)`: Load a string into an existing script
-- `loadTextBundle(_:parser:)`: Load from a TextBundle URL
-- `loadHighland(_:parser:)`: Load from a Highland file URL
+- `init(filename:elements:titlePage:suppressSceneNumbers:)`: Create from explicit data
+- `init(file:parser:)`: Parse a .fountain file
+- `init(string:parser:)`: Parse Fountain text from memory
+- `init(highland:)`: Parse Highland .highland archive
+- `init(textBundle:)`: Parse TextBundle/TextPack format
 
 **Writing:**
 - `stringFromDocument()`: Get the complete document as Fountain text
@@ -554,29 +638,79 @@ The main class for working with Fountain scripts.
 - `stringFromTitlePage()`: Get just the title page
 - `write(toFile:)`: Write to a file path
 - `write(to:)`: Write to a URL
-- `writeToTextBundle(destinationURL:fountainFilename:)`: Write to a TextBundle
-- `writeToTextBundleWithResources(destinationURL:name:includeResources:)`: Write to a TextBundle with resources
-- `writeToHighland(destinationURL:name:includeResources:)`: Write to a Highland file
-
-**Content Access:**
-- `getContentUrl(from:)`: Get the URL to the content file for any supported format (.fountain, .highland, .textbundle)
-- `getContent(from:)`: Get content as a string from any supported format (strips front matter from .fountain files)
-- `getGuionElements(from:parser:)`: Get guión elements, parsing if needed (optionally from URL)
 
 **Analysis:**
 - `extractCharacters()`: Returns `CharacterList` - dictionary of character names to character information
-- `writeCharactersJSON(toFile:)`: Write character data to JSON file
-- `writeCharactersJSON(to:)`: Write character data to JSON URL
+- `extractSceneLocations()`: Returns location data with INT/EXT, time-of-day, scene IDs
 - `extractOutline()`: Returns `OutlineList` - array of outline elements with parent-child relationships
 - `extractOutlineTree()`: Returns `OutlineTree` - hierarchical tree structure of outline elements
-- `writeOutlineJSON(toFile:)`: Write outline data to JSON file
-- `writeOutlineJSON(to:)`: Write outline data to JSON URL
 
-**Properties:**
+**Properties (all immutable):**
 - `elements`: `[GuionElement]` - Array of parsed guión elements
 - `titlePage`: `[[String: [String]]]` - Title page metadata
 - `filename`: `String?` - Original filename if loaded from file
 - `suppressSceneNumbers`: `Bool` - Whether to suppress scene numbers when writing
+
+---
+
+### GuionDocumentModel
+
+SwiftData-backed mutable model for screenplay persistence.
+
+**Conversion Methods:**
+- `static func from(_:in:generateSummaries:)`: Create from GuionParsedScreenplay
+- `func toGuionParsedScreenplay()`: Convert to immutable screenplay
+
+**Properties:**
+- `filename`: `String?` - Original filename
+- `rawContent`: `String?` - Raw screenplay text
+- `elements`: `[GuionElementModel]` - Parsed screenplay elements
+- `titlePage`: `[TitlePageEntryModel]` - Title page metadata
+- `suppressSceneNumbers`: `Bool` - Scene number flag
+
+**Methods:**
+- `parseContent(rawContent:filename:contentType:modelContext:)`: Async parsing from raw text
+- `extractCharacters()`: Extract character information from the document
+
+---
+
+### TextPack Format
+
+**TextPackWriter:**
+- `static func createTextPack(from: GuionParsedScreenplay)`: Create bundle from screenplay
+- `static func createTextPack(from: GuionDocumentModel)`: Create bundle from SwiftData model
+
+**TextPackReader:**
+- `static func readTextPack(from:)`: Load as `GuionParsedScreenplay`
+- `static func readTextPack(from:in:generateSummaries:)`: Load as `GuionDocumentModel` (SwiftData)
+- `static func readCharacters(from:)`: Extract character JSON
+- `static func readLocations(from:)`: Extract location JSON
+- `static func readElements(from:)`: Extract elements JSON
+- `static func readTitlePage(from:)`: Extract title page JSON
+
+---
+
+### FountainParser
+
+High-performance state machine parser for Fountain format.
+
+**Initialization:**
+- `init(file:)`: Parse file at path
+- `init(string:)`: Parse Fountain text
+
+**Properties:**
+- `elements`: `[GuionElement]` - Parsed screenplay elements
+- `titlePage`: `[[String: [String]]]` - Extracted title page metadata
+
+---
+
+### FDXParser
+
+Parser for Final Draft FDX XML format.
+
+**Methods:**
+- `func parse(data:filename:)`: Parse FDX XML into GuionElements
+- Returns `FDXParsedDocument` with elements and metadata
 
 ### GuionElement
 
@@ -680,12 +814,23 @@ if let root = tree.root {
 }
 ```
 
-### ParserType
+## Package Structure
 
-Enum specifying which parser to use.
+SwiftGuion is organized into functional modules:
 
-- `.fast`: Line-by-line parser (default, recommended)
-- `.regex`: Regular expression-based parser (legacy)
+```
+Sources/SwiftGuion/
+├── Core/                  # GuionParsedScreenplay (immutable, Sendable)
+├── FileFormat/            # Guion native .guion TextPack format
+├── ImportExport/          # Format parsers and writers (Fountain, FDX, Highland)
+├── Analysis/              # Scene analysis, character extraction, UI data
+└── UI/                    # SwiftUI components (GuionViewer, widgets)
+```
+
+**Key Dependencies:**
+- **ZIPFoundation**: Highland archive extraction
+- **SwiftData**: Document persistence (macOS 14.0+)
+- **SwiftUI**: User interface components (macOS 14.0+)
 
 ## License
 

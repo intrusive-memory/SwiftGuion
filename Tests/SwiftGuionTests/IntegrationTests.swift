@@ -68,7 +68,7 @@ final class IntegrationTests: XCTestCase {
             throw XCTSkip("BigFish.fountain not found in test bundle")
         }
 
-        let script = try FountainScript(file: fountainURL.path)
+        let script = try GuionParsedScreenplay(file: fountainURL.path)
 
         // Step 2: Convert to GuionDocumentModel (simulating import)
         let document = await GuionDocumentParserSwiftData.parse(script: script, in: modelContext)
@@ -524,7 +524,7 @@ final class IntegrationTests: XCTestCase {
         try exportedScript.write(to: fountainURL)
 
         // Re-import from Fountain
-        let reimportedScript = try FountainScript(file: fountainURL.path)
+        let reimportedScript = try GuionParsedScreenplay(file: fountainURL.path)
         let reimported = await GuionDocumentParserSwiftData.parse(script: reimportedScript, in: modelContext)
 
         // Verify fidelity

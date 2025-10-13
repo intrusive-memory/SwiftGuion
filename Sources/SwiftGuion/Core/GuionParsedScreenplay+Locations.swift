@@ -97,9 +97,9 @@ extension GuionElement {
     }
 }
 
-// MARK: - FountainScript Extension
+// MARK: - GuionParsedScreenplay Extension
 
-extension FountainScript {
+extension GuionParsedScreenplay {
     /// Extract all scene locations from the script
     /// - Returns: Array of scenes with their parsed locations
     public func extractSceneLocations() -> [SceneWithLocation] {

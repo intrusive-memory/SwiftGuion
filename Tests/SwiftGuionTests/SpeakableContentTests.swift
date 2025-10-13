@@ -55,7 +55,7 @@ import SwiftFijos
 
 @Test func testSpeakableContentWithRealScript() async throws {
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
-    let script = try FountainScript(file: fountainURL.path)
+    let script = try GuionParsedScreenplay(file: fountainURL.path)
 
     // Find a scene heading and verify it's speakable
     let sceneHeadings = script.elements.filter { $0.elementType == "Scene Heading" }
@@ -90,7 +90,7 @@ import SwiftFijos
 
 @Test func testSpeakableContentForAllElementTypes() async throws {
     let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
-    let script = try FountainScript(file: fountainURL.path)
+    let script = try GuionParsedScreenplay(file: fountainURL.path)
 
     // Iterate through all elements and verify speakableText doesn't crash
     for element in script.elements {
@@ -108,17 +108,18 @@ import SwiftFijos
 
 @Test func testSpeakableContentGenerateNarration() async throws {
     // Create a simple script to test narration generation
-    let script = FountainScript()
-    script.elements = [
-        GuionElement(elementType: "Scene Heading", elementText: "INT. COFFEE SHOP - DAY"),
-        GuionElement(elementType: "Action", elementText: "Edward sits at a table, reading a newspaper."),
-        GuionElement(elementType: "Character", elementText: "WILL"),
-        GuionElement(elementType: "Dialogue", elementText: "Dad, we need to talk."),
-        GuionElement(elementType: "Character", elementText: "EDWARD"),
-        GuionElement(elementType: "Parenthetical", elementText: "(without looking up)"),
-        GuionElement(elementType: "Dialogue", elementText: "What about?"),
-        GuionElement(elementType: "Transition", elementText: "CUT TO:")
-    ]
+    let script = GuionParsedScreenplay(
+        elements: [
+            GuionElement(elementType: "Scene Heading", elementText: "INT. COFFEE SHOP - DAY"),
+            GuionElement(elementType: "Action", elementText: "Edward sits at a table, reading a newspaper."),
+            GuionElement(elementType: "Character", elementText: "WILL"),
+            GuionElement(elementType: "Dialogue", elementText: "Dad, we need to talk."),
+            GuionElement(elementType: "Character", elementText: "EDWARD"),
+            GuionElement(elementType: "Parenthetical", elementText: "(without looking up)"),
+            GuionElement(elementType: "Dialogue", elementText: "What about?"),
+            GuionElement(elementType: "Transition", elementText: "CUT TO:")
+        ]
+    )
 
     // Generate narration by combining speakable content
     let narration = script.elements

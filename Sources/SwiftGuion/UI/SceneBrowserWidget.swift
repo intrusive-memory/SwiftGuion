@@ -24,9 +24,9 @@ public struct SceneBrowserWidget: View {
         self.browserData = browserData
     }
 
-    /// Creates a SceneBrowserWidget directly from a FountainScript
-    /// - Parameter script: The FountainScript to extract browser data from
-    public init(script: FountainScript) {
+    /// Creates a SceneBrowserWidget directly from a GuionParsedScreenplay
+    /// - Parameter script: The GuionParsedScreenplay to extract browser data from
+    public init(script: GuionParsedScreenplay) {
         self.browserData = script.extractSceneBrowserData()
     }
 

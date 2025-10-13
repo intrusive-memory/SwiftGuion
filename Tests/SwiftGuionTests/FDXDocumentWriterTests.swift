@@ -206,7 +206,7 @@ struct FDXDocumentWriterTests {
         let fdxData = FDXDocumentWriter.makeFDX(from: document)
 
         // Parse it back
-        let parser = FDXDocumentParser()
+        let parser = FDXParser()
         let parsedDocument = try parser.parse(data: fdxData, filename: "test.fdx")
 
         // Verify content

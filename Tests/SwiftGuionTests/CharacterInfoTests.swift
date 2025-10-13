@@ -15,16 +15,17 @@ struct CharacterInfoTests {
     @Test("Extract characters and write to JSON file")
     func testWriteCharactersJSON() throws {
         // Create a simple script with characters
-        let script = FountainScript()
-        script.elements = [
-            GuionElement(elementType: "Scene Heading", elementText: "INT. COFFEE SHOP - DAY"),
-            GuionElement(elementType: "Character", elementText: "ALICE"),
-            GuionElement(elementType: "Dialogue", elementText: "Hello, Bob!"),
-            GuionElement(elementType: "Character", elementText: "BOB"),
-            GuionElement(elementType: "Dialogue", elementText: "Hi, Alice!"),
-            GuionElement(elementType: "Character", elementText: "ALICE"),
-            GuionElement(elementType: "Dialogue", elementText: "How are you?"),
-        ]
+        let script = GuionParsedScreenplay(
+            elements: [
+                GuionElement(elementType: "Scene Heading", elementText: "INT. COFFEE SHOP - DAY"),
+                GuionElement(elementType: "Character", elementText: "ALICE"),
+                GuionElement(elementType: "Dialogue", elementText: "Hello, Bob!"),
+                GuionElement(elementType: "Character", elementText: "BOB"),
+                GuionElement(elementType: "Dialogue", elementText: "Hi, Alice!"),
+                GuionElement(elementType: "Character", elementText: "ALICE"),
+                GuionElement(elementType: "Dialogue", elementText: "How are you?"),
+            ]
+        )
 
         // Write to temporary file
         let tempDir = FileManager.default.temporaryDirectory
@@ -49,13 +50,14 @@ struct CharacterInfoTests {
 
     @Test("Write characters JSON with special character names")
     func testWriteCharactersJSONWithSpecialNames() throws {
-        let script = FountainScript()
-        script.elements = [
-            GuionElement(elementType: "Character", elementText: "JOHN (V.O.)"),
-            GuionElement(elementType: "Dialogue", elementText: "This is a voiceover."),
-            GuionElement(elementType: "Character", elementText: "SARAH (O.S.)"),
-            GuionElement(elementType: "Dialogue", elementText: "I'm off screen."),
-        ]
+        let script = GuionParsedScreenplay(
+            elements: [
+                GuionElement(elementType: "Character", elementText: "JOHN (V.O.)"),
+                GuionElement(elementType: "Dialogue", elementText: "This is a voiceover."),
+                GuionElement(elementType: "Character", elementText: "SARAH (O.S.)"),
+                GuionElement(elementType: "Dialogue", elementText: "I'm off screen."),
+            ]
+        )
 
         let tempDir = FileManager.default.temporaryDirectory
         let outputPath = tempDir.appendingPathComponent("test-special-characters.json").path
@@ -70,11 +72,12 @@ struct CharacterInfoTests {
 
     @Test("Write empty characters to JSON")
     func testWriteEmptyCharactersJSON() throws {
-        let script = FountainScript()
-        script.elements = [
-            GuionElement(elementType: "Scene Heading", elementText: "INT. ROOM - DAY"),
-            GuionElement(elementType: "Action", elementText: "The room is empty."),
-        ]
+        let script = GuionParsedScreenplay(
+            elements: [
+                GuionElement(elementType: "Scene Heading", elementText: "INT. ROOM - DAY"),
+                GuionElement(elementType: "Action", elementText: "The room is empty."),
+            ]
+        )
 
         let tempDir = FileManager.default.temporaryDirectory
         let outputPath = tempDir.appendingPathComponent("test-empty-characters.json").path
