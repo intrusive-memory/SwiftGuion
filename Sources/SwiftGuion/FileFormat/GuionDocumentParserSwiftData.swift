@@ -95,7 +95,7 @@ public class GuionDocumentParserSwiftData {
             return await parse(script: script, in: modelContext, generateSummaries: generateSummaries)
         case "fdx":
             let data = try Data(contentsOf: url)
-            let parser = FDXDocumentParser()
+            let parser = FDXParser()
             do {
                 let parsed = try parser.parse(data: data, filename: url.lastPathComponent)
                 let elements = parsed.elements.map { GuionElement(from: $0) }

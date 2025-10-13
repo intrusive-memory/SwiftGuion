@@ -1,6 +1,6 @@
 //
-//  FDXDocumentParser.swift
-//  SwiftFountain
+//  FDXParser.swift
+//  SwiftGuion
 //
 
 import Foundation
@@ -54,12 +54,13 @@ public struct FDXParsedDocument {
     }
 }
 
-public enum FDXDocumentParserError: Error {
+public enum FDXParserError: Error {
     case unableToParse
 }
 
 #if canImport(FoundationXML) || os(macOS) || os(iOS) || os(tvOS) || os(watchOS) || os(visionOS)
-public final class FDXDocumentParser: NSObject {
+/// Parses Final Draft FDX format files into GuionElements
+public final class FDXParser: NSObject {
     private enum Section {
         case none
         case scriptContent
@@ -98,7 +99,7 @@ public final class FDXDocumentParser: NSObject {
         parser.shouldResolveExternalEntities = false
 
         guard parser.parse() else {
-            throw FDXDocumentParserError.unableToParse
+            throw FDXParserError.unableToParse
         }
 
         let titleEntries: [FDXParsedTitlePageEntry]
@@ -147,7 +148,7 @@ public final class FDXDocumentParser: NSObject {
     }
 }
 
-extension FDXDocumentParser: XMLParserDelegate {
+extension FDXParser: XMLParserDelegate {
     public func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String: String]) {
         elementStack.append(elementName)
 
@@ -253,9 +254,9 @@ extension FDXDocumentParser: XMLParserDelegate {
     }
 }
 #else
-public final class FDXDocumentParser {
+public final class FDXParser {
     public func parse(data: Data, filename: String?) throws -> FDXParsedDocument {
-        throw FDXDocumentParserError.unableToParse
+        throw FDXParserError.unableToParse
     }
 }
 #endif

@@ -1,6 +1,6 @@
 //
-//  FastFountainParser.swift
-//  SwiftFountain
+//  FountainParser.swift
+//  SwiftGuion
 //
 //  Copyright (c) 2012-2013 Nima Yousefi & John August
 //  Swift conversion (c) 2025
@@ -26,7 +26,8 @@
 
 import Foundation
 
-public class FastFountainParser {
+/// Parses Fountain format screenplay files into GuionElements
+public class FountainParser {
     public var elements: [GuionElement] = []
     public var titlePage: [[String: [String]]] = []
 

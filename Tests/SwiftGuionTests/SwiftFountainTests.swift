@@ -11,7 +11,7 @@ import SwiftFijos
     let fdxURL = try Fijos.getFixture("bigfish", extension: "fdx")
 
     let data = try Data(contentsOf: fdxURL)
-    let parser = FDXDocumentParser()
+    let parser = FDXParser()
     let parsedDocument = try parser.parse(data: data, filename: fdxURL.lastPathComponent)
 
     #expect(!parsedDocument.elements.isEmpty, "FDX parser should produce screenplay elements")

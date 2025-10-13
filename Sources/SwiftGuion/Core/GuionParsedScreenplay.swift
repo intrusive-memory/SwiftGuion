@@ -65,7 +65,7 @@ public final class GuionParsedScreenplay {
 
         switch parser {
         case .fast, .regex:
-            let fountainParser = try FastFountainParser(file: path)
+            let fountainParser = try FountainParser(file: path)
             self.init(
                 filename: filename,
                 elements: fountainParser.elements,
@@ -81,7 +81,7 @@ public final class GuionParsedScreenplay {
     public convenience init(string: String, parser: ParserType = .fast) throws {
         switch parser {
         case .fast, .regex:
-            let fountainParser = FastFountainParser(string: string)
+            let fountainParser = FountainParser(string: string)
             self.init(
                 filename: nil,
                 elements: fountainParser.elements,

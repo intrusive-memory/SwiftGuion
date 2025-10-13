@@ -212,7 +212,7 @@ public struct GuionViewer: View {
                 case "fdx":
                     // Load FDX using parser
                     let data = try Data(contentsOf: url)
-                    let parser = FDXDocumentParser()
+                    let parser = FDXParser()
                     let parsedDoc = try parser.parse(data: data, filename: url.lastPathComponent)
 
                     // Convert FDXParsedElements to GuionElements
