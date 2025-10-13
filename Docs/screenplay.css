@@ -1,0 +1,131 @@
+body{
+    margin: 0;
+    padding: 0;
+    background: url('http://cdn.backgroundhost.com/backgrounds/subtlepatterns/escheresque.png');
+    font-family: 'Source Code Pro', monospace;
+}
+
+/**
+* Main layout
+*/
+
+header{
+    text-align: center;
+    color: #333;
+    padding: 10px 10px 30px 10px;
+    h1{
+        font-family: 'Satisfy', cursive;
+        margin: 0;
+        font-size: 66px;
+    }
+    p{
+        margin: 0;
+        font-size: 22px;
+    }
+}
+
+footer{
+    text-align: center;
+    padding: 30px 10px 10px 10px;
+    a{
+        color: black;
+        &:hover{
+            text-decoration: none;
+        }
+    }
+}
+
+header p,
+footer p{
+    font-family: 'Kulim Park', sans-serif;
+}
+
+main{
+    max-width: 1000px;
+    background: white;
+    padding: 30px;
+    margin: 0 auto;
+    box-shadow:
+        0 2.2px 22.6px rgba(0, 0, 0, 0.017),
+        0 5.5px 34.5px rgba(0, 0, 0, 0.022),
+        0 11.2px 42.6px rgba(0, 0, 0, 0.028),
+        0 23px 49px rgba(0, 0, 0, 0.038),
+        0 63px 58px rgba(0, 0, 0, 0.07)
+    ;
+}
+
+/**
+* Screenplay element styles
+*/
+main{
+    div{
+        h2, h3, p{
+            font-size: 16px;
+            margin: 0;
+        }
+        margin-bottom: 20px;
+        &.heading{
+            text-transform: uppercase;
+        }
+        &.character{
+            width: 40%;
+            margin: 0 auto 20px;
+            p.paranthetical,
+            h3{
+                text-align: center;
+            }
+            h3{
+                text-transform: uppercase;
+            }
+        }
+        &.transition{
+            text-align: right;
+            text-transform: uppercase;
+        }
+        &.shot{
+            text-transform: uppercase;
+        }
+    }
+}
+
+
+/**
+* Print styles - these format the screenplay for printing, removing any page elements
+*/
+@media print{
+    @page{
+        margin: 1in 1in 1in 1.5in;
+    }
+    header,footer{
+        display: none;
+    }
+    main{
+        box-shadow: none;
+        font-size: 12pt;
+        font-family: 'Courier New', Courier, monospace;
+        div{
+            &.character{
+                width: auto;
+                p.paranthetical,
+                h3{
+                    text-align: left;
+                }
+                h3{
+                    margin-left: 2in;
+                }
+                p.paranthetical{
+                    margin-left: 1.5in;
+                    margin-right: 2in;
+                }
+                p{
+                    margin-left: 1in;
+                    margin-right: 1.5in;
+                }
+            }
+            &.transition{
+                text-align: left;
+                margin-left: 4in;
+            }
+        }
+    }
+}

@@ -1,6 +1,6 @@
 //
 //  SceneGroupWidget.swift
-//  GuionDocumentApp
+//  SwiftGuion
 //
 //  Copyright (c) 2025
 //
@@ -8,15 +8,33 @@
 //
 
 import SwiftUI
-import SwiftGuion
 
-struct SceneGroupWidget: View {
+/// A widget displaying a scene group (Level 3) with its contained scenes
+public struct SceneGroupWidget: View {
     let sceneGroup: SceneGroupData
     @Binding var isExpanded: Bool
     @Binding var expandedScenes: Set<String>
     @Binding var expandedPreScenes: Set<String>
 
-    var body: some View {
+    /// Creates a SceneGroupWidget
+    /// - Parameters:
+    ///   - sceneGroup: The scene group data to display
+    ///   - isExpanded: Binding to control the scene group's expanded/collapsed state
+    ///   - expandedScenes: Binding to the set of expanded scene IDs
+    ///   - expandedPreScenes: Binding to the set of expanded pre-scene IDs
+    public init(
+        sceneGroup: SceneGroupData,
+        isExpanded: Binding<Bool>,
+        expandedScenes: Binding<Set<String>>,
+        expandedPreScenes: Binding<Set<String>>
+    ) {
+        self.sceneGroup = sceneGroup
+        self._isExpanded = isExpanded
+        self._expandedScenes = expandedScenes
+        self._expandedPreScenes = expandedPreScenes
+    }
+
+    public var body: some View {
         DisclosureGroup(
             isExpanded: $isExpanded,
             content: {

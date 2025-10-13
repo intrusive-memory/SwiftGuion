@@ -1,6 +1,6 @@
 //
 //  ChapterWidget.swift
-//  GuionDocumentApp
+//  SwiftGuion
 //
 //  Copyright (c) 2025
 //
@@ -8,16 +8,37 @@
 //
 
 import SwiftUI
-import SwiftGuion
 
-struct ChapterWidget: View {
+/// A widget displaying a chapter (Level 2) with its contained scene groups
+public struct ChapterWidget: View {
     let chapter: ChapterData
     @Binding var isExpanded: Bool
     @Binding var expandedSceneGroups: Set<String>
     @Binding var expandedScenes: Set<String>
     @Binding var expandedPreScenes: Set<String>
 
-    var body: some View {
+    /// Creates a ChapterWidget
+    /// - Parameters:
+    ///   - chapter: The chapter data to display
+    ///   - isExpanded: Binding to control the chapter's expanded/collapsed state
+    ///   - expandedSceneGroups: Binding to the set of expanded scene group IDs
+    ///   - expandedScenes: Binding to the set of expanded scene IDs
+    ///   - expandedPreScenes: Binding to the set of expanded pre-scene IDs
+    public init(
+        chapter: ChapterData,
+        isExpanded: Binding<Bool>,
+        expandedSceneGroups: Binding<Set<String>>,
+        expandedScenes: Binding<Set<String>>,
+        expandedPreScenes: Binding<Set<String>>
+    ) {
+        self.chapter = chapter
+        self._isExpanded = isExpanded
+        self._expandedSceneGroups = expandedSceneGroups
+        self._expandedScenes = expandedScenes
+        self._expandedPreScenes = expandedPreScenes
+    }
+
+    public var body: some View {
         DisclosureGroup(
             isExpanded: $isExpanded,
             content: {
