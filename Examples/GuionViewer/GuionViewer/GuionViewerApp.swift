@@ -1,6 +1,6 @@
 //
-//  Guio_nViewerApp.swift
-//  GuiónViewer
+//  GuionViewerApp.swift
+//  GuionViewer
 //
 //  Created by TOM STOVALL on 10/13/25.
 //
@@ -10,9 +10,9 @@ import SwiftData
 import UniformTypeIdentifiers
 
 @main
-struct Guio_nViewerApp: App {
+struct GuionViewerApp: App {
     var body: some Scene {
-        DocumentGroup(editing: .itemDocument, migrationPlan: Guio_nViewerMigrationPlan.self) {
+        DocumentGroup(editing: .itemDocument, migrationPlan: GuionViewerMigrationPlan.self) {
             ContentView()
         }
     }
@@ -24,9 +24,9 @@ extension UTType {
     }
 }
 
-struct Guio_nViewerMigrationPlan: SchemaMigrationPlan {
+struct GuionViewerMigrationPlan: SchemaMigrationPlan {
     static var schemas: [VersionedSchema.Type] = [
-        Guio_nViewerVersionedSchema.self,
+        GuionViewerVersionedSchema.self,
     ]
 
     static var stages: [MigrationStage] = [
@@ -34,7 +34,7 @@ struct Guio_nViewerMigrationPlan: SchemaMigrationPlan {
     ]
 }
 
-struct Guio_nViewerVersionedSchema: VersionedSchema {
+struct GuionViewerVersionedSchema: VersionedSchema {
     static var versionIdentifier = Schema.Version(1, 0, 0)
 
     static var models: [any PersistentModel.Type] = [

@@ -1,13 +1,13 @@
 //
-//  Guio_nViewerUITestsLaunchTests.swift
-//  GuiónViewerUITests
+//  GuionViewerUITestsLaunchTests.swift
+//  GuionViewerUITests
 //
 //  Created by TOM STOVALL on 10/13/25.
 //
 
 import XCTest
 
-final class Guio_nViewerUITestsLaunchTests: XCTestCase {
+final class GuionViewerUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

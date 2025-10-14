@@ -1,6 +1,6 @@
 //
 //  Item.swift
-//  GuiónViewer
+//  GuionViewer
 //
 //  Created by TOM STOVALL on 10/13/25.
 //

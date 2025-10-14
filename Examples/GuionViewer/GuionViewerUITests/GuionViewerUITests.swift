@@ -1,13 +1,13 @@
 //
-//  Guio_nViewerUITests.swift
-//  GuiónViewerUITests
+//  GuionViewerUITests.swift
+//  GuionViewerUITests
 //
 //  Created by TOM STOVALL on 10/13/25.
 //
 
 import XCTest
 
-final class Guio_nViewerUITests: XCTestCase {
+final class GuionViewerUITests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.

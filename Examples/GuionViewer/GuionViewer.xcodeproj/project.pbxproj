@@ -7,75 +7,75 @@
 	objects = {
 
 /* Begin PBXContainerItemProxy section */
-		D680BD962E9DCC9E00E40FB9 /* PBXContainerItemProxy */ = {
+		D60B54EB2E9DCEFB00ED1E15 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = D680BD7D2E9DCC9D00E40FB9 /* Project object */;
+			containerPortal = D60B54D22E9DCEFA00ED1E15 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = D680BD842E9DCC9D00E40FB9;
-			remoteInfo = "GuiónViewer";
+			remoteGlobalIDString = D60B54D92E9DCEFA00ED1E15;
+			remoteInfo = GuionViewer;
 		};
-		D680BDA02E9DCC9E00E40FB9 /* PBXContainerItemProxy */ = {
+		D60B54F52E9DCEFB00ED1E15 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = D680BD7D2E9DCC9D00E40FB9 /* Project object */;
+			containerPortal = D60B54D22E9DCEFA00ED1E15 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = D680BD842E9DCC9D00E40FB9;
-			remoteInfo = "GuiónViewer";
+			remoteGlobalIDString = D60B54D92E9DCEFA00ED1E15;
+			remoteInfo = GuionViewer;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		D680BD852E9DCC9D00E40FB9 /* GuiónViewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "GuiónViewer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		D680BD952E9DCC9E00E40FB9 /* GuiónViewerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "GuiónViewerTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		D680BD9F2E9DCC9E00E40FB9 /* GuiónViewerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "GuiónViewerUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D60B54DA2E9DCEFA00ED1E15 /* GuionViewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GuionViewer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D60B54EA2E9DCEFB00ED1E15 /* GuionViewerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GuionViewerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D60B54F42E9DCEFB00ED1E15 /* GuionViewerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GuionViewerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		D680BDA72E9DCC9E00E40FB9 /* Exceptions for "GuiónViewer" folder in "GuiónViewer" target */ = {
+		D60B54FC2E9DCEFB00ED1E15 /* Exceptions for "GuionViewer" folder in "GuionViewer" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = D680BD842E9DCC9D00E40FB9 /* GuiónViewer */;
+			target = D60B54D92E9DCEFA00ED1E15 /* GuionViewer */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		D680BD872E9DCC9D00E40FB9 /* GuiónViewer */ = {
+		D60B54DC2E9DCEFA00ED1E15 /* GuionViewer */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				D680BDA72E9DCC9E00E40FB9 /* Exceptions for "GuiónViewer" folder in "GuiónViewer" target */,
+				D60B54FC2E9DCEFB00ED1E15 /* Exceptions for "GuionViewer" folder in "GuionViewer" target */,
 			);
-			path = "GuiónViewer";
+			path = GuionViewer;
 			sourceTree = "<group>";
 		};
-		D680BD982E9DCC9E00E40FB9 /* GuiónViewerTests */ = {
+		D60B54ED2E9DCEFB00ED1E15 /* GuionViewerTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "GuiónViewerTests";
+			path = GuionViewerTests;
 			sourceTree = "<group>";
 		};
-		D680BDA22E9DCC9E00E40FB9 /* GuiónViewerUITests */ = {
+		D60B54F72E9DCEFB00ED1E15 /* GuionViewerUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "GuiónViewerUITests";
+			path = GuionViewerUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		D680BD822E9DCC9D00E40FB9 /* Frameworks */ = {
+		D60B54D72E9DCEFA00ED1E15 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D680BD922E9DCC9E00E40FB9 /* Frameworks */ = {
+		D60B54E72E9DCEFB00ED1E15 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D680BD9C2E9DCC9E00E40FB9 /* Frameworks */ = {
+		D60B54F12E9DCEFB00ED1E15 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -85,22 +85,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		D680BD7C2E9DCC9D00E40FB9 = {
+		D60B54D12E9DCEFA00ED1E15 = {
 			isa = PBXGroup;
 			children = (
-				D680BD872E9DCC9D00E40FB9 /* GuiónViewer */,
-				D680BD982E9DCC9E00E40FB9 /* GuiónViewerTests */,
-				D680BDA22E9DCC9E00E40FB9 /* GuiónViewerUITests */,
-				D680BD862E9DCC9D00E40FB9 /* Products */,
+				D60B54DC2E9DCEFA00ED1E15 /* GuionViewer */,
+				D60B54ED2E9DCEFB00ED1E15 /* GuionViewerTests */,
+				D60B54F72E9DCEFB00ED1E15 /* GuionViewerUITests */,
+				D60B54DB2E9DCEFA00ED1E15 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		D680BD862E9DCC9D00E40FB9 /* Products */ = {
+		D60B54DB2E9DCEFA00ED1E15 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D680BD852E9DCC9D00E40FB9 /* GuiónViewer.app */,
-				D680BD952E9DCC9E00E40FB9 /* GuiónViewerTests.xctest */,
-				D680BD9F2E9DCC9E00E40FB9 /* GuiónViewerUITests.xctest */,
+				D60B54DA2E9DCEFA00ED1E15 /* GuionViewer.app */,
+				D60B54EA2E9DCEFB00ED1E15 /* GuionViewerTests.xctest */,
+				D60B54F42E9DCEFB00ED1E15 /* GuionViewerUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -108,134 +108,134 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		D680BD842E9DCC9D00E40FB9 /* GuiónViewer */ = {
+		D60B54D92E9DCEFA00ED1E15 /* GuionViewer */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D680BDA82E9DCC9E00E40FB9 /* Build configuration list for PBXNativeTarget "GuiónViewer" */;
+			buildConfigurationList = D60B54FD2E9DCEFB00ED1E15 /* Build configuration list for PBXNativeTarget "GuionViewer" */;
 			buildPhases = (
-				D680BD812E9DCC9D00E40FB9 /* Sources */,
-				D680BD822E9DCC9D00E40FB9 /* Frameworks */,
-				D680BD832E9DCC9D00E40FB9 /* Resources */,
+				D60B54D62E9DCEFA00ED1E15 /* Sources */,
+				D60B54D72E9DCEFA00ED1E15 /* Frameworks */,
+				D60B54D82E9DCEFA00ED1E15 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				D680BD872E9DCC9D00E40FB9 /* GuiónViewer */,
+				D60B54DC2E9DCEFA00ED1E15 /* GuionViewer */,
 			);
-			name = "GuiónViewer";
+			name = GuionViewer;
 			packageProductDependencies = (
 			);
-			productName = "GuiónViewer";
-			productReference = D680BD852E9DCC9D00E40FB9 /* GuiónViewer.app */;
+			productName = GuionViewer;
+			productReference = D60B54DA2E9DCEFA00ED1E15 /* GuionViewer.app */;
 			productType = "com.apple.product-type.application";
 		};
-		D680BD942E9DCC9E00E40FB9 /* GuiónViewerTests */ = {
+		D60B54E92E9DCEFB00ED1E15 /* GuionViewerTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D680BDAD2E9DCC9E00E40FB9 /* Build configuration list for PBXNativeTarget "GuiónViewerTests" */;
+			buildConfigurationList = D60B55022E9DCEFB00ED1E15 /* Build configuration list for PBXNativeTarget "GuionViewerTests" */;
 			buildPhases = (
-				D680BD912E9DCC9E00E40FB9 /* Sources */,
-				D680BD922E9DCC9E00E40FB9 /* Frameworks */,
-				D680BD932E9DCC9E00E40FB9 /* Resources */,
+				D60B54E62E9DCEFB00ED1E15 /* Sources */,
+				D60B54E72E9DCEFB00ED1E15 /* Frameworks */,
+				D60B54E82E9DCEFB00ED1E15 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				D680BD972E9DCC9E00E40FB9 /* PBXTargetDependency */,
+				D60B54EC2E9DCEFB00ED1E15 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				D680BD982E9DCC9E00E40FB9 /* GuiónViewerTests */,
+				D60B54ED2E9DCEFB00ED1E15 /* GuionViewerTests */,
 			);
-			name = "GuiónViewerTests";
+			name = GuionViewerTests;
 			packageProductDependencies = (
 			);
-			productName = "GuiónViewerTests";
-			productReference = D680BD952E9DCC9E00E40FB9 /* GuiónViewerTests.xctest */;
+			productName = GuionViewerTests;
+			productReference = D60B54EA2E9DCEFB00ED1E15 /* GuionViewerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		D680BD9E2E9DCC9E00E40FB9 /* GuiónViewerUITests */ = {
+		D60B54F32E9DCEFB00ED1E15 /* GuionViewerUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D680BDB02E9DCC9E00E40FB9 /* Build configuration list for PBXNativeTarget "GuiónViewerUITests" */;
+			buildConfigurationList = D60B55052E9DCEFB00ED1E15 /* Build configuration list for PBXNativeTarget "GuionViewerUITests" */;
 			buildPhases = (
-				D680BD9B2E9DCC9E00E40FB9 /* Sources */,
-				D680BD9C2E9DCC9E00E40FB9 /* Frameworks */,
-				D680BD9D2E9DCC9E00E40FB9 /* Resources */,
+				D60B54F02E9DCEFB00ED1E15 /* Sources */,
+				D60B54F12E9DCEFB00ED1E15 /* Frameworks */,
+				D60B54F22E9DCEFB00ED1E15 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				D680BDA12E9DCC9E00E40FB9 /* PBXTargetDependency */,
+				D60B54F62E9DCEFB00ED1E15 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				D680BDA22E9DCC9E00E40FB9 /* GuiónViewerUITests */,
+				D60B54F72E9DCEFB00ED1E15 /* GuionViewerUITests */,
 			);
-			name = "GuiónViewerUITests";
+			name = GuionViewerUITests;
 			packageProductDependencies = (
 			);
-			productName = "GuiónViewerUITests";
-			productReference = D680BD9F2E9DCC9E00E40FB9 /* GuiónViewerUITests.xctest */;
+			productName = GuionViewerUITests;
+			productReference = D60B54F42E9DCEFB00ED1E15 /* GuionViewerUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		D680BD7D2E9DCC9D00E40FB9 /* Project object */ = {
+		D60B54D22E9DCEFA00ED1E15 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2600;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
-					D680BD842E9DCC9D00E40FB9 = {
+					D60B54D92E9DCEFA00ED1E15 = {
 						CreatedOnToolsVersion = 26.0.1;
 					};
-					D680BD942E9DCC9E00E40FB9 = {
+					D60B54E92E9DCEFB00ED1E15 = {
 						CreatedOnToolsVersion = 26.0.1;
-						TestTargetID = D680BD842E9DCC9D00E40FB9;
+						TestTargetID = D60B54D92E9DCEFA00ED1E15;
 					};
-					D680BD9E2E9DCC9E00E40FB9 = {
+					D60B54F32E9DCEFB00ED1E15 = {
 						CreatedOnToolsVersion = 26.0.1;
-						TestTargetID = D680BD842E9DCC9D00E40FB9;
+						TestTargetID = D60B54D92E9DCEFA00ED1E15;
 					};
 				};
 			};
-			buildConfigurationList = D680BD802E9DCC9D00E40FB9 /* Build configuration list for PBXProject "GuiónViewer" */;
+			buildConfigurationList = D60B54D52E9DCEFA00ED1E15 /* Build configuration list for PBXProject "GuionViewer" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = D680BD7C2E9DCC9D00E40FB9;
+			mainGroup = D60B54D12E9DCEFA00ED1E15;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = D680BD862E9DCC9D00E40FB9 /* Products */;
+			productRefGroup = D60B54DB2E9DCEFA00ED1E15 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				D680BD842E9DCC9D00E40FB9 /* GuiónViewer */,
-				D680BD942E9DCC9E00E40FB9 /* GuiónViewerTests */,
-				D680BD9E2E9DCC9E00E40FB9 /* GuiónViewerUITests */,
+				D60B54D92E9DCEFA00ED1E15 /* GuionViewer */,
+				D60B54E92E9DCEFB00ED1E15 /* GuionViewerTests */,
+				D60B54F32E9DCEFB00ED1E15 /* GuionViewerUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		D680BD832E9DCC9D00E40FB9 /* Resources */ = {
+		D60B54D82E9DCEFA00ED1E15 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D680BD932E9DCC9E00E40FB9 /* Resources */ = {
+		D60B54E82E9DCEFB00ED1E15 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D680BD9D2E9DCC9E00E40FB9 /* Resources */ = {
+		D60B54F22E9DCEFB00ED1E15 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -245,21 +245,21 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		D680BD812E9DCC9D00E40FB9 /* Sources */ = {
+		D60B54D62E9DCEFA00ED1E15 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D680BD912E9DCC9E00E40FB9 /* Sources */ = {
+		D60B54E62E9DCEFB00ED1E15 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D680BD9B2E9DCC9E00E40FB9 /* Sources */ = {
+		D60B54F02E9DCEFB00ED1E15 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -269,20 +269,20 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		D680BD972E9DCC9E00E40FB9 /* PBXTargetDependency */ = {
+		D60B54EC2E9DCEFB00ED1E15 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D680BD842E9DCC9D00E40FB9 /* GuiónViewer */;
-			targetProxy = D680BD962E9DCC9E00E40FB9 /* PBXContainerItemProxy */;
+			target = D60B54D92E9DCEFA00ED1E15 /* GuionViewer */;
+			targetProxy = D60B54EB2E9DCEFB00ED1E15 /* PBXContainerItemProxy */;
 		};
-		D680BDA12E9DCC9E00E40FB9 /* PBXTargetDependency */ = {
+		D60B54F62E9DCEFB00ED1E15 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D680BD842E9DCC9D00E40FB9 /* GuiónViewer */;
-			targetProxy = D680BDA02E9DCC9E00E40FB9 /* PBXContainerItemProxy */;
+			target = D60B54D92E9DCEFA00ED1E15 /* GuionViewer */;
+			targetProxy = D60B54F52E9DCEFB00ED1E15 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		D680BDA92E9DCC9E00E40FB9 /* Debug */ = {
+		D60B54FE2E9DCEFB00ED1E15 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -295,7 +295,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "GuiónViewer/Info.plist";
+				INFOPLIST_FILE = GuionViewer/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -313,7 +313,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "io.stovak.GuionViewer.Guio-nViewer";
+				PRODUCT_BUNDLE_IDENTIFIER = io.stovak.GuionViewer.GuionViewer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -329,7 +329,7 @@
 			};
 			name = Debug;
 		};
-		D680BDAA2E9DCC9E00E40FB9 /* Release */ = {
+		D60B54FF2E9DCEFB00ED1E15 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -342,7 +342,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "GuiónViewer/Info.plist";
+				INFOPLIST_FILE = GuionViewer/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -360,7 +360,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "io.stovak.GuionViewer.Guio-nViewer";
+				PRODUCT_BUNDLE_IDENTIFIER = io.stovak.GuionViewer.GuionViewer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -376,7 +376,7 @@
 			};
 			name = Release;
 		};
-		D680BDAB2E9DCC9E00E40FB9 /* Debug */ = {
+		D60B55002E9DCEFB00ED1E15 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -438,7 +438,7 @@
 			};
 			name = Debug;
 		};
-		D680BDAC2E9DCC9E00E40FB9 /* Release */ = {
+		D60B55012E9DCEFB00ED1E15 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -492,7 +492,7 @@
 			};
 			name = Release;
 		};
-		D680BDAE2E9DCC9E00E40FB9 /* Debug */ = {
+		D60B55032E9DCEFB00ED1E15 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -503,7 +503,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "io.stovak.GuionViewer.Guio-nViewerTests";
+				PRODUCT_BUNDLE_IDENTIFIER = io.stovak.GuionViewer.GuionViewerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -513,12 +513,12 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GuiónViewer.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/GuiónViewer";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GuionViewer.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/GuionViewer";
 				XROS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Debug;
 		};
-		D680BDAF2E9DCC9E00E40FB9 /* Release */ = {
+		D60B55042E9DCEFB00ED1E15 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -529,7 +529,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "io.stovak.GuionViewer.Guio-nViewerTests";
+				PRODUCT_BUNDLE_IDENTIFIER = io.stovak.GuionViewer.GuionViewerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -539,12 +539,12 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GuiónViewer.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/GuiónViewer";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GuionViewer.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/GuionViewer";
 				XROS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Release;
 		};
-		D680BDB12E9DCC9E00E40FB9 /* Debug */ = {
+		D60B55062E9DCEFB00ED1E15 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -554,7 +554,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "io.stovak.GuionViewer.Guio-nViewerUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = io.stovak.GuionViewer.GuionViewerUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -564,12 +564,12 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_TARGET_NAME = "GuiónViewer";
+				TEST_TARGET_NAME = GuionViewer;
 				XROS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Debug;
 		};
-		D680BDB22E9DCC9E00E40FB9 /* Release */ = {
+		D60B55072E9DCEFB00ED1E15 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -579,7 +579,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "io.stovak.GuionViewer.Guio-nViewerUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = io.stovak.GuionViewer.GuionViewerUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -589,7 +589,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_TARGET_NAME = "GuiónViewer";
+				TEST_TARGET_NAME = GuionViewer;
 				XROS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Release;
@@ -597,43 +597,43 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		D680BD802E9DCC9D00E40FB9 /* Build configuration list for PBXProject "GuiónViewer" */ = {
+		D60B54D52E9DCEFA00ED1E15 /* Build configuration list for PBXProject "GuionViewer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				D680BDAB2E9DCC9E00E40FB9 /* Debug */,
-				D680BDAC2E9DCC9E00E40FB9 /* Release */,
+				D60B55002E9DCEFB00ED1E15 /* Debug */,
+				D60B55012E9DCEFB00ED1E15 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D680BDA82E9DCC9E00E40FB9 /* Build configuration list for PBXNativeTarget "GuiónViewer" */ = {
+		D60B54FD2E9DCEFB00ED1E15 /* Build configuration list for PBXNativeTarget "GuionViewer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				D680BDA92E9DCC9E00E40FB9 /* Debug */,
-				D680BDAA2E9DCC9E00E40FB9 /* Release */,
+				D60B54FE2E9DCEFB00ED1E15 /* Debug */,
+				D60B54FF2E9DCEFB00ED1E15 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D680BDAD2E9DCC9E00E40FB9 /* Build configuration list for PBXNativeTarget "GuiónViewerTests" */ = {
+		D60B55022E9DCEFB00ED1E15 /* Build configuration list for PBXNativeTarget "GuionViewerTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				D680BDAE2E9DCC9E00E40FB9 /* Debug */,
-				D680BDAF2E9DCC9E00E40FB9 /* Release */,
+				D60B55032E9DCEFB00ED1E15 /* Debug */,
+				D60B55042E9DCEFB00ED1E15 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D680BDB02E9DCC9E00E40FB9 /* Build configuration list for PBXNativeTarget "GuiónViewerUITests" */ = {
+		D60B55052E9DCEFB00ED1E15 /* Build configuration list for PBXNativeTarget "GuionViewerUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				D680BDB12E9DCC9E00E40FB9 /* Debug */,
-				D680BDB22E9DCC9E00E40FB9 /* Release */,
+				D60B55062E9DCEFB00ED1E15 /* Debug */,
+				D60B55072E9DCEFB00ED1E15 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = D680BD7D2E9DCC9D00E40FB9 /* Project object */;
+	rootObject = D60B54D22E9DCEFA00ED1E15 /* Project object */;
 }
