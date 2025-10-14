@@ -46,7 +46,7 @@ struct ExportCommands: Commands {
         let panel = NSSavePanel()
         panel.title = "Export to Fountain"
         panel.allowedContentTypes = [.fountain]
-        panel.nameFieldStringValue = document.documentModel.filename.replacingOccurrences(of: ".guion", with: ".fountain")
+        panel.nameFieldStringValue = (document.documentModel.filename ?? "Untitled").replacingOccurrences(of: ".guion", with: ".fountain")
 
         panel.begin { response in
             guard response == .OK, let url = panel.url else { return }
@@ -71,7 +71,7 @@ struct ExportCommands: Commands {
         let panel = NSSavePanel()
         panel.title = "Export to Highland"
         panel.allowedContentTypes = [.highland]
-        panel.nameFieldStringValue = document.documentModel.filename.replacingOccurrences(of: ".guion", with: ".highland")
+        panel.nameFieldStringValue = (document.documentModel.filename ?? "Untitled").replacingOccurrences(of: ".guion", with: ".highland")
 
         panel.begin { response in
             guard response == .OK, let url = panel.url else { return }
@@ -96,7 +96,7 @@ struct ExportCommands: Commands {
         let panel = NSSavePanel()
         panel.title = "Export to Final Draft"
         panel.allowedContentTypes = [.fdx]
-        panel.nameFieldStringValue = document.documentModel.filename.replacingOccurrences(of: ".guion", with: ".fdx")
+        panel.nameFieldStringValue = (document.documentModel.filename ?? "Untitled").replacingOccurrences(of: ".guion", with: ".fdx")
 
         panel.begin { response in
             guard response == .OK, let url = panel.url else { return }
@@ -105,7 +105,7 @@ struct ExportCommands: Commands {
                 do {
                     let screenplay = document.documentModel.toGuionParsedScreenplay()
                     let fdxData = FDXDocumentWriter.write(screenplay)
-                    try fdxData.write(to: url, atomically: true)
+                    try fdxData.write(to: url)
 
                     showSuccessAlert(message: "Exported to \(url.lastPathComponent)")
                 } catch {
@@ -145,7 +145,7 @@ struct ExportCommands: Commands {
 // MARK: - FocusedValues Extension
 
 extension FocusedValues {
-    var document: FocusedBinding<GuionDocument> {
+    var document: Binding<GuionDocument>? {
         get { self[DocumentKey.self] }
         set { self[DocumentKey.self] = newValue }
     }

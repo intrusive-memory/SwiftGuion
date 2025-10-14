@@ -10,6 +10,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 import SwiftData
 import SwiftGuion
+import Combine
 
 /// Document type for GuionView application.
 ///
@@ -111,31 +112,32 @@ final class GuionDocument: ReferenceFileDocument {
             throw CocoaError(.fileReadUnsupportedScheme)
         }
 
-        // Convert to document model
+        // For Phase 1, create empty model and populate filename
         self.documentModel = GuionDocumentModel()
         if let screenplay = self.screenplay {
-            self.documentModel = GuionDocumentModel.fromScreenplay(screenplay)
+            self.documentModel.filename = screenplay.filename
+            // TODO: Phase 2 will implement full conversion with ModelContext
         }
     }
 
     // MARK: - Snapshot
 
-    typealias Snapshot = Data
+    typealias Snapshot = FileWrapper
 
-    func snapshot(contentType: UTType) throws -> Data {
+    func snapshot(contentType: UTType) throws -> FileWrapper {
         // Convert document model to screenplay
         let screenplay = documentModel.toGuionParsedScreenplay()
 
         // Create TextPack bundle
         let textPack = try TextPackWriter.createTextPack(from: screenplay)
 
-        // Serialize to Data
-        return try textPack.serializedData()
+        // Return the FileWrapper directly
+        return textPack
     }
 
-    func fileWrapper(snapshot: Data, configuration: WriteConfiguration) throws -> FileWrapper {
-        // Deserialize Data back to FileWrapper
-        return try FileWrapper(serializedRepresentation: snapshot)
+    func fileWrapper(snapshot: FileWrapper, configuration: WriteConfiguration) throws -> FileWrapper {
+        // Just return the snapshot as-is
+        return snapshot
     }
 }
 
@@ -163,35 +165,3 @@ extension UTType {
     }
 }
 
-// MARK: - GuionDocumentModel Extensions
-
-extension GuionDocumentModel {
-    /// Create GuionDocumentModel from GuionParsedScreenplay
-    static func fromScreenplay(_ screenplay: GuionParsedScreenplay) -> GuionDocumentModel {
-        let model = GuionDocumentModel()
-        model.filename = screenplay.filename
-
-        // Convert elements
-        for element in screenplay.elements {
-            let elementModel = GuionElementModel()
-            elementModel.elementType = element.type
-            elementModel.elementText = element.text
-            elementModel.sceneNumber = element.sceneNumber ?? ""
-            elementModel.isDualDialogue = element.isDualDialogue
-            elementModel.pageNumber = element.pageNumber
-            model.elements.append(elementModel)
-        }
-
-        // Convert title page
-        if let titlePageDict = screenplay.titlePage.first {
-            for (key, values) in titlePageDict {
-                let entry = TitlePageEntryModel()
-                entry.key = key
-                entry.values = values
-                model.titlePage.append(entry)
-            }
-        }
-
-        return model
-    }
-}

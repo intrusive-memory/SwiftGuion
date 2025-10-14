@@ -47,12 +47,8 @@ struct ImportCommands: Commands {
             Task { @MainActor in
                 do {
                     let screenplay = try GuionParsedScreenplay(file: url.path)
-                    // Create new document with imported screenplay
-                    let newDocument = GuionDocument()
-                    newDocument.documentModel = GuionDocumentModel.fromScreenplay(screenplay)
-
-                    // Show success message
-                    showSuccessAlert(message: "Imported \(url.lastPathComponent)")
+                    // Phase 1: Just show success (document creation handled by app)
+                    showSuccessAlert(message: "Imported \(url.lastPathComponent) with \(screenplay.elements.count) elements")
                 } catch {
                     showErrorAlert(message: "Failed to import file: \(error.localizedDescription)")
                 }
@@ -72,10 +68,8 @@ struct ImportCommands: Commands {
             Task { @MainActor in
                 do {
                     let screenplay = try GuionParsedScreenplay(highland: url)
-                    let newDocument = GuionDocument()
-                    newDocument.documentModel = GuionDocumentModel.fromScreenplay(screenplay)
-
-                    showSuccessAlert(message: "Imported \(url.lastPathComponent)")
+                    // Phase 1: Just show success
+                    showSuccessAlert(message: "Imported \(url.lastPathComponent) with \(screenplay.elements.count) elements")
                 } catch {
                     showErrorAlert(message: "Failed to import file: \(error.localizedDescription)")
                 }
@@ -115,10 +109,8 @@ struct ImportCommands: Commands {
                         suppressSceneNumbers: parsedDoc.suppressSceneNumbers
                     )
 
-                    let newDocument = GuionDocument()
-                    newDocument.documentModel = GuionDocumentModel.fromScreenplay(screenplay)
-
-                    showSuccessAlert(message: "Imported \(url.lastPathComponent)")
+                    // Phase 1: Just show success
+                    showSuccessAlert(message: "Imported \(url.lastPathComponent) with \(screenplay.elements.count) elements")
                 } catch {
                     showErrorAlert(message: "Failed to import file: \(error.localizedDescription)")
                 }

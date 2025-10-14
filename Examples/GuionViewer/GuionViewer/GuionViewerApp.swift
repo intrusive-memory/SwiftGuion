@@ -2,42 +2,26 @@
 //  GuionViewerApp.swift
 //  GuionViewer
 //
-//  Created by TOM STOVALL on 10/13/25.
+//  Phase 1: Core Document Operations
+//  Copyright (c) 2025
 //
 
 import SwiftUI
 import SwiftData
-import UniformTypeIdentifiers
 
+/// Main application entry point for GuionViewer.
+///
+/// GuionViewer is a sample macOS application demonstrating the SwiftGuion library's capabilities.
+/// It provides a complete document-based application for viewing screenplay files in multiple formats.
 @main
 struct GuionViewerApp: App {
     var body: some Scene {
-        DocumentGroup(editing: .itemDocument, migrationPlan: GuionViewerMigrationPlan.self) {
-            ContentView()
+        DocumentGroup(newDocument: GuionDocument.init) { file in
+            ContentView(document: file.document)
+        }
+        .commands {
+            ImportCommands()
+            ExportCommands()
         }
     }
-}
-
-extension UTType {
-    static var itemDocument: UTType {
-        UTType(importedAs: "com.example.item-document")
-    }
-}
-
-struct GuionViewerMigrationPlan: SchemaMigrationPlan {
-    static var schemas: [VersionedSchema.Type] = [
-        GuionViewerVersionedSchema.self,
-    ]
-
-    static var stages: [MigrationStage] = [
-        // Stages of migration between VersionedSchema, if required.
-    ]
-}
-
-struct GuionViewerVersionedSchema: VersionedSchema {
-    static var versionIdentifier = Schema.Version(1, 0, 0)
-
-    static var models: [any PersistentModel.Type] = [
-        Item.self,
-    ]
 }

@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		D6485F922E9DD09E00537319 /* SwiftGuion in Frameworks */ = {isa = PBXBuildFile; productRef = D6485F912E9DD09E00537319 /* SwiftGuion */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		D60B54EB2E9DCEFB00ED1E15 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -65,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6485F922E9DD09E00537319 /* SwiftGuion in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +130,7 @@
 			);
 			name = GuionViewer;
 			packageProductDependencies = (
+				D6485F912E9DD09E00537319 /* SwiftGuion */,
 			);
 			productName = GuionViewer;
 			productReference = D60B54DA2E9DCEFA00ED1E15 /* GuionViewer.app */;
@@ -208,6 +214,9 @@
 			);
 			mainGroup = D60B54D12E9DCEFA00ED1E15;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				D6485F902E9DD09E00537319 /* XCLocalSwiftPackageReference "../../../SwiftGuion" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D60B54DB2E9DCEFA00ED1E15 /* Products */;
 			projectDirPath = "";
@@ -634,6 +643,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		D6485F902E9DD09E00537319 /* XCLocalSwiftPackageReference "../../../SwiftGuion" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../../SwiftGuion;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D6485F912E9DD09E00537319 /* SwiftGuion */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SwiftGuion;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D60B54D22E9DCEFA00ED1E15 /* Project object */;
 }
