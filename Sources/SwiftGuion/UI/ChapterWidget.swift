@@ -16,6 +16,7 @@ public struct ChapterWidget: View {
     @Binding var expandedSceneGroups: Set<String>
     @Binding var expandedScenes: Set<String>
     @Binding var expandedPreScenes: Set<String>
+    @Environment(\.screenplayFontSize) var fontSize
 
     /// Creates a ChapterWidget
     /// - Parameters:
@@ -38,55 +39,90 @@ public struct ChapterWidget: View {
         self._expandedPreScenes = expandedPreScenes
     }
 
+    private var chapterNumber: Int? {
+        ScreenplayPageFormat.extractChapterNumber(from: chapter.title)
+    }
+
+    private var startingPageNumber: Int {
+        ScreenplayPageFormat.startingPageNumber(forChapter: chapterNumber)
+    }
+
     public var body: some View {
-        DisclosureGroup(
-            isExpanded: $isExpanded,
-            content: {
-                VStack(alignment: .leading, spacing: 16) {
-                    ForEach(chapter.sceneGroups) { sceneGroup in
-                        SceneGroupWidget(
-                            sceneGroup: sceneGroup,
-                            isExpanded: Binding(
-                                get: { expandedSceneGroups.contains(sceneGroup.id) },
-                                set: { isExpanded in
-                                    if isExpanded {
-                                        expandedSceneGroups.insert(sceneGroup.id)
-                                    } else {
-                                        expandedSceneGroups.remove(sceneGroup.id)
+        VStack(alignment: .leading, spacing: 0) {
+            // Page break before chapter (reduced spacing)
+            Spacer()
+                .frame(height: fontSize * 2)
+
+            DisclosureGroup(
+                isExpanded: $isExpanded,
+                content: {
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(chapter.sceneGroups) { sceneGroup in
+                            SceneGroupWidget(
+                                sceneGroup: sceneGroup,
+                                isExpanded: Binding(
+                                    get: { expandedSceneGroups.contains(sceneGroup.id) },
+                                    set: { isExpanded in
+                                        if isExpanded {
+                                            expandedSceneGroups.insert(sceneGroup.id)
+                                        } else {
+                                            expandedSceneGroups.remove(sceneGroup.id)
+                                        }
                                     }
+                                ),
+                                expandedScenes: $expandedScenes,
+                                expandedPreScenes: $expandedPreScenes
+                            )
+                        }
+                    }
+                    .padding(.top, 8)
+                },
+                label: {
+                    HStack(spacing: 8) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack(spacing: 6) {
+                                if chapter.element.isSynthetic {
+                                    Text("INFERRED:")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .foregroundStyle(.secondary)
+                                        .textCase(.uppercase)
                                 }
-                            ),
-                            expandedScenes: $expandedScenes,
-                            expandedPreScenes: $expandedPreScenes
-                        )
+                                Text(chapter.title)
+                                    .font(.title2)
+                                    .bold()
+                                    .foregroundStyle(chapter.element.isSynthetic ? .secondary : .primary)
+                            }
+
+                            // Display starting page number
+                            Text("Page \(startingPageNumber)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .monospacedDigit()
+                        }
+
+                        Spacer()
                     }
                 }
-                .padding(.top, 12)
-            },
-            label: {
-                Text(chapter.title)
-                    .font(.title2)
-                    .bold()
-                    .foregroundStyle(chapter.element.isSynthetic ? .secondary : .primary)
-            }
-        )
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel("Chapter: \(chapter.title)")
-        .accessibilityHint("\(chapter.sceneGroups.count) scene groups")
-        .padding(.vertical, 10)
-        .padding(.horizontal, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 4)
-                .fill(Color.secondary.opacity(0.05))
-        )
-        .overlay(
-            VStack {
-                Spacer()
-                Rectangle()
-                    .fill(Color.secondary.opacity(0.3))
-                    .frame(height: 1)
-            }
-        )
+            )
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel("Chapter: \(chapter.title), starting page \(startingPageNumber)")
+            .accessibilityHint("\(chapter.sceneGroups.count) scene groups")
+            .padding(.vertical, 6)
+            .padding(.horizontal, 8)
+            .background(
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.secondary.opacity(0.05))
+            )
+            .overlay(
+                VStack {
+                    Spacer()
+                    Rectangle()
+                        .fill(Color.secondary.opacity(0.3))
+                        .frame(height: 1)
+                }
+            )
+        }
     }
 }
 
@@ -208,4 +244,40 @@ public struct ChapterWidget: View {
         )
         .padding()
     }
+}
+
+#Preview("Synthetic Chapter") {
+    ChapterWidget(
+        chapter: ChapterData(
+            element: OutlineElement(
+                id: "chapter-synthetic",
+                index: 0,
+                level: 2,
+                range: [0, 0],
+                rawString: "",
+                string: "(Untitled Section)",
+                type: "sectionHeader",
+                isSynthetic: true
+            ),
+            sceneGroups: [
+                SceneGroupData(
+                    element: OutlineElement(
+                        id: "group-1",
+                        index: 1,
+                        level: 3,
+                        range: [10, 100],
+                        rawString: "### SCENE GROUP",
+                        string: "SCENE GROUP",
+                        type: "sectionHeader"
+                    ),
+                    scenes: []
+                )
+            ]
+        ),
+        isExpanded: .constant(true),
+        expandedSceneGroups: .constant([]),
+        expandedScenes: .constant([]),
+        expandedPreScenes: .constant([])
+    )
+    .padding()
 }

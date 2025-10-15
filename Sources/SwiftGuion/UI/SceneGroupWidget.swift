@@ -69,10 +69,19 @@ public struct SceneGroupWidget: View {
             },
             label: {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(sceneGroup.title)
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(sceneGroup.element.isSynthetic ? .secondary : .primary)
+                    HStack(spacing: 6) {
+                        if sceneGroup.element.isSynthetic {
+                            Text("INFERRED:")
+                                .font(.caption2)
+                                .fontWeight(.medium)
+                                .foregroundStyle(.secondary)
+                                .textCase(.uppercase)
+                        }
+                        Text(sceneGroup.title)
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(sceneGroup.element.isSynthetic ? .secondary : .primary)
+                    }
 
                     if let directive = sceneGroup.directive,
                        let description = sceneGroup.directiveDescription {
@@ -193,6 +202,44 @@ public struct SceneGroupWidget: View {
         ),
         isExpanded: .constant(true),
         expandedScenes: .constant(["scene-1"]),
+        expandedPreScenes: .constant([])
+    )
+    .padding()
+}
+
+#Preview("Synthetic Scene Group") {
+    SceneGroupWidget(
+        sceneGroup: SceneGroupData(
+            element: OutlineElement(
+                id: "group-synthetic",
+                index: 0,
+                level: 3,
+                range: [0, 0],
+                rawString: "",
+                string: "(Untitled Section)",
+                type: "sectionHeader",
+                isSynthetic: true
+            ),
+            scenes: [
+                SceneData(
+                    element: OutlineElement(
+                        id: "scene-1",
+                        index: 1,
+                        level: 0,
+                        range: [10, 50],
+                        rawString: "INT. ROOM - DAY",
+                        string: "INT. ROOM - DAY",
+                        type: "sceneHeader"
+                    ),
+                    sceneElements: [
+                        GuionElement(type: "Action", text: "Action happens here.")
+                    ],
+                    sceneLocation: SceneLocation.parse("INT. ROOM - DAY")
+                )
+            ]
+        ),
+        isExpanded: .constant(true),
+        expandedScenes: .constant([]),
         expandedPreScenes: .constant([])
     )
     .padding()

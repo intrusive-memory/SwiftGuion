@@ -34,21 +34,15 @@ extension GuionParsedScreenplay {
         var outlineIndex = 0
         var characterPosition = 0
         var parentStack: [OutlineElement] = [] // Stack to track parent elements
-        
-        // First pass: check if we have any level 1 headers and validate
+
+        // First pass: check if we have any level 1 headers
         var levelOneCount = 0
         for element in elements {
             if element.elementType == "Section Heading" && element.sectionDepth == 1 {
                 levelOneCount += 1
             }
         }
-        
-        // Ensure we have at most one level 1 header
-        if levelOneCount > 1 {
-            // Log warning or handle multiple level 1 headers (keep only the first one)
-            print("Warning: Multiple level 1 headers found. Only the first one will be treated as level 1.")
-        }
-        
+
         // If no level 1 header exists, add the script title as level 1
         if levelOneCount == 0 {
             let scriptTitle = getScriptTitle()
@@ -73,8 +67,6 @@ extension GuionParsedScreenplay {
             parentStack.append(titleElement)
             outlineIndex += 1
         }
-
-        var foundFirstLevelOne = false
         
         for element in elements {
             var shouldInclude = false
@@ -86,21 +78,7 @@ extension GuionParsedScreenplay {
             case "Section Heading":
                 shouldInclude = true
                 outlineType = "sectionHeader"
-                
-                let sectionLevel = Int(element.sectionDepth)
-                
-                // Handle level 1 headers specially
-                if sectionLevel == 1 {
-                    if !foundFirstLevelOne {
-                        level = 1
-                        foundFirstLevelOne = true
-                    } else {
-                        // Treat subsequent level 1 headers as level 2 (chapter level)
-                        level = 2
-                    }
-                } else {
-                    level = sectionLevel
-                }
+                level = Int(element.sectionDepth)
 
             case "Scene Heading":
                 shouldInclude = true
@@ -182,12 +160,68 @@ extension GuionParsedScreenplay {
                 
                 // Determine parent-child relationships
                 var parentId: String? = nil
-                
+
                 // Update parent stack based on current level
                 while !parentStack.isEmpty && parentStack.last!.level >= level {
                     parentStack.removeLast()
                 }
-                
+
+                // Check if we need to create synthetic elements for missing levels
+                if !parentStack.isEmpty && !isEndMarker {
+                    let lastStackLevel = parentStack.last?.level ?? 0
+                    let expectedParentLevel = level - 1
+
+                    if lastStackLevel < expectedParentLevel {
+                        // We have a gap - need to create synthetic elements for missing levels
+                        for syntheticLevel in (lastStackLevel + 1)...expectedParentLevel {
+                            // Check if we already have a synthetic element at this level with the same parent
+                            let potentialParent = parentStack.last
+                            let existingSynthetic = outline.first {
+                                $0.level == syntheticLevel &&
+                                $0.isSynthetic &&
+                                $0.parentId == potentialParent?.id
+                            }
+
+                            if let existing = existingSynthetic {
+                                // Reuse existing synthetic element
+                                parentStack.append(existing)
+                            } else {
+                                // Create new synthetic element
+                                let syntheticId = "outline-\(outlineIndex)"
+                                let syntheticParentId = potentialParent?.id
+
+                                let syntheticElement = OutlineElement(
+                                    id: syntheticId,
+                                    index: outlineIndex,
+                                    level: syntheticLevel,
+                                    range: [characterPosition, 0],
+                                    rawString: "",
+                                    string: "(Untitled Section)",
+                                    type: "sectionHeader",
+                                    sceneDirective: nil,
+                                    sceneDirectiveDescription: nil,
+                                    parentId: syntheticParentId,
+                                    childIds: [],
+                                    isEndMarker: false,
+                                    sceneId: nil,
+                                    isSynthetic: true
+                                )
+
+                                outline.append(syntheticElement)
+
+                                // Update parent's children
+                                if let syntheticParentId = syntheticParentId,
+                                   let parentIndex = outline.firstIndex(where: { $0.id == syntheticParentId }) {
+                                    outline[parentIndex].childIds.append(syntheticId)
+                                }
+
+                                parentStack.append(syntheticElement)
+                                outlineIndex += 1
+                            }
+                        }
+                    }
+                }
+
                 // Set parent if there's a suitable parent in the stack
                 if !parentStack.isEmpty && !isEndMarker {
                     if let parent = parentStack.last(where: { $0.level < level }) {

@@ -205,9 +205,8 @@ extension GuionParsedScreenplay {
         var pendingOverBlack: [GuionElement]?
 
         for sceneElement in sceneElements {
-            // Get scene content
-            let sceneText = sceneElement.sceneText(from: self, outline: outline)
-            let sceneGuionElements = parseSceneContent(sceneText: sceneText)
+            // Extract actual scene elements with proper types
+            let sceneGuionElements = extractSceneElements(for: sceneElement)
 
             // Check if this is an OVER BLACK scene
             if isOverBlackScene(sceneElement) {
@@ -250,7 +249,37 @@ extension GuionParsedScreenplay {
         return element.string.uppercased().contains("OVER BLACK")
     }
 
-    /// Parse scene content text into GuionElements
+    /// Extract actual scene elements directly from the screenplay
+    private func extractSceneElements(for sceneElement: OutlineElement) -> [GuionElement] {
+        guard let sceneId = sceneElement.sceneId else { return [] }
+
+        // Find all elements that belong to this scene
+        var sceneElements: [GuionElement] = []
+        var inScene = false
+
+        for element in elements {
+            // Check if this element starts the scene (by matching sceneId)
+            if element.elementType == "Scene Heading" && element.sceneId == sceneId {
+                inScene = true
+                continue // Skip the scene heading itself (it's already in the outline)
+            }
+
+            // Check if we've reached the next scene (any scene heading after we've started)
+            if inScene && element.elementType == "Scene Heading" {
+                break
+            }
+
+            // Collect all elements between this scene heading and the next
+            // Note: Only scene headings have sceneIds; dialogue, action, etc. do not
+            if inScene {
+                sceneElements.append(element)
+            }
+        }
+
+        return sceneElements
+    }
+
+    /// Parse scene content text into GuionElements (legacy fallback)
     private func parseSceneContent(sceneText: String) -> [GuionElement] {
         // The sceneText already includes all elements from the scene
         // We need to parse it back into GuionElements
