@@ -175,7 +175,7 @@ public struct GuionViewer: View {
                     }
 
             case .loaded(let browserData):
-                SceneBrowserWidget(browserData: browserData)
+                SceneBrowserWidget(browserData: browserData, autoExpand: true)
 
             case .error(let error):
                 ErrorView(error: error)

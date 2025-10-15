@@ -12,6 +12,7 @@ import SwiftUI
 /// Main scene browser widget displaying the hierarchical outline structure of a screenplay
 public struct SceneBrowserWidget: View {
     let browserData: SceneBrowserData
+    let autoExpand: Bool
 
     @State private var expandedChapters: Set<String> = []
     @State private var expandedSceneGroups: Set<String> = []
@@ -19,15 +20,21 @@ public struct SceneBrowserWidget: View {
     @State private var expandedPreScenes: Set<String> = []
 
     /// Creates a SceneBrowserWidget from SceneBrowserData
-    /// - Parameter browserData: The scene browser data containing the screenplay structure
-    public init(browserData: SceneBrowserData) {
+    /// - Parameters:
+    ///   - browserData: The scene browser data containing the screenplay structure
+    ///   - autoExpand: If true, automatically expands first two levels (chapters and scene groups) on load. Default is true.
+    public init(browserData: SceneBrowserData, autoExpand: Bool = true) {
         self.browserData = browserData
+        self.autoExpand = autoExpand
     }
 
     /// Creates a SceneBrowserWidget directly from a GuionParsedScreenplay
-    /// - Parameter script: The GuionParsedScreenplay to extract browser data from
-    public init(script: GuionParsedScreenplay) {
+    /// - Parameters:
+    ///   - script: The GuionParsedScreenplay to extract browser data from
+    ///   - autoExpand: If true, automatically expands first two levels (chapters and scene groups) on load. Default is true.
+    public init(script: GuionParsedScreenplay, autoExpand: Bool = true) {
         self.browserData = script.extractSceneBrowserData()
+        self.autoExpand = autoExpand
     }
 
     public var body: some View {
@@ -84,6 +91,26 @@ public struct SceneBrowserWidget: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(nsColor: .textBackgroundColor))
         .accessibilityElement(children: .contain)
+        .onAppear {
+            if autoExpand {
+                expandFirstTwoLevels()
+            }
+        }
+    }
+
+    /// Automatically expands the first two levels (chapters and scene groups) to show the scene list
+    private func expandFirstTwoLevels() {
+        // Expand all chapters (Level 2)
+        expandedChapters = Set(browserData.chapters.map { $0.id })
+
+        // Expand all scene groups within chapters (Level 3)
+        var sceneGroupIDs: Set<String> = []
+        for chapter in browserData.chapters {
+            for sceneGroup in chapter.sceneGroups {
+                sceneGroupIDs.insert(sceneGroup.id)
+            }
+        }
+        expandedSceneGroups = sceneGroupIDs
     }
 }
 

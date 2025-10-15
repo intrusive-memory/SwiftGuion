@@ -62,12 +62,18 @@ public struct SceneWidget: View {
                 content: {
                     VStack(alignment: .leading, spacing: 8) {
                         #if canImport(SwiftData)
-                        ForEach(scene.sceneElementModels.indices, id: \.self) { index in
-                            SceneElementViewFromModel(element: scene.sceneElementModels[index])
+                        // Filter out Scene Heading since it's already shown in the label
+                        ForEach(scene.sceneElementModels.filter { $0.elementType != "Scene Heading" }.indices, id: \.self) { index in
+                            let filteredElements = scene.sceneElementModels.filter { $0.elementType != "Scene Heading" }
+                            SceneElementViewFromModel(element: filteredElements[index])
                         }
                         #else
-                        ForEach(scene.sceneElements.indices, id: \.self) { index in
-                            SceneElementView(element: scene.sceneElements[index])
+                        // Filter out Scene Heading since it's already shown in the label
+                        if let elements = scene.sceneElements {
+                            ForEach(elements.filter { $0.elementType != "Scene Heading" }.indices, id: \.self) { index in
+                                let filteredElements = elements.filter { $0.elementType != "Scene Heading" }
+                                SceneElementView(element: filteredElements[index])
+                            }
                         }
                         #endif
                     }
