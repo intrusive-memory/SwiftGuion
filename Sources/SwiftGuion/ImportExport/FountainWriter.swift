@@ -81,7 +81,7 @@ public class FountainWriter {
                 textToWrite = "===="
             } else if element.elementType == "Section Heading" {
                 let sectionDepthMarkup = String(repeating: "#", count: Int(element.sectionDepth))
-                textToWrite = sectionDepthMarkup + element.elementText
+                textToWrite = sectionDepthMarkup + " " + element.elementText
             } else if element.elementType == "Transition" {
                 if !matches(string: element.elementText, pattern: FountainRegexes.transitionPattern) {
                     textToWrite = "> \(element.elementText)"

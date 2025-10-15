@@ -122,19 +122,51 @@ public final class GuionDocumentModel {
         // Generate summaries for scene headings if requested
         if generateSummaries {
             let outline = screenplay.extractOutline()
+            var elementsWithSummaries: [GuionElement] = []
+            var skipIndices = Set<Int>()
 
-            for element in screenplay.elements {
-                var summary: String? = nil
-
-                // Generate summary only for Scene Heading elements
-                if element.elementType == "Scene Heading" {
-                    if let sceneId = element.sceneId,
-                       let scene = outline.first(where: { $0.sceneId == sceneId }) {
-                        summary = await SceneSummarizer.summarizeScene(scene, from: screenplay, outline: outline)
-                    }
+            for (index, element) in screenplay.elements.enumerated() {
+                // Skip if already processed (e.g., OVER BLACK that was handled with scene)
+                if skipIndices.contains(index) {
+                    continue
                 }
 
-                let elementModel = GuionElementModel(from: element, summary: summary)
+                // Add the original element
+                elementsWithSummaries.append(element)
+
+                // Check if this is a scene heading that needs a summary
+                if element.elementType == "Scene Heading",
+                   let sceneId = element.sceneId,
+                   let scene = outline.first(where: { $0.sceneId == sceneId }) {
+
+                    // Generate summary
+                    if let summaryText = await SceneSummarizer.summarizeScene(scene, from: screenplay, outline: outline) {
+                        // Check if next element is OVER BLACK
+                        if index + 1 < screenplay.elements.count {
+                            let nextElement = screenplay.elements[index + 1]
+                            if nextElement.elementType == "Action" &&
+                               nextElement.elementText.uppercased().contains("OVER BLACK") {
+                                // Add OVER BLACK element before summary
+                                elementsWithSummaries.append(nextElement)
+                                skipIndices.insert(index + 1)
+                            }
+                        }
+
+                        // Create summary element as #### SUMMARY: text
+                        // Note: Leading space is required because Fountain parser preserves the space after hashtags
+                        var summaryElement = GuionElement(
+                            elementType: "Section Heading",
+                            elementText: " SUMMARY: \(summaryText)"
+                        )
+                        summaryElement.sectionDepth = 4
+                        elementsWithSummaries.append(summaryElement)
+                    }
+                }
+            }
+
+            // Convert all elements including inserted summaries to models
+            for element in elementsWithSummaries {
+                let elementModel = GuionElementModel(from: element)
                 elementModel.document = document
                 document.elements.append(elementModel)
             }
@@ -169,6 +201,130 @@ public final class GuionDocumentModel {
             elements: convertedElements,
             titlePage: titlePageArray,
             suppressSceneNumbers: suppressSceneNumbers
+        )
+    }
+
+    /// Extract hierarchical scene browser data from SwiftData models
+    ///
+    /// This method builds the chapter → scene group → scene hierarchy directly
+    /// from the `elements` relationship, without converting to GuionParsedScreenplay.
+    ///
+    /// **Architecture**: Returns structure with references to GuionElementModel instances,
+    /// not value copies. UI components read properties directly from models for reactive updates.
+    ///
+    /// - Returns: SceneBrowserData with model references
+    public func extractSceneBrowserData() -> SceneBrowserData {
+        // For Phase 1: Convert to screenplay and use existing extraction logic
+        // TODO: Phase 2 will implement direct SwiftData traversal for better performance
+        let screenplay = toGuionParsedScreenplay()
+        let valueBasedData = screenplay.extractSceneBrowserData()
+
+        // Map value-based structure to model-based structure
+        return mapToModelBased(valueData: valueBasedData)
+    }
+
+    /// Map value-based SceneBrowserData to model-based SceneBrowserData
+    private func mapToModelBased(valueData: SceneBrowserData) -> SceneBrowserData {
+        // Build lookup dictionary: sceneId -> GuionElementModel (for scene headings)
+        var sceneHeadingLookup: [String: GuionElementModel] = [:]
+        for element in elements {
+            if let sceneId = element.sceneId, element.elementType == "Scene Heading" {
+                sceneHeadingLookup[sceneId] = element
+            }
+        }
+
+        // Build lookup for all elements by text+type (for scene content matching)
+        // This allows us to find model equivalents of value-based elements
+        var elementLookup: [[String: String]: [GuionElementModel]] = [:]
+        for element in elements {
+            let key = ["text": element.elementText, "type": element.elementType]
+            if elementLookup[key] == nil {
+                elementLookup[key] = []
+            }
+            elementLookup[key]?.append(element)
+        }
+
+        // Map chapters
+        let mappedChapters = valueData.chapters.map { chapter in
+            // Map scene groups
+            let mappedSceneGroups = chapter.sceneGroups.map { sceneGroup in
+                // Map scenes
+                let mappedScenes = sceneGroup.scenes.map { scene in
+                    // Find the scene heading model by sceneId
+                    let sceneHeadingModel = scene.sceneId.flatMap { sceneHeadingLookup[$0] }
+
+                    // Find scene content element models
+                    var sceneElementModels: [GuionElementModel] = []
+
+                    // Add the scene heading first
+                    if let heading = sceneHeadingModel {
+                        sceneElementModels.append(heading)
+                    }
+
+                    // Add all scene content elements
+                    if let valueElements = scene.sceneElements {
+                        // Track which models we've already used to avoid duplicates
+                        var usedModels = Set<ObjectIdentifier>()
+                        if let heading = sceneHeadingModel {
+                            usedModels.insert(ObjectIdentifier(heading))
+                        }
+
+                        for valueElement in valueElements {
+                            let key = ["text": valueElement.elementText, "type": valueElement.elementType]
+                            if let candidates = elementLookup[key] {
+                                // Find first unused match
+                                if let match = candidates.first(where: { !usedModels.contains(ObjectIdentifier($0)) }) {
+                                    sceneElementModels.append(match)
+                                    usedModels.insert(ObjectIdentifier(match))
+                                }
+                            }
+                        }
+                    }
+
+                    // Find preScene element models
+                    var preSceneElementModels: [GuionElementModel]? = nil
+                    if let preSceneValues = scene.preSceneElements {
+                        var preSceneModels: [GuionElementModel] = []
+                        var usedModels = Set<ObjectIdentifier>()
+
+                        for valueElement in preSceneValues {
+                            let key = ["text": valueElement.elementText, "type": valueElement.elementType]
+                            if let candidates = elementLookup[key] {
+                                if let match = candidates.first(where: { !usedModels.contains(ObjectIdentifier($0)) }) {
+                                    preSceneModels.append(match)
+                                    usedModels.insert(ObjectIdentifier(match))
+                                }
+                            }
+                        }
+
+                        if !preSceneModels.isEmpty {
+                            preSceneElementModels = preSceneModels
+                        }
+                    }
+
+                    return SceneData(
+                        sceneHeadingModel: sceneHeadingModel,
+                        sceneElementModels: sceneElementModels,
+                        preSceneElementModels: preSceneElementModels,
+                        sceneLocation: scene.sceneLocation
+                    )
+                }
+
+                return SceneGroupData(
+                    element: sceneGroup.element,
+                    scenes: mappedScenes
+                )
+            }
+
+            return ChapterData(
+                element: chapter.element,
+                sceneGroups: mappedSceneGroups
+            )
+        }
+
+        return SceneBrowserData(
+            title: valueData.title,
+            chapters: mappedChapters
         )
     }
 }

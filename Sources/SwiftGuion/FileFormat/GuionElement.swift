@@ -106,6 +106,13 @@ public protocol GuionElementProtocol {
     /// This UUID helps track scenes even when their text changes or when
     /// multiple scenes have identical headings.
     var sceneId: String? { get set }
+
+    /// AI-generated summary of the scene content (for Scene Heading elements).
+    ///
+    /// This field contains a concise summary of what happens in the scene,
+    /// generated using Apple Intelligence or extractive summarization.
+    /// Only populated for Scene Heading elements when summarization is enabled.
+    var summary: String? { get set }
 }
 
 /// Lightweight struct representing a screenplay element.
@@ -156,6 +163,7 @@ public struct GuionElement: GuionElementProtocol {
     public var sceneNumber: String?
     public var sectionDepth: Int
     public var sceneId: String?
+    public var summary: String?
 
     /// Creates a new screenplay element with the specified type and text.
     ///
@@ -180,6 +188,7 @@ public struct GuionElement: GuionElementProtocol {
         self.isDualDialogue = false
         self.sectionDepth = 0
         self.sceneId = nil
+        self.summary = nil
     }
 
     /// Creates a new screenplay element with the specified type and text.
@@ -213,6 +222,7 @@ public struct GuionElement: GuionElementProtocol {
         self.sceneNumber = element.sceneNumber
         self.sectionDepth = element.sectionDepth
         self.sceneId = element.sceneId
+        self.summary = element.summary
     }
 }
 

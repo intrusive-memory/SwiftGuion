@@ -163,6 +163,7 @@ struct GuionElementTests {
             var sceneNumber: String?
             var sectionDepth: Int
             var sceneId: String?
+            var summary: String?
         }
 
         // Test basic description
@@ -173,7 +174,8 @@ struct GuionElementTests {
             isDualDialogue: false,
             sceneNumber: nil,
             sectionDepth: 0,
-            sceneId: nil
+            sceneId: nil,
+            summary: nil
         )
         #expect(basicElement.description.contains("Custom Action"))
         #expect(basicElement.description.contains("This is custom text"))
@@ -186,7 +188,8 @@ struct GuionElementTests {
             isDualDialogue: false,
             sceneNumber: nil,
             sectionDepth: 0,
-            sceneId: nil
+            sceneId: nil,
+            summary: nil
         )
         #expect(centeredElement.description.contains("centered"))
 
@@ -198,7 +201,8 @@ struct GuionElementTests {
             isDualDialogue: true,
             sceneNumber: nil,
             sectionDepth: 0,
-            sceneId: nil
+            sceneId: nil,
+            summary: nil
         )
         #expect(dualElement.description.contains("dual dialogue"))
 
@@ -210,7 +214,8 @@ struct GuionElementTests {
             isDualDialogue: false,
             sceneNumber: nil,
             sectionDepth: 3,
-            sceneId: nil
+            sceneId: nil,
+            summary: nil
         )
         #expect(sectionElement.description.contains("3"))
     }

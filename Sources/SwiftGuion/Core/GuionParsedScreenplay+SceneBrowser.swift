@@ -219,6 +219,9 @@ extension GuionParsedScreenplay {
             // Parse scene location
             let location = SceneLocation.parse(sceneElement.string)
 
+            // Note: Summary is accessed from GuionElement directly via model in SwiftData mode
+            // Value-based SceneData reads from element's summary property
+
             // Create scene data
             let sceneData = SceneData(
                 element: sceneElement,
