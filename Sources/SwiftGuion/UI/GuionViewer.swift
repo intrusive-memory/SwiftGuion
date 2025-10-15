@@ -10,7 +10,6 @@
 
 #if canImport(SwiftUI)
 import SwiftUI
-#if canImport(SwiftData)
 import SwiftData
 
 /// Complete viewer component for displaying screenplay documents in SwiftUI applications.
@@ -175,7 +174,7 @@ public struct GuionViewer: View {
                     }
 
             case .loaded(let browserData):
-                SceneBrowserWidget(browserData: browserData)
+                SceneBrowserWidget(browserData: browserData, autoExpand: true)
 
             case .error(let error):
                 ErrorView(error: error)
@@ -483,5 +482,4 @@ extension GuionDocumentModel {
         .frame(width: 600, height: 800)
 }
 
-#endif // canImport(SwiftData)
 #endif // canImport(SwiftUI)

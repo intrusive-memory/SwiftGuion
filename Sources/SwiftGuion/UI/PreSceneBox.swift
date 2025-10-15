@@ -8,17 +8,18 @@
 //
 
 import SwiftUI
+import SwiftData
 
 /// A collapsible box displaying pre-scene content (OVER BLACK) with an expandable disclosure
 public struct PreSceneBox: View {
-    let content: [GuionElement]
+    let content: [GuionElementModel]
     @Binding var isExpanded: Bool
 
     /// Creates a PreSceneBox with the given content and expansion state
     /// - Parameters:
-    ///   - content: Array of GuionElements representing the pre-scene content
+    ///   - content: Array of GuionElementModels representing the pre-scene content
     ///   - isExpanded: Binding to control the expanded/collapsed state
-    public init(content: [GuionElement], isExpanded: Binding<Bool>) {
+    public init(content: [GuionElementModel], isExpanded: Binding<Bool>) {
         self.content = content
         self._isExpanded = isExpanded
     }
@@ -82,40 +83,4 @@ public struct PreSceneBox: View {
                 .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
         )
     }
-}
-
-// MARK: - Preview
-
-#Preview("PreScene Collapsed") {
-    PreSceneBox(
-        content: [
-            GuionElement(type: "Action", text: "CHAPTER 1"),
-            GuionElement(type: "Action", text: "BERNARD")
-        ],
-        isExpanded: .constant(false)
-    )
-    .padding()
-}
-
-#Preview("PreScene Expanded") {
-    PreSceneBox(
-        content: [
-            GuionElement(type: "Action", text: "CHAPTER 1"),
-            GuionElement(type: "Action", text: "BERNARD")
-        ],
-        isExpanded: .constant(true)
-    )
-    .padding()
-}
-
-#Preview("PreScene Long Content") {
-    PreSceneBox(
-        content: [
-            GuionElement(type: "Action", text: "CHAPTER 2"),
-            GuionElement(type: "Action", text: "KILLIAN"),
-            GuionElement(type: "Action", text: "Over the sounds of a steam room, we hear...")
-        ],
-        isExpanded: .constant(true)
-    )
-    .padding()
 }

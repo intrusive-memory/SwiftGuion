@@ -61,7 +61,7 @@ final class SceneBrowserUITests: XCTestCase {
                 // Verify scenes
                 for scene in sceneGroup.scenes {
                     XCTAssertFalse(scene.id.isEmpty, "Scene should have valid ID")
-                    XCTAssertEqual(scene.element.type, "sceneHeader", "Scene element should be scene header")
+                    XCTAssertEqual(scene.element?.type, "sceneHeader", "Scene element should be scene header")
                 }
             }
         }
@@ -77,16 +77,18 @@ final class SceneBrowserUITests: XCTestCase {
         for chapter in browserData.chapters {
             for sceneGroup in chapter.sceneGroups {
                 for scene in sceneGroup.scenes {
-                    if !scene.sceneElements.isEmpty {
+                    if !(scene.sceneElements?.isEmpty ?? true) {
                         foundSceneWithContent = true
 
                         // Verify scene has elements
-                        XCTAssertGreaterThan(scene.sceneElements.count, 0, "Scene should have elements")
+                        XCTAssertGreaterThan(scene.sceneElements?.count ?? 0, 0, "Scene should have elements")
 
                         // Verify elements have content
-                        for element in scene.sceneElements {
-                            XCTAssertFalse(element.elementText.isEmpty, "Element should have text")
-                            XCTAssertFalse(element.elementType.isEmpty, "Element should have type")
+                        if let sceneElements = scene.sceneElements {
+                            for element in sceneElements {
+                                XCTAssertFalse(element.elementText.isEmpty, "Element should have text")
+                                XCTAssertFalse(element.elementType.isEmpty, "Element should have type")
+                            }
                         }
 
                         break
@@ -383,7 +385,7 @@ final class SceneBrowserUITests: XCTestCase {
         )
 
         XCTAssertFalse(sceneData.slugline.isEmpty, "Scene should have slugline")
-        XCTAssertTrue(sceneData.sceneElements.isEmpty, "Scene should have no elements")
+        XCTAssertTrue(sceneData.sceneElements?.isEmpty ?? true, "Scene should have no elements")
         XCTAssertFalse(sceneData.hasPreScene, "Scene should have no preScene")
     }
 
@@ -405,7 +407,7 @@ final class SceneBrowserUITests: XCTestCase {
         )
 
         XCTAssertNil(sceneData.sceneLocation, "Scene should have nil location")
-        XCTAssertFalse(sceneData.sceneElements.isEmpty, "Scene should still have elements")
+        XCTAssertFalse(sceneData.sceneElements?.isEmpty ?? true, "Scene should still have elements")
     }
 
     func testPreSceneTextProperty() {

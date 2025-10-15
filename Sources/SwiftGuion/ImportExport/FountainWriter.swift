@@ -81,7 +81,11 @@ public class FountainWriter {
                 textToWrite = "===="
             } else if element.elementType == "Section Heading" {
                 let sectionDepthMarkup = String(repeating: "#", count: Int(element.sectionDepth))
-                textToWrite = sectionDepthMarkup + element.elementText
+                // Remove leading space if present to avoid double spaces
+                let text = element.elementText.hasPrefix(" ")
+                    ? String(element.elementText.dropFirst())
+                    : element.elementText
+                textToWrite = sectionDepthMarkup + " " + text
             } else if element.elementType == "Transition" {
                 if !matches(string: element.elementText, pattern: FountainRegexes.transitionPattern) {
                     textToWrite = "> \(element.elementText)"

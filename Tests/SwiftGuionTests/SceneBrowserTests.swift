@@ -96,7 +96,7 @@ final class SceneBrowserTests: XCTestCase {
         XCTAssertEqual(sceneData.id, "scene-1")
         XCTAssertEqual(sceneData.slugline, "INT. STEAM ROOM - DAY")
         XCTAssertEqual(sceneData.sceneId, "uuid-123")
-        XCTAssertEqual(sceneData.sceneElements.count, 1)
+        XCTAssertEqual(sceneData.sceneElements?.count, 1)
         XCTAssertFalse(sceneData.hasPreScene)
         XCTAssertFalse(sceneData.isOverBlack)
     }
@@ -215,7 +215,7 @@ final class SceneBrowserTests: XCTestCase {
         if let firstScene = firstGroup.scenes.first {
             XCTAssertFalse(firstScene.slugline.isEmpty, "Scene should have slugline")
             XCTAssertNotNil(firstScene.element)
-            XCTAssertEqual(firstScene.element.type, "sceneHeader")
+            XCTAssertEqual(firstScene.element?.type, "sceneHeader")
         }
     }
 

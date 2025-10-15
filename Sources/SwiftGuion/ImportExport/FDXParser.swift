@@ -16,8 +16,9 @@ public struct FDXParsedElement: GuionElementProtocol {
     public var sceneNumber: String?
     public var sectionDepth: Int
     public var sceneId: String?
+    public var summary: String?
 
-    public init(elementText: String, elementType: String, isCentered: Bool, isDualDialogue: Bool, sceneNumber: String?, sectionDepth: Int, sceneId: String? = nil) {
+    public init(elementText: String, elementType: String, isCentered: Bool, isDualDialogue: Bool, sceneNumber: String?, sectionDepth: Int, sceneId: String? = nil, summary: String? = nil) {
         self.elementText = elementText
         self.elementType = elementType
         self.isCentered = isCentered
@@ -25,6 +26,7 @@ public struct FDXParsedElement: GuionElementProtocol {
         self.sceneNumber = sceneNumber
         self.sectionDepth = sectionDepth
         self.sceneId = sceneId
+        self.summary = summary
     }
 }
 
