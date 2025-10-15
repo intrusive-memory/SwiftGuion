@@ -58,7 +58,12 @@ public struct SceneWidget: View {
                             if dialogueBlocks[blockIndex].isDialogueBlock {
                                 DialogueBlockView(block: dialogueBlocks[blockIndex])
                             } else {
-                                SceneElementView(element: dialogueBlocks[blockIndex].elements[0])
+                                let element = dialogueBlocks[blockIndex].elements[0]
+                                if element.elementType == "Action" {
+                                    ActionView(element: element)
+                                } else {
+                                    SceneElementView(element: element)
+                                }
                             }
                         }
                     }
@@ -134,10 +139,6 @@ struct SceneElementView: View {
                     .foregroundStyle(colorForElement)
                     .textSelection(.enabled)
                     .multilineTextAlignment(textAlignment)
-                    .frame(
-                        maxWidth: contentWidth(totalWidth: geometry.size.width),
-                        alignment: alignmentForElement
-                    )
 
                 // Trailing margin
                 if trailingMarginWidth(totalWidth: geometry.size.width) > 0 {
@@ -148,6 +149,7 @@ struct SceneElementView: View {
             .frame(width: geometry.size.width, alignment: .leading)
         }
         .frame(height: elementHeight)
+        .fixedSize(horizontal: false, vertical: false)
         .padding(.vertical, verticalPadding)
     }
 
@@ -257,7 +259,7 @@ struct SceneElementView: View {
         case "Transition":
             return fontSize * 0.67 // 2em spacing before transitions
         case "Action":
-            return fontSize * 0.17
+            return fontSize * 0.35
         default:
             return fontSize * 0.08
         }
@@ -352,8 +354,8 @@ struct DialogueBlockView: View {
                 }
             }
         }
-        .padding(.top, fontSize * 0.3)
-        .padding(.bottom, fontSize * 1.5)
+        .padding(.top, fontSize * 0.57)
+        .padding(.bottom, fontSize * 0.85)
         .background(
             GeometryReader { geometry in
                 // Background positioned to cover only dialogue text area (25% to 75% of width)
@@ -362,10 +364,10 @@ struct DialogueBlockView: View {
                         .frame(width: geometry.size.width * 0.22)
 
                     RoundedRectangle(cornerRadius: 6)
-                        .fill(Color.secondary.opacity(0.15))
+                        .fill(Color.secondary.opacity(0.06))
                         .overlay(
                             RoundedRectangle(cornerRadius: 6)
-                                .stroke(Color.secondary.opacity(0.25), lineWidth: 1)
+                                .stroke(Color.secondary.opacity(0.10), lineWidth: 1)
                         )
                         .frame(width: geometry.size.width * 0.56)
                         .padding(.horizontal, 12)
@@ -421,7 +423,7 @@ struct DialogueParentheticalView: View {
                     .frame(width: geometry.size.width * 0.32)
 
                 Text(element.elementText)
-                    .font(.custom("Courier New", size: fontSize))
+                    .font(.custom("Courier New", size: fontSize * 0.65))
                     .italic()
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
@@ -503,5 +505,37 @@ struct DialogueLyricsView: View {
         }
         .frame(height: nil)
         .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+// MARK: - Action View
+
+/// Action line view with proper screenplay formatting (10% left margin, 10% right margin)
+struct ActionView: View {
+    let element: GuionElementModel
+    @Environment(\.screenplayFontSize) var fontSize
+
+    var body: some View {
+        GeometryReader { geometry in
+            HStack(alignment: .top, spacing: 0) {
+                // 10% left margin for action
+                Spacer()
+                    .frame(width: geometry.size.width * 0.10)
+
+                Text(element.elementText)
+                    .font(.custom("Courier New", size: fontSize))
+                    .foregroundStyle(.primary)
+                    .textSelection(.enabled)
+                    .frame(
+                        maxWidth: geometry.size.width * 0.80, // 100% - 10% - 10% = 80%
+                        alignment: .leading
+                    )
+
+                // 10% right margin
+                Spacer()
+                    .frame(width: geometry.size.width * 0.10)
+            }
+        }
+        .padding(.vertical, fontSize * 0.35)
     }
 }
