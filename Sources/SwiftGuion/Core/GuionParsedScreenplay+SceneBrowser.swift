@@ -251,29 +251,66 @@ extension GuionParsedScreenplay {
 
     /// Extract actual scene elements directly from the screenplay
     private func extractSceneElements(for sceneElement: OutlineElement) -> [GuionElement] {
-        guard let sceneId = sceneElement.sceneId else { return [] }
+        // Try sceneId-based extraction first (preferred method)
+        if let sceneId = sceneElement.sceneId {
+            var sceneElements: [GuionElement] = []
+            var inScene = false
 
-        // Find all elements that belong to this scene
-        var sceneElements: [GuionElement] = []
-        var inScene = false
+            for element in elements {
+                // Check if this element starts the scene (by matching sceneId)
+                if element.elementType == "Scene Heading" && element.sceneId == sceneId {
+                    inScene = true
+                    continue // Skip the scene heading itself (it's already in the outline)
+                }
 
-        for element in elements {
-            // Check if this element starts the scene (by matching sceneId)
-            if element.elementType == "Scene Heading" && element.sceneId == sceneId {
-                inScene = true
-                continue // Skip the scene heading itself (it's already in the outline)
+                // Check if we've reached the next scene (any scene heading after we've started)
+                if inScene && element.elementType == "Scene Heading" {
+                    break
+                }
+
+                // Collect all elements between this scene heading and the next
+                // Note: Only scene headings have sceneIds; dialogue, action, etc. do not
+                if inScene {
+                    sceneElements.append(element)
+                }
             }
 
-            // Check if we've reached the next scene (any scene heading after we've started)
-            if inScene && element.elementType == "Scene Heading" {
+            return sceneElements
+        }
+
+        // Fallback: Use text-based parsing when sceneId is not available
+        // This handles synthetic scenes, manually constructed outlines, or imported data without UUIDs
+        return extractSceneElementsByRange(for: sceneElement)
+    }
+
+    /// Extract scene elements by matching text (fallback for scenes without sceneId)
+    private func extractSceneElementsByRange(for sceneElement: OutlineElement) -> [GuionElement] {
+        var sceneElements: [GuionElement] = []
+        var foundSceneHeading = false
+
+        // Normalize the scene heading text for comparison
+        let targetText = sceneElement.string.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Find the scene heading by matching text and collect elements after it
+        for element in elements {
+            // Check if this is our scene heading
+            if !foundSceneHeading {
+                if element.elementType == "Scene Heading" {
+                    let elementText = element.elementText.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if elementText == targetText {
+                        foundSceneHeading = true
+                        continue // Skip the scene heading itself
+                    }
+                }
+                continue
+            }
+
+            // Once we've found our scene, collect elements until the next scene heading
+            if element.elementType == "Scene Heading" {
                 break
             }
 
-            // Collect all elements between this scene heading and the next
-            // Note: Only scene headings have sceneIds; dialogue, action, etc. do not
-            if inScene {
-                sceneElements.append(element)
-            }
+            sceneElements.append(element)
         }
 
         return sceneElements
