@@ -18,6 +18,8 @@ public struct SceneBrowserWidget: View {
     @State private var expandedSceneGroups: Set<String> = []
     @State private var expandedScenes: Set<String> = []
     @State private var expandedPreScenes: Set<String> = []
+    @State private var currentFontSize: CGFloat = 12
+    @State private var lastWidth: CGFloat = 0
 
     /// Creates a SceneBrowserWidget from SceneBrowserData
     /// - Parameters:
@@ -38,63 +40,95 @@ public struct SceneBrowserWidget: View {
     }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Title header (Level 1 - always visible)
-            if let title = browserData.title {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(title.string)
-                        .font(.largeTitle)
-                        .bold()
-                        .foregroundStyle(title.isSynthetic ? .secondary : .primary)
+        GeometryReader { geometry in
+            VStack(alignment: .leading, spacing: 0) {
+                // Title header (Level 1 - always visible)
+                if let title = browserData.title {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 8) {
+                            if title.isSynthetic {
+                                Text("INFERRED:")
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                                    .foregroundStyle(.secondary)
+                                    .textCase(.uppercase)
+                            }
+                            Text(title.string)
+                                .font(.largeTitle)
+                                .bold()
+                                .foregroundStyle(title.isSynthetic ? .secondary : .primary)
+                        }
                         .accessibilityAddTraits(.isHeader)
                         .accessibilityLabel("Script title: \(title.string)")
 
-                    Divider()
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, 20)
-                .padding(.bottom, 12)
-            }
-
-            // Scrollable chapter list or empty state
-            if browserData.chapters.isEmpty {
-                EmptyBrowserView()
-            } else {
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 16) {
-                        ForEach(browserData.chapters) { chapter in
-                            ChapterWidget(
-                                chapter: chapter,
-                                isExpanded: Binding(
-                                    get: { expandedChapters.contains(chapter.id) },
-                                    set: { isExpanded in
-                                        if isExpanded {
-                                            expandedChapters.insert(chapter.id)
-                                        } else {
-                                            expandedChapters.remove(chapter.id)
-                                        }
-                                    }
-                                ),
-                                expandedSceneGroups: $expandedSceneGroups,
-                                expandedScenes: $expandedScenes,
-                                expandedPreScenes: $expandedPreScenes
-                            )
-                        }
+                        Divider()
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
+                    .padding(.horizontal, 8)
+                    .padding(.top, 8)
+                    .padding(.bottom, 4)
                 }
-                .accessibilityLabel("Scene browser")
-                .accessibilityHint("\(browserData.chapters.count) chapters")
+
+                // Scrollable chapter list or empty state
+                if browserData.chapters.isEmpty {
+                    EmptyBrowserView()
+                } else {
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 8) {
+                            ForEach(browserData.chapters) { chapter in
+                                ChapterWidget(
+                                    chapter: chapter,
+                                    isExpanded: Binding(
+                                        get: { expandedChapters.contains(chapter.id) },
+                                        set: { isExpanded in
+                                            if isExpanded {
+                                                expandedChapters.insert(chapter.id)
+                                            } else {
+                                                expandedChapters.remove(chapter.id)
+                                            }
+                                        }
+                                    ),
+                                    expandedSceneGroups: $expandedSceneGroups,
+                                    expandedScenes: $expandedScenes,
+                                    expandedPreScenes: $expandedPreScenes
+                                )
+                            }
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                    }
+                    .accessibilityLabel("Scene browser")
+                    .accessibilityHint("\(browserData.chapters.count) chapters")
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color(nsColor: .textBackgroundColor))
+            .environment(\.screenplayFontSize, currentFontSize)
+            .accessibilityElement(children: .contain)
+            .onAppear {
+                if autoExpand {
+                    expandFirstTwoLevels()
+                }
+                // Calculate initial font size
+                updateFontSize(for: geometry.size.width)
+            }
+            .onChange(of: geometry.size.width) { _, newWidth in
+                // Recalculate font size when window width changes
+                updateFontSize(for: newWidth)
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(nsColor: .textBackgroundColor))
-        .accessibilityElement(children: .contain)
-        .onAppear {
-            if autoExpand {
-                expandFirstTwoLevels()
-            }
+    }
+
+    /// Update font size based on available width
+    private func updateFontSize(for width: CGFloat) {
+        // Only recalculate if width changed significantly (more than 1 point)
+        guard abs(width - lastWidth) > 1 else { return }
+
+        lastWidth = width
+        let newFontSize = ScreenplayPageFormat.calculateFontSize(forWidth: width)
+
+        // Animate font size changes for smooth resizing
+        withAnimation(.easeInOut(duration: 0.15)) {
+            currentFontSize = newFontSize
         }
     }
 

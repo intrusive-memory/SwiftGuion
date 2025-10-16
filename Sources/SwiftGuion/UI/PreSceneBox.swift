@@ -14,6 +14,7 @@ import SwiftData
 public struct PreSceneBox: View {
     let content: [GuionElementModel]
     @Binding var isExpanded: Bool
+    @Environment(\.screenplayFontSize) var fontSize
 
     /// Creates a PreSceneBox with the given content and expansion state
     /// - Parameters:
@@ -40,7 +41,7 @@ public struct PreSceneBox: View {
                         .animation(.easeInOut(duration: 0.2), value: isExpanded)
 
                     Text("OVER BLACK")
-                        .font(.caption)
+                        .font(.custom("Courier New", size: fontSize * 0.83))
                         .italic()
                         .foregroundStyle(.secondary)
 
@@ -62,7 +63,7 @@ public struct PreSceneBox: View {
                 VStack(alignment: .center, spacing: 4) {
                     ForEach(content.indices, id: \.self) { index in
                         Text(content[index].elementText)
-                            .font(.system(.body, design: .monospaced))
+                            .font(.custom("Courier New", size: fontSize))
                             .italic()
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)

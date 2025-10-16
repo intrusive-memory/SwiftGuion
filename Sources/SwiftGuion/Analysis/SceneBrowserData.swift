@@ -87,11 +87,53 @@ public struct SceneData: Identifiable {
     /// Reference to the scene heading element model (SwiftData)
     public let sceneHeadingModel: GuionElementModel?
 
-    /// References to scene content element models (SwiftData)
-    public let sceneElementModels: [GuionElementModel]
+    /// Internal storage for model-based elements
+    private let _sceneElementModels: [GuionElementModel]?
 
-    /// References to pre-scene content element models (SwiftData)
-    public let preSceneElementModels: [GuionElementModel]?
+    /// Internal storage for model-based pre-scene elements
+    private let _preSceneElementModels: [GuionElementModel]?
+
+    /// References to scene content element models (SwiftData or converted from value types)
+    public var sceneElementModels: [GuionElementModel] {
+        // If we have model-based elements, return them
+        if let models = _sceneElementModels {
+            return models
+        }
+
+        // Otherwise, convert value-based elements to models
+        guard let elements = sceneElements else { return [] }
+        return elements.map { element in
+            GuionElementModel(
+                elementText: element.elementText,
+                elementType: element.elementType,
+                isCentered: element.isCentered,
+                isDualDialogue: element.isDualDialogue,
+                sceneNumber: element.sceneNumber,
+                sectionDepth: element.sectionDepth
+            )
+        }
+    }
+
+    /// References to pre-scene content element models (SwiftData or converted from value types)
+    public var preSceneElementModels: [GuionElementModel]? {
+        // If we have model-based elements, return them
+        if let models = _preSceneElementModels {
+            return models
+        }
+
+        // Otherwise, convert value-based elements to models
+        guard let elements = preSceneElements else { return nil }
+        return elements.map { element in
+            GuionElementModel(
+                elementText: element.elementText,
+                elementType: element.elementType,
+                isCentered: element.isCentered,
+                isDualDialogue: element.isDualDialogue,
+                sceneNumber: element.sceneNumber,
+                sectionDepth: element.sectionDepth
+            )
+        }
+    }
     #endif
 
     /// Value-type storage (always available for compatibility)
@@ -112,8 +154,8 @@ public struct SceneData: Identifiable {
     ) {
         self.id = sceneHeadingModel?.sceneId ?? UUID().uuidString
         self.sceneHeadingModel = sceneHeadingModel
-        self.sceneElementModels = sceneElementModels
-        self.preSceneElementModels = preSceneElementModels
+        self._sceneElementModels = sceneElementModels
+        self._preSceneElementModels = preSceneElementModels
 
         // Set value-based properties to nil when using model-based init
         self.element = nil
@@ -137,10 +179,11 @@ public struct SceneData: Identifiable {
         self.sceneLocation = sceneLocation
 
         #if canImport(SwiftData)
-        // Set model-based properties to nil/empty when using value-based init
+        // Set model-based properties to nil when using value-based init
+        // The computed properties will convert on-the-fly
         self.sceneHeadingModel = nil
-        self.sceneElementModels = []
-        self.preSceneElementModels = nil
+        self._sceneElementModels = nil
+        self._preSceneElementModels = nil
         #endif
     }
 

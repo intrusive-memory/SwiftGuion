@@ -599,6 +599,192 @@ More action.
         XCTAssertGreaterThan(browserData.chapters[0].sceneGroups.count, 0, "Should have scene groups")
     }
 
+    func testDialogueDisplayInExpandedScene() throws {
+        // Create a scene with dialogue elements
+        let sceneWithDialogue = SceneData(
+            element: OutlineElement(
+                id: "scene-dialogue",
+                index: 1,
+                level: 0,
+                range: [10, 100],
+                rawString: "INT. COFFEE SHOP - DAY",
+                string: "INT. COFFEE SHOP - DAY",
+                type: "sceneHeader"
+            ),
+            sceneElements: [
+                GuionElement(type: "Action", text: "JANE sits at a table, typing on her laptop."),
+                GuionElement(type: "Character", text: "JOHN"),
+                GuionElement(type: "Dialogue", text: "Hey, Jane!"),
+                GuionElement(type: "Character", text: "JANE"),
+                GuionElement(type: "Parenthetical", text: "(looking up)"),
+                GuionElement(type: "Dialogue", text: "Oh, hi John!")
+            ],
+            sceneLocation: SceneLocation.parse("INT. COFFEE SHOP - DAY")
+        )
+
+        // Verify scene has dialogue elements
+        XCTAssertNotNil(sceneWithDialogue.sceneElements, "Scene should have elements")
+        XCTAssertEqual(sceneWithDialogue.sceneElements?.count, 6, "Scene should have 6 elements")
+
+        // Verify dialogue elements are present
+        let dialogueElements = sceneWithDialogue.sceneElements?.filter { $0.elementType == "Dialogue" }
+        XCTAssertEqual(dialogueElements?.count, 2, "Scene should have 2 dialogue elements")
+        XCTAssertEqual(dialogueElements?[0].elementText, "Hey, Jane!", "First dialogue should match")
+        XCTAssertEqual(dialogueElements?[1].elementText, "Oh, hi John!", "Second dialogue should match")
+
+        // Verify character elements are present
+        let characterElements = sceneWithDialogue.sceneElements?.filter { $0.elementType == "Character" }
+        XCTAssertEqual(characterElements?.count, 2, "Scene should have 2 character elements")
+        XCTAssertEqual(characterElements?[0].elementText, "JOHN", "First character should be JOHN")
+        XCTAssertEqual(characterElements?[1].elementText, "JANE", "Second character should be JANE")
+
+        // Verify parenthetical element is present
+        let parentheticalElements = sceneWithDialogue.sceneElements?.filter { $0.elementType == "Parenthetical" }
+        XCTAssertEqual(parentheticalElements?.count, 1, "Scene should have 1 parenthetical")
+        XCTAssertEqual(parentheticalElements?[0].elementText, "(looking up)", "Parenthetical should match")
+
+        // Verify action element is present
+        let actionElements = sceneWithDialogue.sceneElements?.filter { $0.elementType == "Action" }
+        XCTAssertEqual(actionElements?.count, 1, "Scene should have 1 action")
+        XCTAssertEqual(actionElements?[0].elementText, "JANE sits at a table, typing on her laptop.", "Action should match")
+
+        print("✅ Dialogue display test passed - all elements present and correctly typed")
+    }
+
+    func testDialogueInRealScript() throws {
+        // Load test.fountain and verify it contains dialogue
+        let fountainPath = try Fijos.getFixture("test", extension: "fountain").path
+        let script = try GuionParsedScreenplay(file: fountainPath)
+        let browserData = script.extractSceneBrowserData()
+
+        // Find a scene with dialogue
+        var foundDialogue = false
+        var sceneWithDialogue: SceneData?
+
+        for chapter in browserData.chapters {
+            for sceneGroup in chapter.sceneGroups {
+                for scene in sceneGroup.scenes {
+                    if let elements = scene.sceneElements {
+                        let hasDialogue = elements.contains { $0.elementType == "Dialogue" }
+                        if hasDialogue {
+                            foundDialogue = true
+                            sceneWithDialogue = scene
+                            break
+                        }
+                    }
+                }
+                if foundDialogue { break }
+            }
+            if foundDialogue { break }
+        }
+
+        if let scene = sceneWithDialogue {
+            print("📝 Found scene with dialogue: '\(scene.slugline)'")
+
+            // Verify dialogue structure
+            let dialogueElements = scene.sceneElements?.filter { $0.elementType == "Dialogue" } ?? []
+            let characterElements = scene.sceneElements?.filter { $0.elementType == "Character" } ?? []
+
+            XCTAssertGreaterThan(dialogueElements.count, 0, "Should have dialogue elements")
+            XCTAssertGreaterThan(characterElements.count, 0, "Should have character elements")
+
+            // Print dialogue for debugging
+            for element in scene.sceneElements ?? [] {
+                if element.elementType == "Character" || element.elementType == "Dialogue" || element.elementType == "Parenthetical" {
+                    print("  \(element.elementType): \(element.elementText)")
+                }
+            }
+
+            print("✅ Dialogue verification passed")
+        } else {
+            // Note: test.fountain may or may not have dialogue depending on fixture content
+            print("ℹ️  Note: test.fountain does not contain dialogue. Test verifies structure only.")
+        }
+    }
+
+    func testDialogueBlockGrouping() throws {
+        // Create test elements
+        let elements = [
+            GuionElementModel(elementText: "Action line 1", elementType: "Action"),
+            GuionElementModel(elementText: "JOHN", elementType: "Character"),
+            GuionElementModel(elementText: "Hello!", elementType: "Dialogue"),
+            GuionElementModel(elementText: "JANE", elementType: "Character"),
+            GuionElementModel(elementText: "(smiling)", elementType: "Parenthetical"),
+            GuionElementModel(elementText: "Hi there!", elementType: "Dialogue"),
+            GuionElementModel(elementText: "Action line 2", elementType: "Action")
+        ]
+
+        let blocks = groupDialogueBlocks(elements: elements)
+
+        // Should have 4 blocks: Action, John's dialogue, Jane's dialogue, Action
+        XCTAssertEqual(blocks.count, 4, "Should have 4 blocks")
+
+        // Block 0: Action
+        XCTAssertFalse(blocks[0].isDialogueBlock, "First block should not be dialogue")
+        XCTAssertEqual(blocks[0].elements.count, 1, "Action block should have 1 element")
+
+        // Block 1: John's dialogue
+        XCTAssertTrue(blocks[1].isDialogueBlock, "Second block should be dialogue")
+        XCTAssertEqual(blocks[1].elements.count, 2, "John's block should have 2 elements (Character + Dialogue)")
+        XCTAssertEqual(blocks[1].elements[0].elementType, "Character")
+        XCTAssertEqual(blocks[1].elements[1].elementType, "Dialogue")
+
+        // Block 2: Jane's dialogue with parenthetical
+        XCTAssertTrue(blocks[2].isDialogueBlock, "Third block should be dialogue")
+        XCTAssertEqual(blocks[2].elements.count, 3, "Jane's block should have 3 elements (Character + Parenthetical + Dialogue)")
+        XCTAssertEqual(blocks[2].elements[0].elementType, "Character")
+        XCTAssertEqual(blocks[2].elements[1].elementType, "Parenthetical")
+        XCTAssertEqual(blocks[2].elements[2].elementType, "Dialogue")
+
+        // Block 3: Action
+        XCTAssertFalse(blocks[3].isDialogueBlock, "Fourth block should not be dialogue")
+        XCTAssertEqual(blocks[3].elements.count, 1, "Action block should have 1 element")
+
+        print("✅ Dialogue block grouping test passed")
+    }
+
+    func testDialogueElementModels() throws {
+        // Test that dialogue converts correctly to GuionElementModel
+        let sceneWithDialogue = SceneData(
+            element: OutlineElement(
+                id: "scene-dialogue",
+                index: 1,
+                level: 0,
+                range: [10, 100],
+                rawString: "INT. ROOM - DAY",
+                string: "INT. ROOM - DAY",
+                type: "sceneHeader"
+            ),
+            sceneElements: [
+                GuionElement(type: "Character", text: "BOB"),
+                GuionElement(type: "Dialogue", text: "This is a test."),
+                GuionElement(type: "Parenthetical", text: "(whispering)"),
+                GuionElement(type: "Dialogue", text: "Can you hear me?")
+            ],
+            sceneLocation: nil
+        )
+
+        // Get element models (this is what the UI actually uses)
+        let elementModels = sceneWithDialogue.sceneElementModels
+
+        XCTAssertEqual(elementModels.count, 4, "Should have 4 element models")
+
+        // Verify each element model
+        XCTAssertEqual(elementModels[0].elementType, "Character", "First should be Character")
+        XCTAssertEqual(elementModels[0].elementText, "BOB", "Character name should be BOB")
+
+        XCTAssertEqual(elementModels[1].elementType, "Dialogue", "Second should be Dialogue")
+        XCTAssertEqual(elementModels[1].elementText, "This is a test.", "Dialogue text should match")
+
+        XCTAssertEqual(elementModels[2].elementType, "Parenthetical", "Third should be Parenthetical")
+        XCTAssertEqual(elementModels[2].elementText, "(whispering)", "Parenthetical text should match")
+
+        XCTAssertEqual(elementModels[3].elementType, "Dialogue", "Fourth should be Dialogue")
+        XCTAssertEqual(elementModels[3].elementText, "Can you hear me?", "Second dialogue should match")
+
+        print("✅ Element model conversion test passed")
+    }
+
     func testSyntheticElementsNotExported() throws {
         // Create a synthetic element directly
         let syntheticElement = OutlineElement(

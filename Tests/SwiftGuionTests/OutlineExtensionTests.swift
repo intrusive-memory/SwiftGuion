@@ -55,7 +55,7 @@ struct OutlineExtensionTests {
         }
     }
 
-    @Test("Multiple level 1 headers should be demoted")
+    @Test("Multiple level 1 headers are allowed")
     func testMultipleLevelOneHeaders() async throws {
         let fountainURL = try Fijos.getFixture("bigfish", extension: "fountain")
         let script = try GuionParsedScreenplay(file: fountainURL.path)
@@ -63,7 +63,7 @@ struct OutlineExtensionTests {
 
         let level1Elements = outline.filter { $0.level == 1 }
 
-        // Should only have one level 1 element in a well-formed outline
+        // Should have at least one level 1 element, multiple are allowed
         #expect(level1Elements.count >= 1)
     }
 
