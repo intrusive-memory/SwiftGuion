@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import SwiftFijos
 @testable import SwiftGuion
 
 final class OutlineLevelParsingTests: XCTestCase {
@@ -470,12 +471,37 @@ final class OutlineLevelParsingTests: XCTestCase {
     }
 
     func testMrMrCharlesDocument() throws {
-        // Test the actual mr-mr-charles.fountain fixture
-        let fixtureURL = URL(fileURLWithPath: "/Users/stovak/Projects/SwiftGuion/Fixtures/mr-mr-charles.fountain")
-        guard let content = try? String(contentsOf: fixtureURL, encoding: .utf8) else {
-            XCTFail("Could not read mr-mr-charles.fountain fixture")
-            return
-        }
+        // This test uses inline content instead of a fixture file
+        // The mr-mr-charles.fountain fixture demonstrates multiple level 1 sections
+        let content = """
+        # PITCH NOTES
+
+        ## **_LOGLINE_**
+
+        Set in modern Palm Springs, semi-retired photojournalist Mitch Sawyer and his husband Billy Charles become embroiled in a mystery when billionaire Clive WYNANT's assistant is murdered and the whole Wynant family is suspect.
+
+        ## **_GENRES_**
+
+        Mystery, LGBT, PALM SPRINGS, Noir, Comedy
+
+        # SCREENPLAY
+
+        ## CHAPTER 1
+
+        ### PROLOGUE
+
+        INT. ROOM - DAY
+
+        Action.
+
+        ## CHAPTER 2
+
+        ### Scene Group
+
+        INT. ANOTHER ROOM - DAY
+
+        More action.
+        """
 
         let script = try GuionParsedScreenplay(string: content)
         let outline = script.extractOutline()
