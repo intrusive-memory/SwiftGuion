@@ -60,7 +60,6 @@ Phase 5 has been successfully completed, achieving **90.52% line coverage** (exc
 - FountainScript+Outline.swift: **90.98%**
 - FDXDocumentParser.swift: **97.06%**
 - SceneSummarizer.swift: **95.37%**
-- SpeakableContent.swift: **96.08%**
 - SceneBrowserData.swift: **92.73%**
 - FountainScript+Highland.swift: **92.22%**
 - GuionDocumentModel.swift: **99.17%**
@@ -193,7 +192,6 @@ Executed 132 tests, with 0 failures (0 unexpected) in 9.811 seconds
 | GuionDocumentModel.swift | - | **99.17%** | - | ✅ |
 | FDXDocumentParser.swift | - | **97.06%** | - | ✅ |
 | SceneSummarizer.swift | - | **95.37%** | - | ✅ |
-| SpeakableContent.swift | - | **96.08%** | - | ✅ |
 | FDXDocumentWriter.swift | - | **100.00%** | - | ✅ |
 | GuionElement.swift | - | **100.00%** | - | ✅ |
 
@@ -547,7 +545,6 @@ FDXDocumentWriter.swift:      100.00% (57/57 lines)
 
 ```
 FDXDocumentParser.swift:      97.06% (204/204 lines, 6 missed)
-SpeakableContent.swift:       96.08% (51/51 lines, 2 missed)
 SceneSummarizer.swift:        95.37% (108/108 lines, 5 missed)
 ```
 

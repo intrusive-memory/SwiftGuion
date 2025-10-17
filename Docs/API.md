@@ -165,14 +165,6 @@ Each structure includes:
 - Extracts characters, action, and dialogue
 - Produces human-readable scene descriptions
 
-### SpeakableContent
-
-`SpeakableContent` extracts dialogue for text-to-speech or analysis:
-
-- `speakableLines(from:)` – extract all spokentext
-- Filters out stage directions and action
-- Preserves character attribution
-
 ## ImportExport Module
 
 The ImportExport module handles parsing and writing of various screenplay formats:

@@ -122,7 +122,6 @@ Executed 139 tests, with 1 test skipped and 0 failures (0 unexpected) in 52.641 
 | **FDXDocumentWriter.swift** | 57 | 0 | **100.00%** | ✅ |
 | **GuionDocumentModel.swift** | 120 | 1 | **99.17%** | ✅ |
 | FDXDocumentParser.swift | 204 | 6 | 97.06% | ✅ |
-| SpeakableContent.swift | 51 | 2 | 96.08% | ✅ |
 | SceneSummarizer.swift | 108 | 5 | 95.37% | ✅ |
 | FastFountainParser.swift | 422 | 29 | 93.13% | ✅ |
 | SceneBrowserData.swift | 55 | 4 | 92.73% | ✅ |
@@ -734,7 +733,6 @@ FDXDocumentWriter.swift:      100.00% (57/57 lines)
 ```
 GuionDocumentModel.swift:     99.17% (120/120 lines, 1 missed)
 FDXDocumentParser.swift:      97.06% (204/204 lines, 6 missed)
-SpeakableContent.swift:       96.08% (51/51 lines, 2 missed)
 SceneSummarizer.swift:        95.37% (108/108 lines, 5 missed)
 ```
 
