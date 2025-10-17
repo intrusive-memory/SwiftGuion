@@ -17,18 +17,18 @@ import SwiftFijos
     #expect(!parsedDocument.elements.isEmpty, "FDX parser should produce screenplay elements")
 
     // The FDX file starts with an Action element
-    #expect(parsedDocument.elements.first?.elementType == "Action", "First element should be Action")
+    #expect(parsedDocument.elements.first?.elementType == .action, "First element should be Action")
 
     // Find scene headings in the parsed document
     let hasSceneHeading = parsedDocument.elements.contains { element in
-        element.elementType == "Scene Heading" && element.elementText.uppercased().contains("EXT")
+        element.elementType == .sceneHeading && element.elementText.uppercased().contains("EXT")
     }
     #expect(hasSceneHeading, "Parser should capture scene headings from FDX")
 
     // Verify we have various element types
     let elementTypes = Set(parsedDocument.elements.map { $0.elementType })
-    #expect(elementTypes.contains("Scene Heading"), "Should have Scene Heading elements")
-    #expect(elementTypes.contains("Action") || elementTypes.contains("Dialogue"), "Should have Action or Dialogue elements")
+    #expect(elementTypes.contains(.sceneHeading), "Should have Scene Heading elements")
+    #expect(elementTypes.contains(.action) || elementTypes.contains(.dialogue), "Should have Action or Dialogue elements")
 
     let titleContainsBigFish = parsedDocument.titlePageEntries.first?.values.contains { $0.contains("Big Fish") } ?? false
     #expect(titleContainsBigFish, "Title page should capture screenplay title")
@@ -42,7 +42,7 @@ import SwiftFijos
     let script = try GuionParsedScreenplay(file: fountainURL.path)
 
     // Check that we have scene headings
-    let sceneHeadings = script.elements.filter { $0.elementType == "Scene Heading" }
+    let sceneHeadings = script.elements.filter { $0.elementType == .sceneHeading }
     #expect(!sceneHeadings.isEmpty, "Should have scene headings")
 }
 
@@ -343,7 +343,7 @@ import SwiftFijos
 
     let elements = script.getGuionElements()
     #expect(!elements.isEmpty, "Should have screenplay elements")
-    #expect(elements.contains { $0.elementType == "Scene Heading" }, "Should have scene headings")
+    #expect(elements.contains { $0.elementType == .sceneHeading }, "Should have scene headings")
 
     // Test 2: Empty script should return empty array
     let emptyScript = GuionParsedScreenplay()

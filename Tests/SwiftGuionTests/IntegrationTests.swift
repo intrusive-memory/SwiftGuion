@@ -81,11 +81,11 @@ final class IntegrationTests: XCTestCase {
         XCTAssertGreaterThan(document.titlePage.count, 0, "Should have title page entries")
 
         // Verify scene headings exist
-        let sceneHeadings = document.elements.filter { $0.elementType == "Scene Heading" }
+        let sceneHeadings = document.elements.filter { $0.elementType == .sceneHeading }
         XCTAssertGreaterThan(sceneHeadings.count, 0, "Should have scene headings")
 
         // Verify dialogue exists
-        let dialogue = document.elements.filter { $0.elementType == "Dialogue" }
+        let dialogue = document.elements.filter { $0.elementType == .dialogue }
         XCTAssertGreaterThan(dialogue.count, 0, "Should have dialogue")
 
         // Step 4: Save as BigFish.guion
@@ -185,7 +185,7 @@ final class IntegrationTests: XCTestCase {
                 elementText = "Action line \(i). A character does something interesting here."
             }
 
-            let element = GuionElementModel(elementText: elementText, elementType: elementType)
+            let element = GuionElementModel(elementText: elementText, elementType: ElementType(string: elementType))
             element.document = document
             document.elements.append(element)
         }
@@ -254,7 +254,7 @@ final class IntegrationTests: XCTestCase {
             for j in 1...100 {
                 let element = GuionElementModel(
                     elementText: "Document \(i), Element \(j)",
-                    elementType: j % 5 == 0 ? "Scene Heading" : "Action"
+                    elementType: j % 5 == 0 ? ElementType.sceneHeading : ElementType.action
                 )
                 element.document = document
                 document.elements.append(element)
@@ -311,7 +311,7 @@ final class IntegrationTests: XCTestCase {
         for (index, document) in loadedDocuments.enumerated() {
             let newElement = GuionElementModel(
                 elementText: "Added to document \(index + 1)",
-                elementType: "Action"
+                elementType: .action
             )
             newElement.document = document
             document.elements.append(newElement)
@@ -349,7 +349,7 @@ final class IntegrationTests: XCTestCase {
         for i in 1...1000 {
             let element = GuionElementModel(
                 elementText: "Element \(i): " + String(repeating: "test ", count: 20),
-                elementType: i % 10 == 0 ? "Scene Heading" : "Action"
+                elementType: i % 10 == 0 ? ElementType.sceneHeading : ElementType.action
             )
             element.document = document
             document.elements.append(element)
@@ -384,7 +384,7 @@ final class IntegrationTests: XCTestCase {
         for i in 1...50 {
             let element = GuionElementModel(
                 elementText: "Element \(i)",
-                elementType: "Action"
+                elementType: .action
             )
             element.document = document
             document.elements.append(element)
@@ -402,7 +402,7 @@ final class IntegrationTests: XCTestCase {
             // Add an element
             let newElement = GuionElementModel(
                 elementText: "Cycle \(cycle) element",
-                elementType: "Action"
+                elementType: .action
             )
             newElement.document = document
             document.elements.append(newElement)
@@ -436,7 +436,7 @@ final class IntegrationTests: XCTestCase {
         for i in 1...200 {
             let element = GuionElementModel(
                 elementText: "INT. LOCATION \(i) - DAY",
-                elementType: "Scene Heading"
+                elementType: .sceneHeading
             )
             element.document = document
             document.elements.append(element)
@@ -444,7 +444,7 @@ final class IntegrationTests: XCTestCase {
             // Add some action after each scene
             let action = GuionElementModel(
                 elementText: "Something happens in location \(i).",
-                elementType: "Action"
+                elementType: .action
             )
             action.document = document
             document.elements.append(action)
@@ -462,7 +462,7 @@ final class IntegrationTests: XCTestCase {
         let loadTime = Date().timeIntervalSince(loadStart)
 
         // Verify all scene headings have cached locations
-        let sceneHeadings = loaded.elements.filter { $0.elementType == "Scene Heading" }
+        let sceneHeadings = loaded.elements.filter { $0.elementType == .sceneHeading }
         XCTAssertEqual(sceneHeadings.count, 200, "Should have 200 scene headings")
 
         for scene in sceneHeadings {
@@ -502,7 +502,7 @@ final class IntegrationTests: XCTestCase {
         ]
 
         for (type, text) in testElements {
-            let element = GuionElementModel(elementText: text, elementType: type)
+            let element = GuionElementModel(elementText: text, elementType: ElementType(string: type))
             element.document = original
             original.elements.append(element)
         }

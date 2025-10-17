@@ -23,9 +23,9 @@ final class FountainParserTests: XCTestCase {
         let parser = FountainParser(string: script)
 
         XCTAssertGreaterThanOrEqual(parser.elements.count, 4, "Should parse lyrics elements")
-        XCTAssertEqual(parser.elements[0].elementType, "Lyrics")
+        XCTAssertEqual(parser.elements[0].elementType, .lyrics)
         XCTAssertEqual(parser.elements[0].elementText, "~Oh, what a beautiful morning")
-        XCTAssertEqual(parser.elements[1].elementType, "Lyrics")
+        XCTAssertEqual(parser.elements[1].elementType, .lyrics)
     }
 
     func testLyricsWithSpaceBetween() {
@@ -38,9 +38,9 @@ final class FountainParserTests: XCTestCase {
         let parser = FountainParser(string: script)
 
         XCTAssertGreaterThanOrEqual(parser.elements.count, 2, "Should handle lyrics with blank lines")
-        XCTAssertEqual(parser.elements[0].elementType, "Lyrics")
+        XCTAssertEqual(parser.elements[0].elementType, .lyrics)
         // When there's a newline before, it should add a space separator
-        let lyricsCount = parser.elements.filter { $0.elementType == "Lyrics" }.count
+        let lyricsCount = parser.elements.filter { $0.elementType == .lyrics }.count
         XCTAssertGreaterThan(lyricsCount, 1, "Should have multiple lyrics elements")
     }
 
@@ -55,9 +55,9 @@ final class FountainParserTests: XCTestCase {
         let parser = FountainParser(string: script)
 
         XCTAssertGreaterThanOrEqual(parser.elements.count, 2, "Should parse forced action elements")
-        XCTAssertEqual(parser.elements[0].elementType, "Action")
+        XCTAssertEqual(parser.elements[0].elementType, .action)
         XCTAssertEqual(parser.elements[0].elementText, "!This is a forced action line")
-        XCTAssertEqual(parser.elements[1].elementType, "Action")
+        XCTAssertEqual(parser.elements[1].elementType, .action)
     }
 
     // MARK: - Forced Character Tests
@@ -71,9 +71,9 @@ final class FountainParserTests: XCTestCase {
         let parser = FountainParser(string: script)
 
         XCTAssertGreaterThanOrEqual(parser.elements.count, 2, "Should parse forced character")
-        XCTAssertEqual(parser.elements[0].elementType, "Character")
+        XCTAssertEqual(parser.elements[0].elementType, .character)
         XCTAssertEqual(parser.elements[0].elementText, "@McCLANE")
-        XCTAssertEqual(parser.elements[1].elementType, "Dialogue")
+        XCTAssertEqual(parser.elements[1].elementType, .dialogue)
     }
 
     // MARK: - Dialogue Continuation Tests
@@ -88,7 +88,7 @@ final class FountainParserTests: XCTestCase {
 
         let parser = FountainParser(string: script)
 
-        let dialogueElements = parser.elements.filter { $0.elementType == "Dialogue" }
+        let dialogueElements = parser.elements.filter { $0.elementType == .dialogue }
         XCTAssertGreaterThan(dialogueElements.count, 0, "Should have dialogue elements")
     }
 
@@ -103,7 +103,7 @@ final class FountainParserTests: XCTestCase {
         let parser = FountainParser(string: script)
 
         XCTAssertGreaterThan(parser.elements.count, 0, "Should parse dialogue with double spaces")
-        let characterIndex = parser.elements.firstIndex { $0.elementType == "Character" }
+        let characterIndex = parser.elements.firstIndex { $0.elementType == .character }
         XCTAssertNotNil(characterIndex, "Should have character element")
     }
 
@@ -120,7 +120,7 @@ final class FountainParserTests: XCTestCase {
 
         let parser = FountainParser(string: script)
 
-        let actionElements = parser.elements.filter { $0.elementType == "Action" }
+        let actionElements = parser.elements.filter { $0.elementType == .action }
         XCTAssertGreaterThan(actionElements.count, 0, "Should have action elements")
     }
 
@@ -137,7 +137,7 @@ final class FountainParserTests: XCTestCase {
 
         let parser = FountainParser(string: script)
 
-        let pageBreaks = parser.elements.filter { $0.elementType == "Page Break" }
+        let pageBreaks = parser.elements.filter { $0.elementType == .pageBreak }
         XCTAssertEqual(pageBreaks.count, 1, "Should have one page break")
     }
 
@@ -152,7 +152,7 @@ final class FountainParserTests: XCTestCase {
 
         let parser = FountainParser(string: script)
 
-        let synopses = parser.elements.filter { $0.elementType == "Synopsis" }
+        let synopses = parser.elements.filter { $0.elementType == .synopsis }
         XCTAssertEqual(synopses.count, 1, "Should have one synopsis")
         XCTAssertTrue(synopses[0].elementText.contains("John meets Jane"), "Synopsis text should contain expected content")
     }
@@ -168,7 +168,7 @@ final class FountainParserTests: XCTestCase {
 
         let parser = FountainParser(string: script)
 
-        let comments = parser.elements.filter { $0.elementType == "Comment" }
+        let comments = parser.elements.filter { $0.elementType == .comment }
         XCTAssertEqual(comments.count, 1, "Should have one comment")
         XCTAssertEqual(comments[0].elementText, "This is a note about the scene")
     }
@@ -184,7 +184,7 @@ final class FountainParserTests: XCTestCase {
 
         let parser = FountainParser(string: script)
 
-        let boneyards = parser.elements.filter { $0.elementType == "Boneyard" }
+        let boneyards = parser.elements.filter { $0.elementType == .boneyard }
         XCTAssertEqual(boneyards.count, 1, "Should have one boneyard")
     }
 
@@ -202,7 +202,7 @@ final class FountainParserTests: XCTestCase {
 
         let parser = FountainParser(string: script)
 
-        let boneyards = parser.elements.filter { $0.elementType == "Boneyard" }
+        let boneyards = parser.elements.filter { $0.elementType == .boneyard }
         XCTAssertEqual(boneyards.count, 1, "Should have one boneyard")
     }
 
@@ -219,7 +219,7 @@ final class FountainParserTests: XCTestCase {
 
         let parser = FountainParser(string: script)
 
-        let sections = parser.elements.filter { $0.elementType == "Section Heading" }
+        let sections = parser.elements.filter { $0.elementType.isSectionHeading }
         XCTAssertEqual(sections.count, 3, "Should have three section headings")
         XCTAssertEqual(sections[0].sectionDepth, 1)  // One #
         XCTAssertEqual(sections[1].sectionDepth, 2)  // Two #
@@ -235,7 +235,7 @@ final class FountainParserTests: XCTestCase {
 
         let parser = FountainParser(string: script)
 
-        let scenes = parser.elements.filter { $0.elementType == "Scene Heading" }
+        let scenes = parser.elements.filter { $0.elementType == .sceneHeading }
         XCTAssertEqual(scenes.count, 1, "Should have one forced scene heading")
         XCTAssertEqual(scenes[0].elementText, "FLASHBACK - 1984")
     }
@@ -249,7 +249,7 @@ final class FountainParserTests: XCTestCase {
 
         let parser = FountainParser(string: script)
 
-        let scenes = parser.elements.filter { $0.elementType == "Scene Heading" }
+        let scenes = parser.elements.filter { $0.elementType == .sceneHeading }
         XCTAssertEqual(scenes.count, 1, "Should have scene heading")
         XCTAssertEqual(scenes[0].sceneNumber, "1", "Should extract scene number")
         XCTAssertFalse(scenes[0].elementText.contains("#"), "Scene text should not contain # markers")
@@ -264,7 +264,7 @@ final class FountainParserTests: XCTestCase {
 
         let parser = FountainParser(string: script)
 
-        let scenes = parser.elements.filter { $0.elementType == "Scene Heading" }
+        let scenes = parser.elements.filter { $0.elementType == .sceneHeading }
         XCTAssertEqual(scenes.count, 1, "Should have forced scene heading")
         XCTAssertEqual(scenes[0].sceneNumber, "42A", "Should extract scene number")
     }
@@ -284,7 +284,7 @@ final class FountainParserTests: XCTestCase {
 
         let parser = FountainParser(string: script)
 
-        let transitions = parser.elements.filter { $0.elementType == "Transition" }
+        let transitions = parser.elements.filter { $0.elementType == .transition }
         XCTAssertGreaterThanOrEqual(transitions.count, 2, "Should have at least two transitions")
     }
 
@@ -299,7 +299,7 @@ final class FountainParserTests: XCTestCase {
 
         let parser = FountainParser(string: script)
 
-        let transitions = parser.elements.filter { $0.elementType == "Transition" }
+        let transitions = parser.elements.filter { $0.elementType == .transition }
         XCTAssertEqual(transitions.count, 1, "Should have forced transition")
         XCTAssertTrue(transitions[0].elementText.contains("SMASH CUT TO:"), "Transition text should contain expected content")
     }
@@ -315,7 +315,7 @@ final class FountainParserTests: XCTestCase {
         let centered = parser.elements.filter { $0.isCentered }
         XCTAssertEqual(centered.count, 1, "Should have centered text")
         XCTAssertEqual(centered[0].elementText, "THE END")
-        XCTAssertEqual(centered[0].elementType, "Action")
+        XCTAssertEqual(centered[0].elementType, .action)
     }
 
     func testDualDialogue() {
@@ -329,7 +329,7 @@ final class FountainParserTests: XCTestCase {
 
         let parser = FountainParser(string: script)
 
-        let characters = parser.elements.filter { $0.elementType == "Character" }
+        let characters = parser.elements.filter { $0.elementType == .character }
         XCTAssertGreaterThanOrEqual(characters.count, 2, "Should have two characters")
 
         // Both characters should be marked as dual dialogue
@@ -399,7 +399,7 @@ final class FountainParserTests: XCTestCase {
 
         let parser = FountainParser(string: script)
 
-        let scenes = parser.elements.filter { $0.elementType == "Scene Heading" }
+        let scenes = parser.elements.filter { $0.elementType == .sceneHeading }
         XCTAssertEqual(scenes.count, 1, "Should recognize OVER BLACK as scene heading")
     }
 
@@ -414,7 +414,7 @@ final class FountainParserTests: XCTestCase {
 
         let parser = FountainParser(string: script)
 
-        let characters = parser.elements.filter { $0.elementType == "Character" }
+        let characters = parser.elements.filter { $0.elementType == .character }
         XCTAssertGreaterThan(characters.count, 0, "Should parse character")
     }
 
@@ -428,7 +428,7 @@ final class FountainParserTests: XCTestCase {
         let parser = FountainParser(string: script)
 
         // This should be merged into action, not treated as a scene heading
-        let scenes = parser.elements.filter { $0.elementType == "Scene Heading" }
+        let scenes = parser.elements.filter { $0.elementType == .sceneHeading }
         XCTAssertEqual(scenes.count, 0, "Should not treat as scene heading without blank lines")
     }
 
@@ -442,7 +442,7 @@ final class FountainParserTests: XCTestCase {
 
         let parser = FountainParser(string: script)
 
-        let parentheticals = parser.elements.filter { $0.elementType == "Parenthetical" }
+        let parentheticals = parser.elements.filter { $0.elementType == .parenthetical }
         XCTAssertEqual(parentheticals.count, 1, "Should have parenthetical")
     }
 }

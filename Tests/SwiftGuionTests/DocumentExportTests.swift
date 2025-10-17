@@ -81,7 +81,7 @@ final class DocumentExportTests: XCTestCase {
 
         let element = GuionElementModel(
             elementText: "INT. OFFICE - DAY",
-            elementType: "Scene Heading"
+            elementType: .sceneHeading
         )
         element.document = document
         document.elements.append(element)
@@ -116,13 +116,13 @@ final class DocumentExportTests: XCTestCase {
         // Create document with specific order
         let document = GuionDocumentModel(filename: "order-test.guion")
 
-        let orderedElements = [
-            ("INT. LOCATION 1 - DAY", "Scene Heading"),
-            ("First action.", "Action"),
-            ("INT. LOCATION 2 - NIGHT", "Scene Heading"),
-            ("Second action.", "Action"),
-            ("JANE", "Character"),
-            ("Hello!", "Dialogue")
+        let orderedElements: [(String, ElementType)] = [
+            ("INT. LOCATION 1 - DAY", .sceneHeading),
+            ("First action.", .action),
+            ("INT. LOCATION 2 - NIGHT", .sceneHeading),
+            ("Second action.", .action),
+            ("JANE", .character),
+            ("Hello!", .dialogue)
         ]
 
         for (text, type) in orderedElements {
@@ -191,7 +191,7 @@ final class DocumentExportTests: XCTestCase {
         ]
 
         for text in specialTexts {
-            let element = GuionElementModel(elementText: text, elementType: "Action")
+            let element = GuionElementModel(elementText: text, elementType: .action)
             element.document = document
             document.elements.append(element)
         }
@@ -328,8 +328,8 @@ final class DocumentExportTests: XCTestCase {
         XCTAssertEqual(reImported.titlePage.count, originalTitlePageCount, "Title page count should match")
 
         // Verify specific elements
-        let originalScenes = original.elements.filter { $0.elementType == "Scene Heading" }
-        let reImportedScenes = reImported.elements.filter { $0.elementType == "Scene Heading" }
+        let originalScenes = original.elements.filter { $0.elementType == .sceneHeading }
+        let reImportedScenes = reImported.elements.filter { $0.elementType == .sceneHeading }
         XCTAssertEqual(reImportedScenes.count, originalScenes.count, "Scene count should match")
 
         // Cleanup
@@ -376,7 +376,7 @@ final class DocumentExportTests: XCTestCase {
         for i in 1...5 {
             let element = GuionElementModel(
                 elementText: "INT. LOCATION \(i) - DAY",
-                elementType: "Scene Heading",
+                elementType: .sceneHeading,
                 sceneNumber: "\(i)"
             )
             element.document = document
@@ -399,13 +399,13 @@ final class DocumentExportTests: XCTestCase {
         // Create document with transitions
         let document = GuionDocumentModel(filename: "transitions.guion")
 
-        let elements: [(String, String)] = [
-            ("INT. OFFICE - DAY", "Scene Heading"),
-            ("Action line.", "Action"),
-            ("CUT TO:", "Transition"),
-            ("INT. HOUSE - NIGHT", "Scene Heading"),
-            ("More action.", "Action"),
-            ("FADE OUT.", "Transition")
+        let elements: [(String, ElementType)] = [
+            ("INT. OFFICE - DAY", .sceneHeading),
+            ("Action line.", .action),
+            ("CUT TO:", .transition),
+            ("INT. HOUSE - NIGHT", .sceneHeading),
+            ("More action.", .action),
+            ("FADE OUT.", .transition)
         ]
 
         for (text, type) in elements {
@@ -431,7 +431,7 @@ final class DocumentExportTests: XCTestCase {
 
         let centeredElement = GuionElementModel(
             elementText: "THE END",
-            elementType: "Centered",
+            elementType: .action,  // Centered is formatting, type is action
             isCentered: true
         )
         centeredElement.document = document
@@ -453,8 +453,8 @@ final class DocumentExportTests: XCTestCase {
         let document = GuionDocumentModel(filename: "large-export.guion")
 
         for i in 1...1000 {
-            let elementType = i % 5 == 0 ? "Scene Heading" : "Action"
-            let text = elementType == "Scene Heading"
+            let elementType = i % 5 == 0 ? ElementType.sceneHeading : ElementType.action
+            let text = elementType == .sceneHeading
                 ? "INT. LOCATION \(i) - DAY"
                 : "Action line number \(i)"
 
@@ -493,28 +493,28 @@ final class DocumentExportTests: XCTestCase {
 
         let scene = GuionElementModel(
             elementText: "INT. TEST LOCATION - DAY",
-            elementType: "Scene Heading"
+            elementType: .sceneHeading
         )
         scene.document = document
         document.elements.append(scene)
 
         let action = GuionElementModel(
             elementText: "Test action.",
-            elementType: "Action"
+            elementType: .action
         )
         action.document = document
         document.elements.append(action)
 
         let character = GuionElementModel(
             elementText: "JOHN",
-            elementType: "Character"
+            elementType: .character
         )
         character.document = document
         document.elements.append(character)
 
         let dialogue = GuionElementModel(
             elementText: "Hello, world!",
-            elementType: "Dialogue"
+            elementType: .dialogue
         )
         dialogue.document = document
         document.elements.append(dialogue)
@@ -535,19 +535,19 @@ final class DocumentExportTests: XCTestCase {
         document.titlePage.append(authorEntry)
 
         // Add various elements
-        let elementTypes: [(String, String)] = [
-            ("INT. OFFICE - DAY", "Scene Heading"),
-            ("John walks into the office.", "Action"),
-            ("JOHN", "Character"),
-            ("Hello, everyone!", "Dialogue"),
-            ("INT. CONFERENCE ROOM - DAY", "Scene Heading"),
-            ("A meeting is in progress.", "Action"),
-            ("JANE", "Character"),
-            ("(whispering)", "Parenthetical"),
-            ("We need to talk.", "Dialogue"),
-            ("CUT TO:", "Transition"),
-            ("EXT. PARKING LOT - DAY", "Scene Heading"),
-            ("John walks to his car.", "Action")
+        let elementTypes: [(String, ElementType)] = [
+            ("INT. OFFICE - DAY", .sceneHeading),
+            ("John walks into the office.", .action),
+            ("JOHN", .character),
+            ("Hello, everyone!", .dialogue),
+            ("INT. CONFERENCE ROOM - DAY", .sceneHeading),
+            ("A meeting is in progress.", .action),
+            ("JANE", .character),
+            ("(whispering)", .parenthetical),
+            ("We need to talk.", .dialogue),
+            ("CUT TO:", .transition),
+            ("EXT. PARKING LOT - DAY", .sceneHeading),
+            ("John walks to his car.", .action)
         ]
 
         for (text, type) in elementTypes {

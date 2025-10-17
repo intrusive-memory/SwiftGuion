@@ -141,7 +141,7 @@ import SwiftFijos
 
 @Test func testGuionElementSceneLocation() {
     // Test scene heading element
-    let sceneElement = GuionElement(elementType: "Scene Heading", elementText: "INT. COFFEE SHOP - DAY")
+    let sceneElement = GuionElement(elementType: .sceneHeading, elementText: "INT. COFFEE SHOP - DAY")
     let location = sceneElement.sceneLocation
     #expect(location != nil)
     #expect(location?.lighting == .interior)
@@ -149,7 +149,7 @@ import SwiftFijos
     #expect(location?.timeOfDay == "DAY")
 
     // Test non-scene heading element
-    let actionElement = GuionElement(elementType: "Action", elementText: "John walks in.")
+    let actionElement = GuionElement(elementType: .action, elementText: "John walks in.")
     #expect(actionElement.sceneLocation == nil)
 }
 
@@ -165,13 +165,13 @@ import SwiftFijos
     // Verify first scene (Big Fish starts with an INT scene)
     if let firstScene = scenes.first {
         #expect(firstScene.location.lighting == .interior)
-        #expect(firstScene.sceneHeading.elementType == "Scene Heading")
+        #expect(firstScene.sceneHeading.elementType == .sceneHeading)
         #expect(firstScene.sceneIndex >= 0)
     }
 
     // All scenes should have valid scene headings
     for scene in scenes {
-        #expect(scene.sceneHeading.elementType == "Scene Heading")
+        #expect(scene.sceneHeading.elementType == .sceneHeading)
         #expect(!scene.location.originalText.isEmpty)
     }
 }
@@ -367,14 +367,14 @@ import SwiftFijos
 
     let script = GuionParsedScreenplay(
         elements: [
-            GuionElement(elementType: "Scene Heading", elementText: "INT. COFFEE SHOP - DAY"),
-            GuionElement(elementType: "Action", elementText: "Alice enters."),
-            GuionElement(elementType: "Scene Heading", elementText: "EXT. PARK - DAY"),
-            GuionElement(elementType: "Action", elementText: "Bob walks."),
-            GuionElement(elementType: "Scene Heading", elementText: "INT. COFFEE SHOP - NIGHT"),
-            GuionElement(elementType: "Action", elementText: "Alice returns."),
-            GuionElement(elementType: "Scene Heading", elementText: "INT. COFFEE SHOP - DAY"),
-            GuionElement(elementType: "Action", elementText: "Alice meets Charlie."),
+            GuionElement(elementType: .sceneHeading, elementText: "INT. COFFEE SHOP - DAY"),
+            GuionElement(elementType: .action, elementText: "Alice enters."),
+            GuionElement(elementType: .sceneHeading, elementText: "EXT. PARK - DAY"),
+            GuionElement(elementType: .action, elementText: "Bob walks."),
+            GuionElement(elementType: .sceneHeading, elementText: "INT. COFFEE SHOP - NIGHT"),
+            GuionElement(elementType: .action, elementText: "Alice returns."),
+            GuionElement(elementType: .sceneHeading, elementText: "INT. COFFEE SHOP - DAY"),
+            GuionElement(elementType: .action, elementText: "Alice meets Charlie."),
         ]
     )
 

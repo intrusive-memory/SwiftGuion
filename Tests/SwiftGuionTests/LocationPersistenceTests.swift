@@ -8,7 +8,7 @@ import SwiftData
 @Test func testLocationParsingOnInit() {
     let element = GuionElementModel(
         elementText: "INT. COFFEE SHOP - DAY",
-        elementType: "Scene Heading"
+        elementType: .sceneHeading
     )
 
     // Location should be automatically parsed
@@ -21,7 +21,7 @@ import SwiftData
 @Test func testLocationParsingWithSetup() {
     let element = GuionElementModel(
         elementText: "INT. BLOOM HOUSE MASTER BEDROOM - NIGHT",
-        elementType: "Scene Heading"
+        elementType: .sceneHeading
     )
 
     #expect(element.locationLighting == "INT")
@@ -33,7 +33,7 @@ import SwiftData
 @Test func testLocationParsingWithModifiers() {
     let element = GuionElementModel(
         elementText: "INT. WILL'S BEDROOM - NIGHT (1973)",
-        elementType: "Scene Heading"
+        elementType: .sceneHeading
     )
 
     #expect(element.locationLighting == "INT")
@@ -46,7 +46,7 @@ import SwiftData
 @Test func testLocationClearedForNonSceneHeading() {
     let element = GuionElementModel(
         elementText: "John walks in.",
-        elementType: "Action"
+        elementType: .action
     )
 
     // No location data should be stored
@@ -59,7 +59,7 @@ import SwiftData
 @Test func testLocationReparsedOnTextChange() {
     let element = GuionElementModel(
         elementText: "INT. COFFEE SHOP - DAY",
-        elementType: "Scene Heading"
+        elementType: .sceneHeading
     )
 
     #expect(element.locationScene == "COFFEE SHOP")
@@ -76,14 +76,14 @@ import SwiftData
 @Test func testLocationReparsedOnTypeChange() {
     let element = GuionElementModel(
         elementText: "INT. COFFEE SHOP - DAY",
-        elementType: "Action"
+        elementType: .action
     )
 
     // Should have no location data initially
     #expect(element.locationScene == nil)
 
     // Change to scene heading using update method
-    element.updateType("Scene Heading")
+    element.elementType = .sceneHeading
 
     // Location should now be parsed
     #expect(element.locationScene == "COFFEE SHOP")
@@ -93,13 +93,13 @@ import SwiftData
 @Test func testLocationClearedWhenTypeChangesFromSceneHeading() {
     let element = GuionElementModel(
         elementText: "INT. COFFEE SHOP - DAY",
-        elementType: "Scene Heading"
+        elementType: .sceneHeading
     )
 
     #expect(element.locationScene == "COFFEE SHOP")
 
     // Change to non-scene heading using update method
-    element.updateType("Action")
+    element.elementType = .action
 
     // Location should be cleared
     #expect(element.locationScene == nil)
@@ -110,7 +110,7 @@ import SwiftData
 @Test func testCachedSceneLocationProperty() {
     let element = GuionElementModel(
         elementText: "INT. COFFEE SHOP - DAY",
-        elementType: "Scene Heading"
+        elementType: .sceneHeading
     )
 
     let location = element.cachedSceneLocation
@@ -124,7 +124,7 @@ import SwiftData
 @Test func testCachedSceneLocationReturnsNilForNonSceneHeading() {
     let element = GuionElementModel(
         elementText: "John walks in.",
-        elementType: "Action"
+        elementType: .action
     )
 
     #expect(element.cachedSceneLocation == nil)
@@ -133,7 +133,7 @@ import SwiftData
 @Test func testManualReparseLocation() {
     let element = GuionElementModel(
         elementText: "INT. COFFEE SHOP - DAY",
-        elementType: "Scene Heading"
+        elementType: .sceneHeading
     )
 
     // Manually clear location data (simulating old data)
@@ -155,15 +155,15 @@ import SwiftData
     // Add some elements
     let scene1 = GuionElementModel(
         elementText: "INT. COFFEE SHOP - DAY",
-        elementType: "Scene Heading"
+        elementType: .sceneHeading
     )
     let action = GuionElementModel(
         elementText: "Alice enters.",
-        elementType: "Action"
+        elementType: .action
     )
     let scene2 = GuionElementModel(
         elementText: "EXT. PARK - NIGHT",
-        elementType: "Scene Heading"
+        elementType: .sceneHeading
     )
 
     document.elements = [scene1, action, scene2]
@@ -188,15 +188,15 @@ import SwiftData
 
     let scene1 = GuionElementModel(
         elementText: "INT. COFFEE SHOP - DAY",
-        elementType: "Scene Heading"
+        elementType: .sceneHeading
     )
     let action = GuionElementModel(
         elementText: "Alice enters.",
-        elementType: "Action"
+        elementType: .action
     )
     let scene2 = GuionElementModel(
         elementText: "EXT. PARK - NIGHT",
-        elementType: "Scene Heading"
+        elementType: .sceneHeading
     )
 
     document.elements = [scene1, action, scene2]
@@ -214,7 +214,7 @@ import SwiftData
 @Test func testLocationDataPersistsThroughChanges() {
     let element = GuionElementModel(
         elementText: "INT. COFFEE SHOP - DAY",
-        elementType: "Scene Heading"
+        elementType: .sceneHeading
     )
 
     let originalLocation = element.cachedSceneLocation
@@ -235,7 +235,7 @@ import SwiftData
 @Test func testComplexLocationPersistence() {
     let element = GuionElementModel(
         elementText: "INT. TINY PARIS RESTAURANT (LA RUE 14°) - NIGHT (1998)",
-        elementType: "Scene Heading"
+        elementType: .sceneHeading
     )
 
     #expect(element.locationLighting == "INT")
@@ -250,7 +250,7 @@ import SwiftData
 
 @Test func testInitFromGuionElement() {
     let plainElement = GuionElement(
-        elementType: "Scene Heading",
+        elementType: .sceneHeading,
         elementText: "INT. HOSPITAL ROOM - DAY"
     )
 
@@ -271,7 +271,7 @@ import SwiftData
 @Test func testMultipleLocationChanges() {
     let element = GuionElementModel(
         elementText: "INT. COFFEE SHOP - DAY",
-        elementType: "Scene Heading"
+        elementType: .sceneHeading
     )
 
     #expect(element.locationScene == "COFFEE SHOP")
@@ -296,12 +296,12 @@ import SwiftData
 @Test func testLocationKeyConsistency() {
     let element1 = GuionElementModel(
         elementText: "INT. COFFEE SHOP - DAY",
-        elementType: "Scene Heading"
+        elementType: .sceneHeading
     )
 
     let element2 = GuionElementModel(
         elementText: "INT. COFFEE SHOP - NIGHT",
-        elementType: "Scene Heading"
+        elementType: .sceneHeading
     )
 
     // Both should have same location key (different time)

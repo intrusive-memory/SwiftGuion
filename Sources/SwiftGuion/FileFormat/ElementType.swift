@@ -98,7 +98,7 @@ import Foundation
 /// - ``isSectionHeading``
 /// - ``isDialogueRelated``
 ///
-public enum ElementType: Equatable, Sendable {
+public enum ElementType: Equatable, Sendable, Hashable {
     /// Scene heading element (slugline).
     ///
     /// Examples: `INT. OFFICE - DAY`, `EXT. PARK - NIGHT`

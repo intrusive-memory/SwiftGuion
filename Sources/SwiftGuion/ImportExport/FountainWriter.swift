@@ -114,7 +114,9 @@ public class FountainWriter {
                 }
             }
 
-            if element.elementType.isDialogueRelated || element.elementType == .comment {
+            // Character elements need a blank line before them to be recognized by the parser
+            // Dialogue, parenthetical, and comments don't need blank lines before them
+            if element.elementType == .dialogue || element.elementType == .parenthetical || element.elementType == .comment {
                 fountainContent += "\(textToWrite)\n"
             } else {
                 fountainContent += "\n\(textToWrite)\n"

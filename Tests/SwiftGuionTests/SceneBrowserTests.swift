@@ -85,7 +85,7 @@ final class SceneBrowserTests: XCTestCase {
         )
 
         let sceneElements = [
-            GuionElement(type: "Action", text: "Bernard and Killian sit in a steam room.")
+            GuionElement(type: .action, text: "Bernard and Killian sit in a steam room.")
         ]
 
         let sceneData = SceneData(
@@ -113,12 +113,12 @@ final class SceneBrowserTests: XCTestCase {
         )
 
         let sceneElements = [
-            GuionElement(type: "Action", text: "Bernard and Killian sit in a steam room.")
+            GuionElement(type: .action, text: "Bernard and Killian sit in a steam room.")
         ]
 
         let preSceneElements = [
-            GuionElement(type: "Action", text: "CHAPTER 1"),
-            GuionElement(type: "Action", text: "BERNARD")
+            GuionElement(type: .action, text: "CHAPTER 1"),
+            GuionElement(type: .action, text: "BERNARD")
         ]
 
         let sceneData = SceneData(
@@ -301,7 +301,7 @@ final class SceneBrowserTests: XCTestCase {
         print("Loaded \(script.elements.count) elements")
 
         // Debug: Check for Section Headings
-        let sectionHeadings = script.elements.filter { $0.elementType == "Section Heading" }
+        let sectionHeadings = script.elements.filter { $0.elementType.isSectionHeading }
         print("Found \(sectionHeadings.count) Section Headings")
         for heading in sectionHeadings.prefix(10) {
             print("  - Depth \(heading.sectionDepth): '\(heading.elementText)'")

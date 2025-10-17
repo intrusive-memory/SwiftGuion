@@ -396,11 +396,24 @@ public final class GuionElementModel: GuionElementProtocol {
             return type
         }
         set {
+            // Track previous type for location handling
+            let wasSceneHeading = elementType == .sceneHeading
+            let isSceneHeading = newValue == .sceneHeading
+
             // Store enum as string
             _elementTypeString = newValue.description
             // Update section depth if applicable
             if case .sectionHeading(let level) = newValue {
                 _sectionDepth = level
+            }
+
+            // Update location data if scene heading status changed
+            if isSceneHeading && !wasSceneHeading {
+                // Became a scene heading - parse location
+                parseAndStoreLocation()
+            } else if !isSceneHeading && wasSceneHeading {
+                // Was a scene heading, no longer is - clear location
+                parseAndStoreLocation()
             }
         }
     }

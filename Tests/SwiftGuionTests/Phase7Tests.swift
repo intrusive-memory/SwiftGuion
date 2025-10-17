@@ -115,18 +115,18 @@ final class Phase7Tests: XCTestCase {
     func testGuionElementCreationExamples() {
         // Example from documentation
         let sceneHeading = GuionElement(
-            elementType: "Scene Heading",
+            elementType: .sceneHeading,
             elementText: "INT. COFFEE SHOP - DAY"
         )
 
-        XCTAssertEqual(sceneHeading.elementType, "Scene Heading")
+        XCTAssertEqual(sceneHeading.elementType, .sceneHeading)
         XCTAssertEqual(sceneHeading.elementText, "INT. COFFEE SHOP - DAY")
         XCTAssertFalse(sceneHeading.isCentered)
         XCTAssertFalse(sceneHeading.isDualDialogue)
 
         // Example with shorter initializer
-        let character = GuionElement(type: "Character", text: "JOHN")
-        XCTAssertEqual(character.elementType, "Character")
+        let character = GuionElement(type: .character, text: "JOHN")
+        XCTAssertEqual(character.elementType, .character)
         XCTAssertEqual(character.elementText, "JOHN")
     }
 
@@ -139,25 +139,31 @@ final class Phase7Tests: XCTestCase {
 
     /// Test element types match documentation
     func testElementTypesMatchDocumentation() {
-        let documentedTypes = [
-            "Scene Heading",
-            "Action",
-            "Character",
-            "Dialogue",
-            "Parenthetical",
-            "Transition",
-            "Section Heading",
-            "Synopsis",
-            "Page Break",
-            "Lyrics",
-            "Centered",
-            "Boneyard"
+        let documentedTypes: [ElementType] = [
+            .sceneHeading,
+            .action,
+            .character,
+            .dialogue,
+            .parenthetical,
+            .transition,
+            .sectionHeading(level: 1),
+            .synopsis,
+            .pageBreak,
+            .lyrics,
+            .comment,
+            .boneyard
         ]
 
         // Create elements of each type to verify they work
         for type in documentedTypes {
             let element = GuionElement(elementType: type, elementText: "Test")
-            XCTAssertEqual(element.elementType, type)
+            // For section headings, check they match ignoring the level
+            if case .sectionHeading = type, case .sectionHeading = element.elementType {
+                // Both are section headings, that's what we're checking
+                XCTAssertTrue(element.elementType.isSectionHeading)
+            } else {
+                XCTAssertEqual(element.elementType, type)
+            }
         }
     }
 
@@ -174,7 +180,7 @@ final class Phase7Tests: XCTestCase {
         for i in 0..<1500 {
             let element = GuionElementModel(
                 elementText: "Scene or dialogue element \(i)",
-                elementType: i % 4 == 0 ? "Scene Heading" : "Action"
+                elementType: i % 4 == 0 ? ElementType.sceneHeading : ElementType.action
             )
             element.document = document
             document.elements.append(element)

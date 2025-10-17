@@ -87,7 +87,7 @@ final class SceneBrowserUITests: XCTestCase {
                         if let sceneElements = scene.sceneElements {
                             for element in sceneElements {
                                 XCTAssertFalse(element.elementText.isEmpty, "Element should have text")
-                                XCTAssertFalse(element.elementType.isEmpty, "Element should have type")
+                                // ElementType is always valid (enum type)
                             }
                         }
 
@@ -401,7 +401,7 @@ final class SceneBrowserUITests: XCTestCase {
                 type: "sceneHeader"
             ),
             sceneElements: [
-                GuionElement(type: "Action", text: "Something happens")
+                GuionElement(type: .action, text: "Something happens")
             ],
             sceneLocation: nil
         )
@@ -423,8 +423,8 @@ final class SceneBrowserUITests: XCTestCase {
             ),
             sceneElements: [],
             preSceneElements: [
-                GuionElement(type: "Action", text: "CHAPTER 1"),
-                GuionElement(type: "Action", text: "BERNARD")
+                GuionElement(type: .action, text: "CHAPTER 1"),
+                GuionElement(type: .action, text: "BERNARD")
             ],
             sceneLocation: nil
         )
@@ -612,12 +612,12 @@ More action.
                 type: "sceneHeader"
             ),
             sceneElements: [
-                GuionElement(type: "Action", text: "JANE sits at a table, typing on her laptop."),
-                GuionElement(type: "Character", text: "JOHN"),
-                GuionElement(type: "Dialogue", text: "Hey, Jane!"),
-                GuionElement(type: "Character", text: "JANE"),
-                GuionElement(type: "Parenthetical", text: "(looking up)"),
-                GuionElement(type: "Dialogue", text: "Oh, hi John!")
+                GuionElement(type: .action, text: "JANE sits at a table, typing on her laptop."),
+                GuionElement(type: .character, text: "JOHN"),
+                GuionElement(type: .dialogue, text: "Hey, Jane!"),
+                GuionElement(type: .character, text: "JANE"),
+                GuionElement(type: .parenthetical, text: "(looking up)"),
+                GuionElement(type: .dialogue, text: "Oh, hi John!")
             ],
             sceneLocation: SceneLocation.parse("INT. COFFEE SHOP - DAY")
         )
@@ -627,24 +627,24 @@ More action.
         XCTAssertEqual(sceneWithDialogue.sceneElements?.count, 6, "Scene should have 6 elements")
 
         // Verify dialogue elements are present
-        let dialogueElements = sceneWithDialogue.sceneElements?.filter { $0.elementType == "Dialogue" }
+        let dialogueElements = sceneWithDialogue.sceneElements?.filter { $0.elementType == .dialogue }
         XCTAssertEqual(dialogueElements?.count, 2, "Scene should have 2 dialogue elements")
         XCTAssertEqual(dialogueElements?[0].elementText, "Hey, Jane!", "First dialogue should match")
         XCTAssertEqual(dialogueElements?[1].elementText, "Oh, hi John!", "Second dialogue should match")
 
         // Verify character elements are present
-        let characterElements = sceneWithDialogue.sceneElements?.filter { $0.elementType == "Character" }
+        let characterElements = sceneWithDialogue.sceneElements?.filter { $0.elementType == .character }
         XCTAssertEqual(characterElements?.count, 2, "Scene should have 2 character elements")
         XCTAssertEqual(characterElements?[0].elementText, "JOHN", "First character should be JOHN")
         XCTAssertEqual(characterElements?[1].elementText, "JANE", "Second character should be JANE")
 
         // Verify parenthetical element is present
-        let parentheticalElements = sceneWithDialogue.sceneElements?.filter { $0.elementType == "Parenthetical" }
+        let parentheticalElements = sceneWithDialogue.sceneElements?.filter { $0.elementType == .parenthetical }
         XCTAssertEqual(parentheticalElements?.count, 1, "Scene should have 1 parenthetical")
         XCTAssertEqual(parentheticalElements?[0].elementText, "(looking up)", "Parenthetical should match")
 
         // Verify action element is present
-        let actionElements = sceneWithDialogue.sceneElements?.filter { $0.elementType == "Action" }
+        let actionElements = sceneWithDialogue.sceneElements?.filter { $0.elementType == .action }
         XCTAssertEqual(actionElements?.count, 1, "Scene should have 1 action")
         XCTAssertEqual(actionElements?[0].elementText, "JANE sits at a table, typing on her laptop.", "Action should match")
 
@@ -665,7 +665,7 @@ More action.
             for sceneGroup in chapter.sceneGroups {
                 for scene in sceneGroup.scenes {
                     if let elements = scene.sceneElements {
-                        let hasDialogue = elements.contains { $0.elementType == "Dialogue" }
+                        let hasDialogue = elements.contains { $0.elementType == .dialogue }
                         if hasDialogue {
                             foundDialogue = true
                             sceneWithDialogue = scene
@@ -682,15 +682,15 @@ More action.
             print("📝 Found scene with dialogue: '\(scene.slugline)'")
 
             // Verify dialogue structure
-            let dialogueElements = scene.sceneElements?.filter { $0.elementType == "Dialogue" } ?? []
-            let characterElements = scene.sceneElements?.filter { $0.elementType == "Character" } ?? []
+            let dialogueElements = scene.sceneElements?.filter { $0.elementType == .dialogue } ?? []
+            let characterElements = scene.sceneElements?.filter { $0.elementType == .character } ?? []
 
             XCTAssertGreaterThan(dialogueElements.count, 0, "Should have dialogue elements")
             XCTAssertGreaterThan(characterElements.count, 0, "Should have character elements")
 
             // Print dialogue for debugging
             for element in scene.sceneElements ?? [] {
-                if element.elementType == "Character" || element.elementType == "Dialogue" || element.elementType == "Parenthetical" {
+                if element.elementType == .character || element.elementType == .dialogue || element.elementType == .parenthetical {
                     print("  \(element.elementType): \(element.elementText)")
                 }
             }
@@ -705,13 +705,13 @@ More action.
     func testDialogueBlockGrouping() throws {
         // Create test elements
         let elements = [
-            GuionElementModel(elementText: "Action line 1", elementType: "Action"),
-            GuionElementModel(elementText: "JOHN", elementType: "Character"),
-            GuionElementModel(elementText: "Hello!", elementType: "Dialogue"),
-            GuionElementModel(elementText: "JANE", elementType: "Character"),
-            GuionElementModel(elementText: "(smiling)", elementType: "Parenthetical"),
-            GuionElementModel(elementText: "Hi there!", elementType: "Dialogue"),
-            GuionElementModel(elementText: "Action line 2", elementType: "Action")
+            GuionElementModel(elementText: "Action line 1", elementType: .action),
+            GuionElementModel(elementText: "JOHN", elementType: .character),
+            GuionElementModel(elementText: "Hello!", elementType: .dialogue),
+            GuionElementModel(elementText: "JANE", elementType: .character),
+            GuionElementModel(elementText: "(smiling)", elementType: .parenthetical),
+            GuionElementModel(elementText: "Hi there!", elementType: .dialogue),
+            GuionElementModel(elementText: "Action line 2", elementType: .action)
         ]
 
         let blocks = groupDialogueBlocks(elements: elements)
@@ -726,15 +726,15 @@ More action.
         // Block 1: John's dialogue
         XCTAssertTrue(blocks[1].isDialogueBlock, "Second block should be dialogue")
         XCTAssertEqual(blocks[1].elements.count, 2, "John's block should have 2 elements (Character + Dialogue)")
-        XCTAssertEqual(blocks[1].elements[0].elementType, "Character")
-        XCTAssertEqual(blocks[1].elements[1].elementType, "Dialogue")
+        XCTAssertEqual(blocks[1].elements[0].elementType, .character)
+        XCTAssertEqual(blocks[1].elements[1].elementType, .dialogue)
 
         // Block 2: Jane's dialogue with parenthetical
         XCTAssertTrue(blocks[2].isDialogueBlock, "Third block should be dialogue")
         XCTAssertEqual(blocks[2].elements.count, 3, "Jane's block should have 3 elements (Character + Parenthetical + Dialogue)")
-        XCTAssertEqual(blocks[2].elements[0].elementType, "Character")
-        XCTAssertEqual(blocks[2].elements[1].elementType, "Parenthetical")
-        XCTAssertEqual(blocks[2].elements[2].elementType, "Dialogue")
+        XCTAssertEqual(blocks[2].elements[0].elementType, .character)
+        XCTAssertEqual(blocks[2].elements[1].elementType, .parenthetical)
+        XCTAssertEqual(blocks[2].elements[2].elementType, .dialogue)
 
         // Block 3: Action
         XCTAssertFalse(blocks[3].isDialogueBlock, "Fourth block should not be dialogue")
@@ -756,10 +756,10 @@ More action.
                 type: "sceneHeader"
             ),
             sceneElements: [
-                GuionElement(type: "Character", text: "BOB"),
-                GuionElement(type: "Dialogue", text: "This is a test."),
-                GuionElement(type: "Parenthetical", text: "(whispering)"),
-                GuionElement(type: "Dialogue", text: "Can you hear me?")
+                GuionElement(type: .character, text: "BOB"),
+                GuionElement(type: .dialogue, text: "This is a test."),
+                GuionElement(type: .parenthetical, text: "(whispering)"),
+                GuionElement(type: .dialogue, text: "Can you hear me?")
             ],
             sceneLocation: nil
         )
@@ -770,16 +770,16 @@ More action.
         XCTAssertEqual(elementModels.count, 4, "Should have 4 element models")
 
         // Verify each element model
-        XCTAssertEqual(elementModels[0].elementType, "Character", "First should be Character")
+        XCTAssertEqual(elementModels[0].elementType, .character, "First should be Character")
         XCTAssertEqual(elementModels[0].elementText, "BOB", "Character name should be BOB")
 
-        XCTAssertEqual(elementModels[1].elementType, "Dialogue", "Second should be Dialogue")
+        XCTAssertEqual(elementModels[1].elementType, .dialogue, "Second should be Dialogue")
         XCTAssertEqual(elementModels[1].elementText, "This is a test.", "Dialogue text should match")
 
-        XCTAssertEqual(elementModels[2].elementType, "Parenthetical", "Third should be Parenthetical")
+        XCTAssertEqual(elementModels[2].elementType, .parenthetical, "Third should be Parenthetical")
         XCTAssertEqual(elementModels[2].elementText, "(whispering)", "Parenthetical text should match")
 
-        XCTAssertEqual(elementModels[3].elementType, "Dialogue", "Fourth should be Dialogue")
+        XCTAssertEqual(elementModels[3].elementType, .dialogue, "Fourth should be Dialogue")
         XCTAssertEqual(elementModels[3].elementText, "Can you hear me?", "Second dialogue should match")
 
         print("✅ Element model conversion test passed")
@@ -873,7 +873,7 @@ More action.
                                         type: "sceneHeader"
                                     ),
                                     sceneElements: [
-                                        GuionElement(type: "Action", text: "Bernard and Killian sit in a steam room.")
+                                        GuionElement(type: .action, text: "Bernard and Killian sit in a steam room.")
                                     ],
                                     sceneLocation: SceneLocation.parse("INT. STEAM ROOM - DAY")
                                 )

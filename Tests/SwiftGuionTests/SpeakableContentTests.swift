@@ -5,51 +5,51 @@ import SwiftFijos
 
 @Test func testSpeakableContentProtocol() async throws {
     // Test Scene Heading
-    let sceneHeading = GuionElement(elementType: "Scene Heading", elementText: "INT. COFFEE SHOP - DAY")
+    let sceneHeading = GuionElement(elementType: .sceneHeading, elementText: "INT. COFFEE SHOP - DAY")
     #expect(sceneHeading.speakableText() == "INT. COFFEE SHOP - DAY", "Scene heading should return full slug line")
 
     // Test Character
-    let character = GuionElement(elementType: "Character", elementText: "EDWARD")
+    let character = GuionElement(elementType: .character, elementText: "EDWARD")
     #expect(character.speakableText() == "EDWARD", "Character should return character name")
 
     // Test Dialogue
-    let dialogue = GuionElement(elementType: "Dialogue", elementText: "I've been thinking about something you said.")
+    let dialogue = GuionElement(elementType: .dialogue, elementText: "I've been thinking about something you said.")
     #expect(dialogue.speakableText() == "I've been thinking about something you said.", "Dialogue should return the character's line")
 
     // Test Parenthetical
-    let parenthetical = GuionElement(elementType: "Parenthetical", elementText: "(under his breath)")
+    let parenthetical = GuionElement(elementType: .parenthetical, elementText: "(under his breath)")
     #expect(parenthetical.speakableText() == "(under his breath)", "Parenthetical should return the direction")
 
     // Test Action
-    let action = GuionElement(elementType: "Action", elementText: "Edward walks slowly across the room, deep in thought.")
+    let action = GuionElement(elementType: .action, elementText: "Edward walks slowly across the room, deep in thought.")
     #expect(action.speakableText() == "Edward walks slowly across the room, deep in thought.", "Action should return the description")
 
     // Test Transition
-    let transition = GuionElement(elementType: "Transition", elementText: "CUT TO:")
+    let transition = GuionElement(elementType: .transition, elementText: "CUT TO:")
     #expect(transition.speakableText() == "CUT TO:", "Transition should return the transition text")
 
     // Test Lyrics
-    let lyrics = GuionElement(elementType: "Lyrics", elementText: "~Here comes the sun~")
+    let lyrics = GuionElement(elementType: .lyrics, elementText: "~Here comes the sun~")
     #expect(lyrics.speakableText() == "~Here comes the sun~", "Lyrics should return the lyrics text")
 
     // Test Comment (should return empty string)
-    let comment = GuionElement(elementType: "Comment", elementText: "This is a note to self")
+    let comment = GuionElement(elementType: .comment, elementText: "This is a note to self")
     #expect(comment.speakableText() == "", "Comments should not be speakable")
 
     // Test Boneyard (should return empty string)
-    let boneyard = GuionElement(elementType: "Boneyard", elementText: "This scene was cut")
+    let boneyard = GuionElement(elementType: .boneyard, elementText: "This scene was cut")
     #expect(boneyard.speakableText() == "", "Boneyard content should not be speakable")
 
     // Test Page Break (should return empty string)
-    let pageBreak = GuionElement(elementType: "Page Break", elementText: "")
+    let pageBreak = GuionElement(elementType: .pageBreak, elementText: "")
     #expect(pageBreak.speakableText() == "", "Page breaks should not be speakable")
 
     // Test Synopsis
-    let synopsis = GuionElement(elementType: "Synopsis", elementText: "Edward meets his future wife")
+    let synopsis = GuionElement(elementType: .synopsis, elementText: "Edward meets his future wife")
     #expect(synopsis.speakableText() == "Edward meets his future wife", "Synopsis should return the synopsis text")
 
     // Test Section Heading
-    let sectionHeading = GuionElement(elementType: "Section Heading", elementText: "ACT II")
+    let sectionHeading = GuionElement(elementType: .sectionHeading(level: 1), elementText: "ACT II")
     #expect(sectionHeading.speakableText() == "ACT II", "Section heading should return the heading text")
 }
 
@@ -58,7 +58,7 @@ import SwiftFijos
     let script = try GuionParsedScreenplay(file: fountainURL.path)
 
     // Find a scene heading and verify it's speakable
-    let sceneHeadings = script.elements.filter { $0.elementType == "Scene Heading" }
+    let sceneHeadings = script.elements.filter { $0.elementType == .sceneHeading }
     #expect(!sceneHeadings.isEmpty, "Should have scene headings")
 
     if let firstScene = sceneHeadings.first {
@@ -68,7 +68,7 @@ import SwiftFijos
     }
 
     // Find dialogue and verify it's speakable
-    let dialogues = script.elements.filter { $0.elementType == "Dialogue" }
+    let dialogues = script.elements.filter { $0.elementType == .dialogue }
     #expect(!dialogues.isEmpty, "Should have dialogue")
 
     if let firstDialogue = dialogues.first {
@@ -78,7 +78,7 @@ import SwiftFijos
     }
 
     // Find action and verify it's speakable
-    let actions = script.elements.filter { $0.elementType == "Action" }
+    let actions = script.elements.filter { $0.elementType == .action }
     #expect(!actions.isEmpty, "Should have actions")
 
     if let firstAction = actions.first {
@@ -97,7 +97,7 @@ import SwiftFijos
         let speakable = element.speakableText()
 
         // Verify non-speakable types return empty strings
-        if element.elementType == "Comment" || element.elementType == "Boneyard" || element.elementType == "Page Break" {
+        if element.elementType == .comment || element.elementType == .boneyard || element.elementType == .pageBreak {
             #expect(speakable.isEmpty, "\(element.elementType) should return empty string")
         } else if !element.elementText.isEmpty {
             // For other types, if there's text, speakable should match
@@ -110,14 +110,14 @@ import SwiftFijos
     // Create a simple script to test narration generation
     let script = GuionParsedScreenplay(
         elements: [
-            GuionElement(elementType: "Scene Heading", elementText: "INT. COFFEE SHOP - DAY"),
-            GuionElement(elementType: "Action", elementText: "Edward sits at a table, reading a newspaper."),
-            GuionElement(elementType: "Character", elementText: "WILL"),
-            GuionElement(elementType: "Dialogue", elementText: "Dad, we need to talk."),
-            GuionElement(elementType: "Character", elementText: "EDWARD"),
-            GuionElement(elementType: "Parenthetical", elementText: "(without looking up)"),
-            GuionElement(elementType: "Dialogue", elementText: "What about?"),
-            GuionElement(elementType: "Transition", elementText: "CUT TO:")
+            GuionElement(elementType: .sceneHeading, elementText: "INT. COFFEE SHOP - DAY"),
+            GuionElement(elementType: .action, elementText: "Edward sits at a table, reading a newspaper."),
+            GuionElement(elementType: .character, elementText: "WILL"),
+            GuionElement(elementType: .dialogue, elementText: "Dad, we need to talk."),
+            GuionElement(elementType: .character, elementText: "EDWARD"),
+            GuionElement(elementType: .parenthetical, elementText: "(without looking up)"),
+            GuionElement(elementType: .dialogue, elementText: "What about?"),
+            GuionElement(elementType: .transition, elementText: "CUT TO:")
         ]
     )
 

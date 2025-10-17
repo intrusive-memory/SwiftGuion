@@ -211,21 +211,21 @@ It's just me!
     func testGuionElementModelSummaryField() async throws {
         let element = GuionElementModel(
             elementText: "INT. COFFEE SHOP - DAY",
-            elementType: "Scene Heading",
+            elementType: .sceneHeading,
             summary: "Test summary"
         )
 
         #expect(element.summary == "Test summary", "Summary should be set correctly")
-        #expect(element.elementType == "Scene Heading", "Element type should be Scene Heading")
+        #expect(element.elementType == .sceneHeading, "Element type should be Scene Heading")
     }
 
     @Test("Protocol-based conversion preserves summary")
     func testProtocolBasedConversionSummary() async throws {
-        let element = GuionElement(elementType: "Scene Heading", elementText: "INT. COFFEE SHOP - DAY")
+        let element = GuionElement(elementType: .sceneHeading, elementText: "INT. COFFEE SHOP - DAY")
         let model = GuionElementModel(from: element, summary: "Test summary")
 
         #expect(model.summary == "Test summary", "Summary should be set correctly")
-        #expect(model.elementType == "Scene Heading", "Element type should be Scene Heading")
+        #expect(model.elementType == .sceneHeading, "Element type should be Scene Heading")
         #expect(model.elementText == "INT. COFFEE SHOP - DAY", "Element text should be preserved")
     }
     #endif

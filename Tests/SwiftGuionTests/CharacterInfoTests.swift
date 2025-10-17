@@ -17,13 +17,13 @@ struct CharacterInfoTests {
         // Create a simple script with characters
         let script = GuionParsedScreenplay(
             elements: [
-                GuionElement(elementType: "Scene Heading", elementText: "INT. COFFEE SHOP - DAY"),
-                GuionElement(elementType: "Character", elementText: "ALICE"),
-                GuionElement(elementType: "Dialogue", elementText: "Hello, Bob!"),
-                GuionElement(elementType: "Character", elementText: "BOB"),
-                GuionElement(elementType: "Dialogue", elementText: "Hi, Alice!"),
-                GuionElement(elementType: "Character", elementText: "ALICE"),
-                GuionElement(elementType: "Dialogue", elementText: "How are you?"),
+                GuionElement(elementType: .sceneHeading, elementText: "INT. COFFEE SHOP - DAY"),
+                GuionElement(elementType: .character, elementText: "ALICE"),
+                GuionElement(elementType: .dialogue, elementText: "Hello, Bob!"),
+                GuionElement(elementType: .character, elementText: "BOB"),
+                GuionElement(elementType: .dialogue, elementText: "Hi, Alice!"),
+                GuionElement(elementType: .character, elementText: "ALICE"),
+                GuionElement(elementType: .dialogue, elementText: "How are you?"),
             ]
         )
 
@@ -52,10 +52,10 @@ struct CharacterInfoTests {
     func testWriteCharactersJSONWithSpecialNames() throws {
         let script = GuionParsedScreenplay(
             elements: [
-                GuionElement(elementType: "Character", elementText: "JOHN (V.O.)"),
-                GuionElement(elementType: "Dialogue", elementText: "This is a voiceover."),
-                GuionElement(elementType: "Character", elementText: "SARAH (O.S.)"),
-                GuionElement(elementType: "Dialogue", elementText: "I'm off screen."),
+                GuionElement(elementType: .character, elementText: "JOHN (V.O.)"),
+                GuionElement(elementType: .dialogue, elementText: "This is a voiceover."),
+                GuionElement(elementType: .character, elementText: "SARAH (O.S.)"),
+                GuionElement(elementType: .dialogue, elementText: "I'm off screen."),
             ]
         )
 
@@ -74,8 +74,8 @@ struct CharacterInfoTests {
     func testWriteEmptyCharactersJSON() throws {
         let script = GuionParsedScreenplay(
             elements: [
-                GuionElement(elementType: "Scene Heading", elementText: "INT. ROOM - DAY"),
-                GuionElement(elementType: "Action", elementText: "The room is empty."),
+                GuionElement(elementType: .sceneHeading, elementText: "INT. ROOM - DAY"),
+                GuionElement(elementType: .action, elementText: "The room is empty."),
             ]
         )
 

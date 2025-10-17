@@ -56,7 +56,7 @@ final class GuionSerializationTests: XCTestCase {
         let original = GuionDocumentModel(filename: "test.guion", rawContent: "Test content")
         let sceneElement = GuionElementModel(
             elementText: "INT. TEST LOCATION - DAY",
-            elementType: "Scene Heading",
+            elementType: .sceneHeading,
             sceneNumber: "1"
         )
         sceneElement.document = original
@@ -64,7 +64,7 @@ final class GuionSerializationTests: XCTestCase {
 
         let actionElement = GuionElementModel(
             elementText: "This is a test action.",
-            elementType: "Action"
+            elementType: .action
         )
         actionElement.document = original
         original.elements.append(actionElement)
@@ -118,7 +118,7 @@ final class GuionSerializationTests: XCTestCase {
         for i in 1...5 {
             let element = GuionElementModel(
                 elementText: "Element \(i)",
-                elementType: "Action"
+                elementType: .action
             )
             element.document = document
             document.elements.append(element)
@@ -159,7 +159,7 @@ final class GuionSerializationTests: XCTestCase {
         for scene in scenes {
             let element = GuionElementModel(
                 elementText: scene,
-                elementType: "Scene Heading"
+                elementType: .sceneHeading
             )
             element.document = document
             document.elements.append(element)
@@ -180,7 +180,7 @@ final class GuionSerializationTests: XCTestCase {
 
         // Verify all scene locations preserved
         for (index, element) in loaded.elements.enumerated() {
-            XCTAssertEqual(element.elementType, "Scene Heading", "Element \(index) should be scene heading")
+            XCTAssertEqual(element.elementType, .sceneHeading, "Element \(index) should be scene heading")
             XCTAssertNotNil(element.locationLighting, "Element \(index) should have cached lighting")
             XCTAssertNotNil(element.locationScene, "Element \(index) should have cached scene")
 
@@ -211,8 +211,7 @@ final class GuionSerializationTests: XCTestCase {
 
             let element = GuionElementModel(
                 elementText: elementText,
-                elementType: elementType
-            )
+                elementType: ElementType(string: elementType))
             element.document = document
             document.elements.append(element)
         }
@@ -297,7 +296,7 @@ final class GuionSerializationTests: XCTestCase {
         for (type, text) in elementTypes {
             let element = GuionElementModel(
                 elementText: text,
-                elementType: type
+                elementType: ElementType(string: type)
             )
             element.document = document
             document.elements.append(element)
@@ -314,7 +313,7 @@ final class GuionSerializationTests: XCTestCase {
         XCTAssertEqual(loaded.elements.count, elementTypes.count, "Should have all element types")
 
         for (index, (expectedType, expectedText)) in elementTypes.enumerated() {
-            XCTAssertEqual(loaded.elements[index].elementType, expectedType, "Element \(index) type should match")
+            XCTAssertEqual(loaded.elements[index].elementType, ElementType(string: expectedType), "Element \(index) type should match")
             XCTAssertEqual(loaded.elements[index].elementText, expectedText, "Element \(index) text should match")
         }
 
@@ -338,7 +337,7 @@ final class GuionSerializationTests: XCTestCase {
         for text in specialTexts {
             let element = GuionElementModel(
                 elementText: text,
-                elementType: "Action"
+                elementType: .action
             )
             element.document = document
             document.elements.append(element)
@@ -366,7 +365,7 @@ final class GuionSerializationTests: XCTestCase {
 
         let element = GuionElementModel(
             elementText: "INT. TEST - DAY",
-            elementType: "Scene Heading"
+            elementType: .sceneHeading
         )
         element.document = document
         document.elements.append(element)
@@ -428,7 +427,7 @@ final class GuionSerializationTests: XCTestCase {
     func testVersionCompatibility() async throws {
         // Test that current version is saved
         let document = GuionDocumentModel(filename: "version.guion")
-        let element = GuionElementModel(elementText: "Test", elementType: "Action")
+        let element = GuionElementModel(elementText: "Test", elementType: .action)
         element.document = document
         document.elements.append(element)
         modelContext.insert(document)
@@ -454,7 +453,7 @@ final class GuionSerializationTests: XCTestCase {
         let document = GuionDocumentModel(filename: "binary.guion")
         let element = GuionElementModel(
             elementText: "INT. TEST - DAY",
-            elementType: "Scene Heading"
+            elementType: .sceneHeading
         )
         element.document = document
         document.elements.append(element)
@@ -515,7 +514,7 @@ final class GuionSerializationTests: XCTestCase {
         for i in 1...10 {
             let element = GuionElementModel(
                 elementText: "INT. LOCATION \(i) - DAY",
-                elementType: "Scene Heading",
+                elementType: .sceneHeading,
                 sceneNumber: "\(i)"
             )
             element.document = document
@@ -562,7 +561,7 @@ final class GuionSerializationTests: XCTestCase {
         // Test that validation succeeds when relationships are correct
         let document = GuionDocumentModel(filename: "valid.guion")
 
-        let element = GuionElementModel(elementText: "Test", elementType: "Action")
+        let element = GuionElementModel(elementText: "Test", elementType: .action)
         element.document = document
         document.elements.append(element)
 
@@ -582,7 +581,7 @@ final class GuionSerializationTests: XCTestCase {
 
         let sceneElement = GuionElementModel(
             elementText: "INT. COFFEE SHOP - DAY",
-            elementType: "Scene Heading"
+            elementType: .sceneHeading
         )
         sceneElement.document = document
         document.elements.append(sceneElement)
@@ -602,7 +601,7 @@ final class GuionSerializationTests: XCTestCase {
 
         let element = GuionElementModel(
             elementText: "INT. COFFEE SHOP - DAY",
-            elementType: "Scene Heading"
+            elementType: .sceneHeading
         )
         element.document = document
         document.elements.append(element)
@@ -624,7 +623,7 @@ final class GuionSerializationTests: XCTestCase {
     func testUnsupportedVersionError() async throws {
         // Create a document with future version number
         let document = GuionDocumentModel(filename: "future.guion")
-        let element = GuionElementModel(elementText: "Test", elementType: "Action")
+        let element = GuionElementModel(elementText: "Test", elementType: .action)
         element.document = document
         document.elements.append(element)
         modelContext.insert(document)
@@ -664,7 +663,7 @@ final class GuionSerializationTests: XCTestCase {
     func testBinaryDataUnsupportedVersion() async throws {
         // Test unsupportedVersion error in binary data decoding
         let document = GuionDocumentModel(filename: "binary_future.guion")
-        let element = GuionElementModel(elementText: "Test", elementType: "Action")
+        let element = GuionElementModel(elementText: "Test", elementType: .action)
         element.document = document
         document.elements.append(element)
         modelContext.insert(document)

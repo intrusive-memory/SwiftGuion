@@ -54,7 +54,7 @@ final class DocumentImportTests: XCTestCase {
 
         let scene = GuionElementModel(
             elementText: "INT. TEST LOCATION - DAY",
-            elementType: "Scene Heading",
+            elementType: .sceneHeading,
             sceneNumber: "1"
         )
         scene.document = original
@@ -62,7 +62,7 @@ final class DocumentImportTests: XCTestCase {
 
         let action = GuionElementModel(
             elementText: "A test action line.",
-            elementType: "Action"
+            elementType: .action
         )
         action.document = original
         original.elements.append(action)
@@ -85,8 +85,8 @@ final class DocumentImportTests: XCTestCase {
         // Step 4: Verify
         XCTAssertEqual(loaded.filename, "test-native.guion", "Filename should be unchanged")
         XCTAssertEqual(loaded.elements.count, 2, "Should have 2 elements")
-        XCTAssertEqual(loaded.elements[0].elementType, "Scene Heading", "First element should be Scene Heading")
-        XCTAssertEqual(loaded.elements[1].elementType, "Action", "Second element should be Action")
+        XCTAssertEqual(loaded.elements[0].elementType, .sceneHeading, "First element should be Scene Heading")
+        XCTAssertEqual(loaded.elements[1].elementType, .action, "Second element should be Action")
 
         // Cleanup
         try? FileManager.default.removeItem(at: tempURL)
@@ -176,7 +176,7 @@ final class DocumentImportTests: XCTestCase {
         for i in 1...100 {
             let element = GuionElementModel(
                 elementText: i % 10 == 0 ? "INT. LOCATION \(i) - DAY" : "Action line \(i)",
-                elementType: i % 10 == 0 ? "Scene Heading" : "Action"
+                elementType: i % 10 == 0 ? ElementType.sceneHeading : ElementType.action
             )
             element.document = document
             document.elements.append(element)
@@ -202,7 +202,7 @@ final class DocumentImportTests: XCTestCase {
         XCTAssertEqual(loaded.elements.count, 100, "All elements should be loaded")
 
         // Verify scene locations are already cached
-        let sceneElements = loaded.elements.filter { $0.elementType == "Scene Heading" }
+        let sceneElements = loaded.elements.filter { $0.elementType == .sceneHeading }
         for sceneElement in sceneElements {
             XCTAssertNotNil(sceneElement.locationLighting, "Scene location should be cached")
             XCTAssertNotNil(sceneElement.locationScene, "Scene location should be cached")
@@ -221,8 +221,8 @@ final class DocumentImportTests: XCTestCase {
         let document = GuionDocumentModel(filename: "perf-test.guion")
 
         for i in 1...500 {
-            let elementType = i % 5 == 0 ? "Scene Heading" : "Action"
-            let elementText = elementType == "Scene Heading"
+            let elementType = i % 5 == 0 ? ElementType.sceneHeading : ElementType.action
+            let elementText = elementType == .sceneHeading
                 ? "INT. LOCATION \(i) - DAY"
                 : "This is action line number \(i)"
 
@@ -261,7 +261,7 @@ final class DocumentImportTests: XCTestCase {
         let originalFilename = "MyGreatScreenplay.guion"
         let document = GuionDocumentModel(filename: originalFilename)
 
-        let element = GuionElementModel(elementText: "INT. ROOM - DAY", elementType: "Scene Heading")
+        let element = GuionElementModel(elementText: "INT. ROOM - DAY", elementType: .sceneHeading)
         element.document = document
         document.elements.append(element)
 

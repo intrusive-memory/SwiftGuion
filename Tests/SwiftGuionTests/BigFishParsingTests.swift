@@ -48,10 +48,10 @@ struct BigFishParsingTests {
 
         // Verify we have various element types
         let elementTypes = Set(document.elements.map { $0.elementType })
-        #expect(elementTypes.contains("Scene Heading"), "Should have scene headings")
-        #expect(elementTypes.contains("Action"), "Should have action elements")
-        #expect(elementTypes.contains("Character"), "Should have character elements")
-        #expect(elementTypes.contains("Dialogue"), "Should have dialogue elements")
+        #expect(elementTypes.contains(.sceneHeading), "Should have scene headings")
+        #expect(elementTypes.contains(.action), "Should have action elements")
+        #expect(elementTypes.contains(.character), "Should have character elements")
+        #expect(elementTypes.contains(.dialogue), "Should have dialogue elements")
 
         // Title page is optional (not all scripts have one)
         // BigFish fountain may or may not have title page depending on parser
@@ -61,7 +61,7 @@ struct BigFishParsingTests {
         #expect(!locations.isEmpty, "Should have parsed scene locations")
 
         // Count characters
-        let characterElements = document.elements.filter { $0.elementType == "Character" }
+        let characterElements = document.elements.filter { $0.elementType == .character }
         let uniqueCharacters = Set(characterElements.map { cleanCharacterName($0.elementText) })
 
         print("✅ BigFish.fountain: \(document.elements.count) elements, \(locations.count) locations, \(uniqueCharacters.count) unique characters")
@@ -88,17 +88,17 @@ struct BigFishParsingTests {
 
         // Verify we have various element types
         let elementTypes = Set(document.elements.map { $0.elementType })
-        #expect(elementTypes.contains("Scene Heading"), "Should have scene headings")
-        #expect(elementTypes.contains("Action"), "Should have action elements")
-        #expect(elementTypes.contains("Character"), "Should have character elements")
-        #expect(elementTypes.contains("Dialogue"), "Should have dialogue elements")
+        #expect(elementTypes.contains(.sceneHeading), "Should have scene headings")
+        #expect(elementTypes.contains(.action), "Should have action elements")
+        #expect(elementTypes.contains(.character), "Should have character elements")
+        #expect(elementTypes.contains(.dialogue), "Should have dialogue elements")
 
         // Verify locations are parsed
         let locations = document.sceneLocations
         #expect(!locations.isEmpty, "Should have parsed scene locations")
 
         // Count characters
-        let characterElements = document.elements.filter { $0.elementType == "Character" }
+        let characterElements = document.elements.filter { $0.elementType == .character }
         let uniqueCharacters = Set(characterElements.map { cleanCharacterName($0.elementText) })
 
         print("✅ BigFish.fdx: \(document.elements.count) elements, \(locations.count) locations, \(uniqueCharacters.count) unique characters")
@@ -126,17 +126,17 @@ struct BigFishParsingTests {
 
         // Verify we have various element types
         let elementTypes = Set(document.elements.map { $0.elementType })
-        #expect(elementTypes.contains("Scene Heading"), "Should have scene headings")
-        #expect(elementTypes.contains("Action"), "Should have action elements")
-        #expect(elementTypes.contains("Character"), "Should have character elements")
-        #expect(elementTypes.contains("Dialogue"), "Should have dialogue elements")
+        #expect(elementTypes.contains(.sceneHeading), "Should have scene headings")
+        #expect(elementTypes.contains(.action), "Should have action elements")
+        #expect(elementTypes.contains(.character), "Should have character elements")
+        #expect(elementTypes.contains(.dialogue), "Should have dialogue elements")
 
         // Verify locations are parsed
         let locations = document.sceneLocations
         #expect(!locations.isEmpty, "Should have parsed scene locations")
 
         // Count characters
-        let characterElements = document.elements.filter { $0.elementType == "Character" }
+        let characterElements = document.elements.filter { $0.elementType == .character }
         let uniqueCharacters = Set(characterElements.map { cleanCharacterName($0.elementText) })
 
         print("✅ BigFish.highland: \(document.elements.count) elements, \(locations.count) locations, \(uniqueCharacters.count) unique characters")

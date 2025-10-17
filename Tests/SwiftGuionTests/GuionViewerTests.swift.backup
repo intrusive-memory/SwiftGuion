@@ -135,7 +135,7 @@ final class GuionViewerTests: XCTestCase {
         // Add some test elements
         let element = GuionElementModel(
             elementText: "INT. ROOM - DAY",
-            elementType: .sceneHeading
+            elementType: "Scene Heading"
         )
         document.elements.append(element)
 
@@ -153,19 +153,19 @@ final class GuionViewerTests: XCTestCase {
         // Add test elements
         let sceneHeading = GuionElementModel(
             elementText: "INT. ROOM - DAY",
-            elementType: .sceneHeading
+            elementType: "Scene Heading"
         )
         let action = GuionElementModel(
             elementText: "A character enters the room.",
-            elementType: .action
+            elementType: "Action"
         )
         let character = GuionElementModel(
             elementText: "JOHN",
-            elementType: .character
+            elementType: "Character"
         )
         let dialogue = GuionElementModel(
             elementText: "Hello, world!",
-            elementType: .dialogue
+            elementType: "Dialogue"
         )
 
         document.elements.append(contentsOf: [sceneHeading, action, character, dialogue])
@@ -174,10 +174,10 @@ final class GuionViewerTests: XCTestCase {
         let script = document.toFountainScript()
 
         XCTAssertEqual(script.elements.count, 4, "Should have 4 elements")
-        XCTAssertEqual(script.elements[0].elementType, .sceneHeading)
+        XCTAssertEqual(script.elements[0].elementType, "Scene Heading")
         XCTAssertEqual(script.elements[0].elementText, "INT. ROOM - DAY")
-        XCTAssertEqual(script.elements[1].elementType, .action)
-        XCTAssertEqual(script.elements[3].elementType, .dialogue)
+        XCTAssertEqual(script.elements[1].elementType, "Action")
+        XCTAssertEqual(script.elements[3].elementType, "Dialogue")
     }
 
     func testToFountainScriptWithTitlePage() {
@@ -203,7 +203,7 @@ final class GuionViewerTests: XCTestCase {
         let document = GuionDocumentModel(filename: "test.guion")
 
         // Add element but no title page
-        let action = GuionElementModel(elementText: "Action text", elementType: .action)
+        let action = GuionElementModel(elementText: "Action text", elementType: "Action")
         document.elements.append(action)
 
         // Convert to FountainScript
@@ -237,25 +237,27 @@ final class GuionViewerTests: XCTestCase {
         // Add elements with special properties
         let centeredElement = GuionElementModel(
             elementText: "THE END",
-            elementType: .action,
+            elementType: "Centered",
             isCentered: true
         )
 
         let dualDialogueElement = GuionElementModel(
             elementText: "Speaking simultaneously",
-            elementType: .dialogue,
+            elementType: "Dialogue",
             isDualDialogue: true
         )
 
         let sceneWithNumber = GuionElementModel(
             elementText: "INT. HOUSE - DAY",
-            elementType: .sceneHeading,
+            elementType: "Scene Heading",
             sceneNumber: "42"
         )
 
         let sectionHeading = GuionElementModel(
             elementText: "ACT ONE",
-            elementType: .sectionHeading(level: 1))
+            elementType: "Section Heading",
+            sectionDepth: 1
+        )
 
         document.elements.append(contentsOf: [
             centeredElement,
@@ -288,7 +290,7 @@ final class GuionViewerTests: XCTestCase {
         let document = GuionDocumentModel(filename: "simple.guion")
         let action = GuionElementModel(
             elementText: "Just some action.",
-            elementType: .action
+            elementType: "Action"
         )
         document.elements.append(action)
 
@@ -324,28 +326,34 @@ final class GuionViewerTests: XCTestCase {
         // Add main title section
         let mainTitle = GuionElementModel(
             elementText: "Complete Screenplay",
-            elementType: .sectionHeading(level: 1))
+            elementType: "Section Heading",
+            sectionDepth: 1
+        )
 
         // Add chapter
         let chapter = GuionElementModel(
             elementText: "CHAPTER 1",
-            elementType: .sectionHeading(level: 2))
+            elementType: "Section Heading",
+            sectionDepth: 2
+        )
 
         // Add scene group
         let sceneGroup = GuionElementModel(
             elementText: "PROLOGUE",
-            elementType: .sectionHeading(level: 3))
+            elementType: "Section Heading",
+            sectionDepth: 3
+        )
 
         // Add scene
         let scene = GuionElementModel(
             elementText: "INT. ROOM - DAY",
-            elementType: .sceneHeading
+            elementType: "Scene Heading"
         )
 
         // Add action
         let action = GuionElementModel(
             elementText: "A character enters.",
-            elementType: .action
+            elementType: "Action"
         )
 
         document.elements.append(contentsOf: [
@@ -461,11 +469,11 @@ final class GuionViewerTests: XCTestCase {
 
         // Mix of structured and unstructured content
         let elements = [
-            GuionElementModel(elementText: "Unstructured action", elementType: .action),
-            GuionElementModel(elementText: "CHAPTER 1", elementType: .sectionHeading(level: 2)),
-            GuionElementModel(elementText: "More action", elementType: .action),
-            GuionElementModel(elementText: "INT. ROOM - DAY", elementType: .sceneHeading),
-            GuionElementModel(elementText: "Scene action", elementType: .action)
+            GuionElementModel(elementText: "Unstructured action", elementType: "Action"),
+            GuionElementModel(elementText: "CHAPTER 1", elementType: "Section Heading", sectionDepth: 2),
+            GuionElementModel(elementText: "More action", elementType: "Action"),
+            GuionElementModel(elementText: "INT. ROOM - DAY", elementType: "Scene Heading"),
+            GuionElementModel(elementText: "Scene action", elementType: "Action")
         ]
 
         document.elements.append(contentsOf: elements)
@@ -481,10 +489,10 @@ final class GuionViewerTests: XCTestCase {
         let document = GuionDocumentModel(filename: "scenes-only.guion")
 
         let scenes = [
-            GuionElementModel(elementText: "INT. ROOM - DAY", elementType: .sceneHeading),
-            GuionElementModel(elementText: "Action 1", elementType: .action),
-            GuionElementModel(elementText: "EXT. STREET - NIGHT", elementType: .sceneHeading),
-            GuionElementModel(elementText: "Action 2", elementType: .action)
+            GuionElementModel(elementText: "INT. ROOM - DAY", elementType: "Scene Heading"),
+            GuionElementModel(elementText: "Action 1", elementType: "Action"),
+            GuionElementModel(elementText: "EXT. STREET - NIGHT", elementType: "Scene Heading"),
+            GuionElementModel(elementText: "Action 2", elementType: "Action")
         ]
 
         document.elements.append(contentsOf: scenes)
@@ -539,29 +547,35 @@ final class GuionViewerTests: XCTestCase {
         let elements = [
             GuionElementModel(
                 elementText: "Test Script",
-                elementType: .sectionHeading(level: 1)),
+                elementType: "Section Heading",
+                sectionDepth: 1
+            ),
             GuionElementModel(
                 elementText: "CHAPTER 1",
-                elementType: .sectionHeading(level: 2)),
+                elementType: "Section Heading",
+                sectionDepth: 2
+            ),
             GuionElementModel(
                 elementText: "ACT ONE",
-                elementType: .sectionHeading(level: 3)),
+                elementType: "Section Heading",
+                sectionDepth: 3
+            ),
             GuionElementModel(
                 elementText: "INT. COFFEE SHOP - DAY",
-                elementType: .sceneHeading,
+                elementType: "Scene Heading",
                 sceneId: "scene-1"
             ),
             GuionElementModel(
                 elementText: "JOHN sits at a table with his laptop.",
-                elementType: .action
+                elementType: "Action"
             ),
             GuionElementModel(
                 elementText: "JOHN",
-                elementType: .character
+                elementType: "Character"
             ),
             GuionElementModel(
                 elementText: "I need more coffee.",
-                elementType: .dialogue
+                elementType: "Dialogue"
             )
         ]
 
@@ -600,7 +614,7 @@ final class GuionViewerTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(firstScene.sceneElementModels.count, 1, "Scene should have at least the heading")
 
         // Verify the heading is correct
-        XCTAssertEqual(firstScene.sceneElementModels.first?.elementType, .sceneHeading)
+        XCTAssertEqual(firstScene.sceneElementModels.first?.elementType, "Scene Heading")
         XCTAssertEqual(firstScene.sceneElementModels.first?.elementText, "INT. COFFEE SHOP - DAY")
 
         // Verify scene heading model is the same as first element
@@ -693,7 +707,7 @@ final class GuionViewerTests: XCTestCase {
 
         // Look for Section Heading elements with depth 4 (summary elements)
         let summaryElements = document.elements.filter {
-            $0.elementType.isSectionHeading &&
+            $0.elementType == "Section Heading" &&
             $0.sectionDepth == 4 &&
             $0.elementText.trimmingCharacters(in: .whitespaces).hasPrefix("SUMMARY:")
         }
@@ -707,7 +721,7 @@ final class GuionViewerTests: XCTestCase {
 
         // Verify element order around scene headings
         for (index, element) in document.elements.enumerated() {
-            if element.elementType == .sceneHeading {
+            if element.elementType == "Scene Heading" {
                 print("\n🎬 Found scene heading at index \(index): \(element.elementText)")
 
                 // Check elements after the scene heading
@@ -716,19 +730,19 @@ final class GuionViewerTests: XCTestCase {
                     print("   Next element: \(nextElement.elementType) - \(nextElement.elementText.prefix(50))")
 
                     // If next is OVER BLACK, summary should be after it
-                    if nextElement.elementType == .action &&
+                    if nextElement.elementType == "Action" &&
                        nextElement.elementText.uppercased().contains("OVER BLACK") {
                         if index + 2 < document.elements.count {
                             let afterOverBlack = document.elements[index + 2]
                             print("   After OVER BLACK: \(afterOverBlack.elementType) - \(afterOverBlack.elementText.prefix(50))")
 
-                            if afterOverBlack.elementType.isSectionHeading &&
+                            if afterOverBlack.elementType == "Section Heading" &&
                                afterOverBlack.sectionDepth == 4 {
                                 XCTAssertTrue(afterOverBlack.elementText.trimmingCharacters(in: .whitespaces).hasPrefix("SUMMARY:"),
                                             "Element after OVER BLACK should be SUMMARY")
                             }
                         }
-                    } else if nextElement.elementType.isSectionHeading &&
+                    } else if nextElement.elementType == "Section Heading" &&
                               nextElement.sectionDepth == 4 {
                         // Summary directly after scene heading (no OVER BLACK)
                         XCTAssertTrue(nextElement.elementText.trimmingCharacters(in: .whitespaces).hasPrefix("SUMMARY:"),
@@ -778,7 +792,7 @@ final class GuionViewerTests: XCTestCase {
 
         // Debug: Check if summary elements were created
         let summaryElements = document.elements.filter {
-            $0.elementType.isSectionHeading &&
+            $0.elementType == "Section Heading" &&
             $0.sectionDepth == 4 &&
             $0.elementText.trimmingCharacters(in: .whitespaces).hasPrefix("SUMMARY:")
         }
@@ -808,7 +822,7 @@ final class GuionViewerTests: XCTestCase {
 
             // Find summary elements in re-imported script
             let reimportedSummaries = reimportedScript.elements.filter {
-                $0.elementType.isSectionHeading &&
+                $0.elementType == "Section Heading" &&
                 $0.sectionDepth == 4 &&
                 $0.elementText.trimmingCharacters(in: .whitespaces).hasPrefix("SUMMARY:")
             }
@@ -825,7 +839,7 @@ final class GuionViewerTests: XCTestCase {
 
             // Verify the summary is in the right position (after scene heading)
             for (index, element) in reimportedScript.elements.enumerated() {
-                if element.elementType == .sceneHeading {
+                if element.elementType == "Scene Heading" {
                     print("\n🎬 Scene heading at index \(index): \(element.elementText)")
 
                     // Check if next non-whitespace element is a summary
@@ -833,7 +847,7 @@ final class GuionViewerTests: XCTestCase {
                         let nextElement = reimportedScript.elements[index + 1]
                         print("   Next: \(nextElement.elementType) - \(nextElement.elementText.prefix(50))")
 
-                        if nextElement.elementType.isSectionHeading && nextElement.sectionDepth == 4 {
+                        if nextElement.elementType == "Section Heading" && nextElement.sectionDepth == 4 {
                             XCTAssertTrue(nextElement.elementText.trimmingCharacters(in: .whitespaces).hasPrefix("SUMMARY:"),
                                         "Element after scene heading should be summary")
                             print("   ✅ Summary element preserved in correct position")
@@ -857,14 +871,14 @@ final class GuionViewerTests: XCTestCase {
         // Add structured content with manual summary
         // Note: Section Heading elementText should have leading space (Fountain format)
         let elements = [
-            GuionElementModel(elementText: " Test Script", elementType: .sectionHeading(level: 1)),
-            GuionElementModel(elementText: " CHAPTER 1", elementType: .sectionHeading(level: 2)),
-            GuionElementModel(elementText: " ACT ONE", elementType: .sectionHeading(level: 3)),
-            GuionElementModel(elementText: "INT. COFFEE SHOP - DAY", elementType: .sceneHeading, sceneId: "scene-1"),
-            GuionElementModel(elementText: " SUMMARY: Alice orders coffee and meets Bob.", elementType: .sectionHeading(level: 4)),
-            GuionElementModel(elementText: "ALICE walks to the counter.", elementType: .action),
-            GuionElementModel(elementText: "ALICE", elementType: .character),
-            GuionElementModel(elementText: "One coffee, please.", elementType: .dialogue)
+            GuionElementModel(elementText: " Test Script", elementType: "Section Heading", sectionDepth: 1),
+            GuionElementModel(elementText: " CHAPTER 1", elementType: "Section Heading", sectionDepth: 2),
+            GuionElementModel(elementText: " ACT ONE", elementType: "Section Heading", sectionDepth: 3),
+            GuionElementModel(elementText: "INT. COFFEE SHOP - DAY", elementType: "Scene Heading", sceneId: "scene-1"),
+            GuionElementModel(elementText: " SUMMARY: Alice orders coffee and meets Bob.", elementType: "Section Heading", sectionDepth: 4),
+            GuionElementModel(elementText: "ALICE walks to the counter.", elementType: "Action"),
+            GuionElementModel(elementText: "ALICE", elementType: "Character"),
+            GuionElementModel(elementText: "One coffee, please.", elementType: "Dialogue")
         ]
 
         document.elements.append(contentsOf: elements)
@@ -889,7 +903,7 @@ final class GuionViewerTests: XCTestCase {
         // Find summary elements in re-imported script
         // Note: elementText will have leading space from Fountain parsing
         let reimportedSummaries = reimportedScript.elements.filter {
-            $0.elementType.isSectionHeading &&
+            $0.elementType == "Section Heading" &&
             $0.sectionDepth == 4 &&
             $0.elementText.trimmingCharacters(in: .whitespaces).hasPrefix("SUMMARY:")
         }
@@ -908,14 +922,14 @@ final class GuionViewerTests: XCTestCase {
         // Verify the summary is in the right position (after scene heading)
         var foundSummaryAfterScene = false
         for (index, element) in reimportedScript.elements.enumerated() {
-            if element.elementType == .sceneHeading {
+            if element.elementType == "Scene Heading" {
                 print("\n🎬 Scene heading at index \(index): \(element.elementText)")
 
                 if index + 1 < reimportedScript.elements.count {
                     let nextElement = reimportedScript.elements[index + 1]
                     print("   Next: \(nextElement.elementType) - \(nextElement.elementText)")
 
-                    if nextElement.elementType.isSectionHeading && nextElement.sectionDepth == 4 {
+                    if nextElement.elementType == "Section Heading" && nextElement.sectionDepth == 4 {
                         XCTAssertTrue(nextElement.elementText.trimmingCharacters(in: .whitespaces).hasPrefix("SUMMARY:"),
                                     "Element after scene heading should be summary")
                         foundSummaryAfterScene = true
@@ -976,7 +990,7 @@ final class GuionViewerTests: XCTestCase {
                                         type: "sceneHeader"
                                     ),
                                     sceneElements: [
-                                        GuionElement(type: .action, text: "Test action.")
+                                        GuionElement(type: "Action", text: "Test action.")
                                     ],
                                     sceneLocation: SceneLocation.parse("INT. STEAM ROOM - DAY")
                                 )
@@ -1000,20 +1014,26 @@ final class GuionViewerTests: XCTestCase {
         let elements = [
             GuionElementModel(
                 elementText: "Sample Screenplay",
-                elementType: .sectionHeading(level: 1)),
+                elementType: "Section Heading",
+                sectionDepth: 1
+            ),
             GuionElementModel(
                 elementText: "CHAPTER 1",
-                elementType: .sectionHeading(level: 2)),
+                elementType: "Section Heading",
+                sectionDepth: 2
+            ),
             GuionElementModel(
                 elementText: "OPENING",
-                elementType: .sectionHeading(level: 3)),
+                elementType: "Section Heading",
+                sectionDepth: 3
+            ),
             GuionElementModel(
                 elementText: "INT. OFFICE - DAY",
-                elementType: .sceneHeading
+                elementType: "Scene Heading"
             ),
             GuionElementModel(
                 elementText: "A character sits at a desk.",
-                elementType: .action
+                elementType: "Action"
             )
         ]
 

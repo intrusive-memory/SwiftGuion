@@ -234,7 +234,7 @@ struct TextPackTests {
 
         #expect(elements.elements.count == screenplay.elements.count)
 
-        // Verify element types
+        // Verify element types (TextPack elements use string representations)
         let types = elements.elements.map { $0.elementType }
         #expect(types.contains("Scene Heading"))
         #expect(types.contains("Action"))

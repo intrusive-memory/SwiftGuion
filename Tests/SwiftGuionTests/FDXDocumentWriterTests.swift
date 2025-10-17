@@ -53,7 +53,7 @@ struct FDXDocumentWriterTests {
         // Add a scene heading
         let sceneHeading = GuionElementModel(
             elementText: "INT. OFFICE - DAY",
-            elementType: "Scene Heading"
+            elementType: .sceneHeading
         )
         sceneHeading.sceneNumber = "1"
         modelContext.insert(sceneHeading)
@@ -62,7 +62,7 @@ struct FDXDocumentWriterTests {
         // Add an action
         let action = GuionElementModel(
             elementText: "John enters the office.",
-            elementType: "Action"
+            elementType: .action
         )
         modelContext.insert(action)
         document.elements.append(action)
@@ -70,14 +70,14 @@ struct FDXDocumentWriterTests {
         // Add character and dialogue
         let character = GuionElementModel(
             elementText: "JOHN",
-            elementType: "Character"
+            elementType: .character
         )
         modelContext.insert(character)
         document.elements.append(character)
 
         let dialogue = GuionElementModel(
             elementText: "Hello, everyone!",
-            elementType: "Dialogue"
+            elementType: .dialogue
         )
         modelContext.insert(dialogue)
         document.elements.append(dialogue)
@@ -102,7 +102,7 @@ struct FDXDocumentWriterTests {
 
         let action = GuionElementModel(
             elementText: "Text with <brackets> & \"quotes\" and 'apostrophes'",
-            elementType: "Action"
+            elementType: .action
         )
         modelContext.insert(action)
         document.elements.append(action)
@@ -196,7 +196,7 @@ struct FDXDocumentWriterTests {
         for (type, text) in elements {
             let element = GuionElementModel(
                 elementText: text,
-                elementType: type
+                elementType: ElementType(string: type)
             )
             modelContext.insert(element)
             document.elements.append(element)
@@ -214,7 +214,7 @@ struct FDXDocumentWriterTests {
 
         for (index, (expectedType, expectedText)) in elements.enumerated() {
             let parsedElement = parsedDocument.elements[index]
-            #expect(parsedElement.elementType == expectedType, "Element type should match at index \(index)")
+            #expect(parsedElement.elementType == ElementType(string: expectedType), "Element type should match at index \(index)")
             #expect(parsedElement.elementText == expectedText, "Element text should match at index \(index)")
         }
     }
@@ -235,7 +235,7 @@ struct FDXDocumentWriterTests {
         for (number, text) in scenes {
             let scene = GuionElementModel(
                 elementText: text,
-                elementType: "Scene Heading"
+                elementType: .sceneHeading
             )
             scene.sceneNumber = number
             modelContext.insert(scene)
