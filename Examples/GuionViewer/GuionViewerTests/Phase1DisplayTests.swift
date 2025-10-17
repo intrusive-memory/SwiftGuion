@@ -62,7 +62,7 @@ final class Phase1DisplayTests: XCTestCase {
                                 type: "sceneHeader"
                             ),
                             sceneElements: [
-                                GuionElement(type: "Action", text: "Action line.")
+                                GuionElement(type: ElementType(string: "Action"), text: "Action line.")
                             ],
                             sceneLocation: SceneLocation.parse("INT. ROOM - DAY")
                         ),
@@ -77,7 +77,7 @@ final class Phase1DisplayTests: XCTestCase {
                                 type: "sceneHeader"
                             ),
                             sceneElements: [
-                                GuionElement(type: "Action", text: "More action.")
+                                GuionElement(type: ElementType(string: "Action"), text: "More action.")
                             ],
                             sceneLocation: SceneLocation.parse("EXT. STREET - NIGHT")
                         )
@@ -119,7 +119,7 @@ final class Phase1DisplayTests: XCTestCase {
                                 type: "sceneHeader"
                             ),
                             sceneElements: [
-                                GuionElement(type: "Action", text: "Office scene.")
+                                GuionElement(type: ElementType(string: "Action"), text: "Office scene.")
                             ],
                             sceneLocation: SceneLocation.parse("INT. OFFICE - DAY")
                         )
@@ -261,11 +261,11 @@ final class Phase1DisplayTests: XCTestCase {
     func testBrowserDataFromSimpleScreenplay() {
         // Create a simple screenplay
         let elements = [
-            GuionElement(type: "Section Heading", text: "# Test Script"),
-            GuionElement(type: "Section Heading", text: "## CHAPTER 1"),
-            GuionElement(type: "Section Heading", text: "### ACT ONE"),
-            GuionElement(type: "Scene Heading", text: "INT. ROOM - DAY"),
-            GuionElement(type: "Action", text: "Action line.")
+            GuionElement(type: ElementType(string: "Section Heading"), text: "# Test Script"),
+            GuionElement(type: ElementType(string: "Section Heading"), text: "## CHAPTER 1"),
+            GuionElement(type: ElementType(string: "Section Heading"), text: "### ACT ONE"),
+            GuionElement(type: ElementType(string: "Scene Heading"), text: "INT. ROOM - DAY"),
+            GuionElement(type: ElementType(string: "Action"), text: "Action line.")
         ]
 
         let screenplay = GuionParsedScreenplay(
@@ -290,17 +290,17 @@ final class Phase1DisplayTests: XCTestCase {
     func testBrowserDataPreservesHierarchy() {
         // Create screenplay with nested structure
         let elements = [
-            GuionElement(type: "Section Heading", text: "# Script Title"),
-            GuionElement(type: "Section Heading", text: "## CHAPTER 1"),
-            GuionElement(type: "Section Heading", text: "### PROLOGUE"),
-            GuionElement(type: "Scene Heading", text: "INT. ROOM - DAY"),
-            GuionElement(type: "Action", text: "Scene 1 action."),
-            GuionElement(type: "Scene Heading", text: "EXT. STREET - NIGHT"),
-            GuionElement(type: "Action", text: "Scene 2 action."),
-            GuionElement(type: "Section Heading", text: "## CHAPTER 2"),
-            GuionElement(type: "Section Heading", text: "### ACT ONE"),
-            GuionElement(type: "Scene Heading", text: "INT. OFFICE - DAY"),
-            GuionElement(type: "Action", text: "Scene 3 action.")
+            GuionElement(type: ElementType(string: "Section Heading"), text: "# Script Title"),
+            GuionElement(type: ElementType(string: "Section Heading"), text: "## CHAPTER 1"),
+            GuionElement(type: ElementType(string: "Section Heading"), text: "### PROLOGUE"),
+            GuionElement(type: ElementType(string: "Scene Heading"), text: "INT. ROOM - DAY"),
+            GuionElement(type: ElementType(string: "Action"), text: "Scene 1 action."),
+            GuionElement(type: ElementType(string: "Scene Heading"), text: "EXT. STREET - NIGHT"),
+            GuionElement(type: ElementType(string: "Action"), text: "Scene 2 action."),
+            GuionElement(type: ElementType(string: "Section Heading"), text: "## CHAPTER 2"),
+            GuionElement(type: ElementType(string: "Section Heading"), text: "### ACT ONE"),
+            GuionElement(type: ElementType(string: "Scene Heading"), text: "INT. OFFICE - DAY"),
+            GuionElement(type: ElementType(string: "Action"), text: "Scene 3 action.")
         ]
 
         let screenplay = GuionParsedScreenplay(

@@ -85,7 +85,7 @@ final class SceneSummaryIntegrationTests: XCTestCase {
         )
 
         // Then: Scene heading elements should have summaries
-        let sceneHeadings = document.elements.filter { $0.elementType == "Scene Heading" }
+        let sceneHeadings = document.elements.filter { $0.elementType == .sceneHeading }
 
         XCTAssertGreaterThan(sceneHeadings.count, 0, "Should have at least one scene heading")
 
@@ -109,7 +109,7 @@ final class SceneSummaryIntegrationTests: XCTestCase {
         )
 
         // Then: Scene heading elements should NOT have summaries
-        let sceneHeadings = document.elements.filter { $0.elementType == "Scene Heading" }
+        let sceneHeadings = document.elements.filter { $0.elementType == .sceneHeading }
 
         for sceneHeading in sceneHeadings {
             XCTAssertNil(sceneHeading.summary, "Scene heading should not have summary when disabled")
@@ -162,7 +162,7 @@ final class SceneSummaryIntegrationTests: XCTestCase {
         XCTAssertEqual(documents.count, 1)
         let fetchedDoc = documents.first!
 
-        let sceneHeadings = fetchedDoc.elements.filter { $0.elementType == "Scene Heading" }
+        let sceneHeadings = fetchedDoc.elements.filter { $0.elementType == .sceneHeading }
         for sceneHeading in sceneHeadings {
             XCTAssertNotNil(sceneHeading.summary, "Persisted scene should have summary")
         }
@@ -172,7 +172,7 @@ final class SceneSummaryIntegrationTests: XCTestCase {
         // Given: A scene element
         let element = GuionElementModel(
             elementText: "INT. TEST ROOM - DAY",
-            elementType: "Scene Heading"
+            elementType: ElementType(string: "Scene Heading")
         )
         element.document = GuionDocumentModel()
         modelContext.insert(element)
