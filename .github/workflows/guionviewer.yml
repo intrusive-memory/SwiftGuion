@@ -21,34 +21,26 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
-      - name: Install xcpretty
-        run: gem install xcpretty
-
       - name: Build GuionViewer
         run: |
-          set -o pipefail
           xcodebuild build \
             -project Examples/GuionViewer/GuionViewer.xcodeproj \
             -scheme GuionViewer \
             -configuration Release \
             -destination 'platform=macOS' \
-            -derivedDataPath Examples/GuionViewer/DerivedData \
-            | xcpretty
+            -derivedDataPath Examples/GuionViewer/DerivedData
 
       - name: Build GuionViewerTests
         run: |
-          set -o pipefail
           xcodebuild build-for-testing \
             -project Examples/GuionViewer/GuionViewer.xcodeproj \
             -scheme GuionViewer \
             -configuration Debug \
             -destination 'platform=macOS' \
-            -derivedDataPath Examples/GuionViewer/DerivedData \
-            | xcpretty
+            -derivedDataPath Examples/GuionViewer/DerivedData
 
       - name: Run GuionViewerTests
         run: |
-          set -o pipefail
           xcodebuild test-without-building \
             -project Examples/GuionViewer/GuionViewer.xcodeproj \
             -scheme GuionViewer \
@@ -56,12 +48,10 @@ jobs:
             -destination 'platform=macOS' \
             -derivedDataPath Examples/GuionViewer/DerivedData \
             -only-testing:GuionViewerTests \
-            -resultBundlePath Examples/GuionViewer/TestResults.xcresult \
-            | xcpretty
+            -resultBundlePath Examples/GuionViewer/TestResults.xcresult
 
       - name: Run GuionViewerUITests
         run: |
-          set -o pipefail
           xcodebuild test-without-building \
             -project Examples/GuionViewer/GuionViewer.xcodeproj \
             -scheme GuionViewer \
@@ -69,8 +59,7 @@ jobs:
             -destination 'platform=macOS' \
             -derivedDataPath Examples/GuionViewer/DerivedData \
             -only-testing:GuionViewerUITests \
-            -resultBundlePath Examples/GuionViewer/UITestResults.xcresult \
-            | xcpretty
+            -resultBundlePath Examples/GuionViewer/UITestResults.xcresult
 
       - name: Upload test results (default branches only)
         if: always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
