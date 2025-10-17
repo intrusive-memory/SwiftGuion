@@ -406,10 +406,10 @@ final class ViewerDocumentTests: XCTestCase {
         XCTAssertFalse(model.suppressSceneNumbers)
 
         // Verify elements converted correctly
-        XCTAssertEqual(model.elements[0].elementType, "Scene Heading")
-        XCTAssertEqual(model.elements[1].elementType, "Action")
-        XCTAssertEqual(model.elements[2].elementType, "Character")
-        XCTAssertEqual(model.elements[3].elementType, "Dialogue")
+        XCTAssertEqual(model.elements[0].elementType.description, "Scene Heading")
+        XCTAssertEqual(model.elements[1].elementType.description, "Action")
+        XCTAssertEqual(model.elements[2].elementType.description, "Character")
+        XCTAssertEqual(model.elements[3].elementType.description, "Dialogue")
     }
 
     func testGuionDocumentModelRoundTrip() throws {
