@@ -1,0 +1,110 @@
+name: GuionViewer Build and Test
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+
+jobs:
+  build-and-test:
+    name: Build and Test GuionViewer
+    runs-on: macos-26
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Install xcpretty
+        run: gem install xcpretty
+
+      - name: Build GuionViewer
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project Examples/GuionViewer/GuionViewer.xcodeproj \
+            -scheme GuionViewer \
+            -configuration Release \
+            -derivedDataPath Examples/GuionViewer/DerivedData \
+            | xcpretty
+
+      - name: Build GuionViewerTests
+        run: |
+          set -o pipefail
+          xcodebuild build-for-testing \
+            -project Examples/GuionViewer/GuionViewer.xcodeproj \
+            -scheme GuionViewer \
+            -configuration Debug \
+            -derivedDataPath Examples/GuionViewer/DerivedData \
+            | xcpretty
+
+      - name: Run GuionViewerTests
+        run: |
+          set -o pipefail
+          xcodebuild test-without-building \
+            -project Examples/GuionViewer/GuionViewer.xcodeproj \
+            -scheme GuionViewer \
+            -configuration Debug \
+            -derivedDataPath Examples/GuionViewer/DerivedData \
+            -only-testing:GuionViewerTests \
+            -resultBundlePath Examples/GuionViewer/TestResults.xcresult \
+            | xcpretty
+
+      - name: Run GuionViewerUITests
+        run: |
+          set -o pipefail
+          xcodebuild test-without-building \
+            -project Examples/GuionViewer/GuionViewer.xcodeproj \
+            -scheme GuionViewer \
+            -configuration Debug \
+            -derivedDataPath Examples/GuionViewer/DerivedData \
+            -only-testing:GuionViewerUITests \
+            -resultBundlePath Examples/GuionViewer/UITestResults.xcresult \
+            | xcpretty
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            Examples/GuionViewer/TestResults.xcresult
+            Examples/GuionViewer/UITestResults.xcresult
+          retention-days: 30
+
+      - name: Archive GuionViewer.app (default branches only)
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        run: |
+          # Find the built app
+          APP_PATH=$(find Examples/GuionViewer/DerivedData/Build/Products/Release -name "GuionViewer.app" -type d | head -n 1)
+
+          if [ -z "$APP_PATH" ]; then
+            echo "Error: GuionViewer.app not found"
+            exit 1
+          fi
+
+          echo "Found app at: $APP_PATH"
+
+          # Create archive directory
+          mkdir -p Examples/GuionViewer/Archive
+
+          # Create a zip archive of the app
+          cd $(dirname "$APP_PATH")
+          zip -r GuionViewer.zip GuionViewer.app
+          mv GuionViewer.zip $GITHUB_WORKSPACE/Examples/GuionViewer/Archive/
+
+          echo "App archived successfully"
+
+      - name: Upload GuionViewer.app artifact (default branches only)
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        uses: actions/upload-artifact@v4
+        with:
+          name: GuionViewer-app
+          path: Examples/GuionViewer/Archive/GuionViewer.zip
+          retention-days: 90
