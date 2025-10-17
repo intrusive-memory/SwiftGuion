@@ -439,7 +439,7 @@ extension GuionDocumentModel {
                                         type: "sceneHeader"
                                     ),
                                     sceneElements: [
-                                        GuionElement(type: "Action", text: "Bernard and Killian sit in a steam room.")
+                                        GuionElement(elementType: .action, elementText: "Bernard and Killian sit in a steam room.")
                                     ],
                                     sceneLocation: SceneLocation.parse("INT. STEAM ROOM - DAY")
                                 )

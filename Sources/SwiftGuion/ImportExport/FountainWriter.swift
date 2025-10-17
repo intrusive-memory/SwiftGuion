@@ -52,19 +52,20 @@ public class FountainWriter {
         for element in script.elements {
             // Data check
             if (element.elementText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || element.elementText.isEmpty)
-                && element.elementType != "Page Break" {
+                && element.elementType != .pageBreak {
                 continue
             }
 
             var textToWrite = ""
 
-            if element.elementType == "Comment" {
+            switch element.elementType {
+            case .comment:
                 textToWrite = "\n[[\(element.elementText)]]"
-            } else if element.elementType == "Boneyard" {
+            case .boneyard:
                 textToWrite = "/*\(element.elementText)*/"
-            } else if element.elementType == "Synopsis" {
+            case .synopsis:
                 textToWrite = "=\(element.elementText)"
-            } else if element.elementType == "Scene Heading" {
+            case .sceneHeading:
                 textToWrite = element.elementText
 
                 // Determine if the scene heading was a forced scene heading
@@ -77,22 +78,22 @@ public class FountainWriter {
                 if !script.suppressSceneNumbers, let sceneNumber = element.sceneNumber {
                     textToWrite = "\(textToWrite) #\(sceneNumber)#"
                 }
-            } else if element.elementType == "Page Break" {
+            case .pageBreak:
                 textToWrite = "===="
-            } else if element.elementType == "Section Heading" {
-                let sectionDepthMarkup = String(repeating: "#", count: Int(element.sectionDepth))
+            case .sectionHeading(let level):
+                let sectionDepthMarkup = String(repeating: "#", count: level)
                 // Remove leading space if present to avoid double spaces
                 let text = element.elementText.hasPrefix(" ")
                     ? String(element.elementText.dropFirst())
                     : element.elementText
                 textToWrite = sectionDepthMarkup + " " + text
-            } else if element.elementType == "Transition" {
+            case .transition:
                 if !matches(string: element.elementText, pattern: FountainRegexes.transitionPattern) {
                     textToWrite = "> \(element.elementText)"
                 } else {
                     textToWrite = element.elementText
                 }
-            } else {
+            default:
                 textToWrite = element.elementText
             }
 
@@ -105,7 +106,7 @@ public class FountainWriter {
                 }
             }
 
-            if element.elementType == "Character" && element.isDualDialogue {
+            if element.elementType == .character && element.isDualDialogue {
                 dualDialogueCount += 1
                 if dualDialogueCount == 2 {
                     textToWrite = "\(textToWrite) ^"
@@ -113,8 +114,7 @@ public class FountainWriter {
                 }
             }
 
-            let dialogueTypes: Set<String> = ["Dialogue", "Parenthetical", "Comment"]
-            if dialogueTypes.contains(element.elementType) {
+            if element.elementType.isDialogueRelated || element.elementType == .comment {
                 fountainContent += "\(textToWrite)\n"
             } else {
                 fountainContent += "\n\(textToWrite)\n"

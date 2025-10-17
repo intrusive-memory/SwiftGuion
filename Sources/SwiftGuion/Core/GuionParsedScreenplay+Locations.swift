@@ -90,7 +90,7 @@ extension GuionElement {
     /// Parse the location from this element if it's a scene heading
     /// Returns nil if this is not a scene heading
     public var sceneLocation: SceneLocation? {
-        guard elementType == "Scene Heading" else {
+        guard elementType == .sceneHeading else {
             return nil
         }
         return SceneLocation.parse(elementText)
@@ -106,7 +106,7 @@ extension GuionParsedScreenplay {
         var scenes: [SceneWithLocation] = []
 
         for (index, element) in elements.enumerated() {
-            guard element.elementType == "Scene Heading" else {
+            guard element.elementType == .sceneHeading else {
                 continue
             }
 

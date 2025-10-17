@@ -48,53 +48,49 @@ extension GuionElementProtocol {
     /// - Other types: Returns the element text as-is
     public func speakableText() -> String {
         switch elementType {
-        case "Scene Heading":
+        case .sceneHeading:
             // For sluglines, speak the entire scene heading
             return elementText
 
-        case "Character":
+        case .character:
             // Speak the character name
             return elementText
 
-        case "Dialogue":
+        case .dialogue:
             // For dialogue, speak the text of the character's line
             return elementText
 
-        case "Parenthetical":
+        case .parenthetical:
             // Speak the parenthetical direction
             return elementText
 
-        case "Action":
+        case .action:
             // For action, speak the text description
             return elementText
 
-        case "Transition":
+        case .transition:
             // Speak the transition
             return elementText
 
-        case "Lyrics":
+        case .lyrics:
             // Speak the lyrics
             return elementText
 
-        case "Synopsis":
+        case .synopsis:
             // Speak the synopsis
             return elementText
 
-        case "Section Heading":
+        case .sectionHeading:
             // Speak the section heading
             return elementText
 
-        case "Comment", "Boneyard":
+        case .comment, .boneyard:
             // Comments and boneyard are not typically spoken
             return ""
 
-        case "Page Break":
+        case .pageBreak:
             // Page breaks are not spoken
             return ""
-
-        default:
-            // For any other element type, return the text
-            return elementText
         }
     }
 }

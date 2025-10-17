@@ -10,21 +10,35 @@ import FoundationXML
 
 public struct FDXParsedElement: GuionElementProtocol {
     public var elementText: String
-    public var elementType: String
+    public var elementType: ElementType
     public var isCentered: Bool
     public var isDualDialogue: Bool
     public var sceneNumber: String?
-    public var sectionDepth: Int
     public var sceneId: String?
     public var summary: String?
 
-    public init(elementText: String, elementType: String, isCentered: Bool, isDualDialogue: Bool, sceneNumber: String?, sectionDepth: Int, sceneId: String? = nil, summary: String? = nil) {
+    /// The depth level for section headings (deprecated, use elementType.level instead)
+    @available(*, deprecated, message: "Use elementType.level instead")
+    public var sectionDepth: Int {
+        get { elementType.level }
+        set {
+            if case .sectionHeading = elementType {
+                elementType = .sectionHeading(level: newValue)
+            }
+        }
+    }
+
+    public init(elementText: String, elementType: ElementType, isCentered: Bool, isDualDialogue: Bool, sceneNumber: String?, sectionDepth: Int, sceneId: String? = nil, summary: String? = nil) {
         self.elementText = elementText
-        self.elementType = elementType
+        // Handle section depth in the element type
+        if case .sectionHeading = elementType {
+            self.elementType = .sectionHeading(level: sectionDepth)
+        } else {
+            self.elementType = elementType
+        }
         self.isCentered = isCentered
         self.isDualDialogue = isDualDialogue
         self.sceneNumber = sceneNumber
-        self.sectionDepth = sectionDepth
         self.sceneId = sceneId
         self.summary = summary
     }
@@ -140,12 +154,38 @@ public final class FDXParser: NSObject {
         rawXML = ""
     }
 
-    private func normalizedElementType(_ type: String) -> String {
+    private func normalizedElementType(_ type: String) -> ElementType {
         switch type {
         case "New Act":
-            return "Section Heading"
+            return .sectionHeading(level: currentSectionDepth)
+        case "Scene Heading":
+            return .sceneHeading
+        case "Action":
+            return .action
+        case "Character":
+            return .character
+        case "Dialogue":
+            return .dialogue
+        case "Parenthetical":
+            return .parenthetical
+        case "Transition":
+            return .transition
+        case "Synopsis":
+            return .synopsis
+        case "Comment":
+            return .comment
+        case "Boneyard":
+            return .boneyard
+        case "Lyrics":
+            return .lyrics
+        case "Page Break":
+            return .pageBreak
+        case "Section Heading":
+            return .sectionHeading(level: currentSectionDepth)
+        case "Centered":
+            return .action // Centered is a formatting flag, not a type
         default:
-            return type
+            return .action // Default to action for unknown types
         }
     }
 }
@@ -209,12 +249,12 @@ extension FDXParser: XMLParserDelegate {
             if isProcessingScriptParagraph && parent == "Content" {
                 let trimmedText = currentParagraphText.replacingOccurrences(of: "\r", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
                 let elementType = normalizedElementType(currentParagraphType ?? "Action")
-                if !trimmedText.isEmpty || elementType == "Page Break" {
-                    let isCentered = currentIsCentered || elementType == "Centered"
+                if !trimmedText.isEmpty || elementType == .pageBreak {
+                    let isCentered = currentIsCentered
 
                     // Generate UUID for Scene Heading elements
                     var sceneId: String? = nil
-                    if elementType == "Scene Heading" {
+                    if elementType == .sceneHeading {
                         sceneId = UUID().uuidString
                     }
 

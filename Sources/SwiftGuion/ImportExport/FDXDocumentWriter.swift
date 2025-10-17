@@ -45,9 +45,9 @@ public enum FDXDocumentWriter {
     }
 
     private static func paragraphXML(for element: GuionElementModel) -> String {
-        var paragraph = "    <Paragraph Type=\"\(escape(element.elementType))\">\n"
+        var paragraph = "    <Paragraph Type=\"\(escape(element.elementType.description))\">\n"
 
-        if let sceneNumber = element.sceneNumber, element.elementType == "Scene Heading" {
+        if let sceneNumber = element.sceneNumber, element.elementType == .sceneHeading {
             paragraph += "      <SceneProperties Number=\"\(escape(sceneNumber))\"/>\n"
         }
 
@@ -58,9 +58,9 @@ public enum FDXDocumentWriter {
     }
 
     private static func paragraphXML(for element: GuionElement) -> String {
-        var paragraph = "    <Paragraph Type=\"\(escape(element.elementType))\">\n"
+        var paragraph = "    <Paragraph Type=\"\(escape(element.elementType.description))\">\n"
 
-        if let sceneNumber = element.sceneNumber, element.elementType == "Scene Heading" {
+        if let sceneNumber = element.sceneNumber, element.elementType == .sceneHeading {
             paragraph += "      <SceneProperties Number=\"\(escape(sceneNumber))\"/>\n"
         }
 

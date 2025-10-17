@@ -258,13 +258,13 @@ extension GuionParsedScreenplay {
 
             for element in elements {
                 // Check if this element starts the scene (by matching sceneId)
-                if element.elementType == "Scene Heading" && element.sceneId == sceneId {
+                if element.elementType == .sceneHeading && element.sceneId == sceneId {
                     inScene = true
                     continue // Skip the scene heading itself (it's already in the outline)
                 }
 
                 // Check if we've reached the next scene (any scene heading after we've started)
-                if inScene && element.elementType == "Scene Heading" {
+                if inScene && element.elementType == .sceneHeading {
                     break
                 }
 
@@ -295,7 +295,7 @@ extension GuionParsedScreenplay {
         for element in elements {
             // Check if this is our scene heading
             if !foundSceneHeading {
-                if element.elementType == "Scene Heading" {
+                if element.elementType == .sceneHeading {
                     let elementText = element.elementText.trimmingCharacters(in: .whitespacesAndNewlines)
                     if elementText == targetText {
                         foundSceneHeading = true
@@ -306,7 +306,7 @@ extension GuionParsedScreenplay {
             }
 
             // Once we've found our scene, collect elements until the next scene heading
-            if element.elementType == "Scene Heading" {
+            if element.elementType == .sceneHeading {
                 break
             }
 
@@ -340,7 +340,7 @@ extension GuionParsedScreenplay {
         // Convert parts to GuionElements
         // This is a simplified approach - ideally we'd re-parse properly
         return contentParts.map { part in
-            GuionElement(type: "Action", text: part)
+            GuionElement(elementType: .action, elementText: part)
         }
     }
 }

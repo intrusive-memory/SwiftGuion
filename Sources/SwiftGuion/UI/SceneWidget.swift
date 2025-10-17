@@ -49,7 +49,7 @@ public struct SceneWidget: View {
                 content: {
                     VStack(alignment: .leading, spacing: fontSize * 0.5) {
                         // Filter out Scene Heading since it's already shown in the label
-                        let filteredElements = scene.sceneElementModels.filter { $0.elementType != "Scene Heading" }
+                        let filteredElements = scene.sceneElementModels.filter { $0.elementType != .sceneHeading }
 
                         // Group dialogue blocks (Character + Parenthetical + Dialogue)
                         let dialogueBlocks = groupDialogueBlocks(elements: filteredElements)
@@ -59,7 +59,7 @@ public struct SceneWidget: View {
                                 DialogueBlockView(block: dialogueBlocks[blockIndex])
                             } else {
                                 let element = dialogueBlocks[blockIndex].elements[0]
-                                if element.elementType == "Action" {
+                                if element.elementType == .action {
                                     ActionView(element: element)
                                 } else {
                                     SceneElementView(element: element)
@@ -158,15 +158,15 @@ struct SceneElementView: View {
     /// Calculate leading margin based on element type (as percentage of total width)
     private func leadingMarginWidth(totalWidth: CGFloat) -> CGFloat {
         switch element.elementType {
-        case "Character":
+        case .character:
             return totalWidth * 0.40 // 40% left margin
-        case "Parenthetical":
+        case .parenthetical:
             return totalWidth * 0.32 // 32% left margin
-        case "Dialogue":
+        case .dialogue:
             return totalWidth * 0.25 // 25% left margin
-        case "Transition":
+        case .transition:
             return totalWidth * 0.65 // 65% left margin (right-aligned effect)
-        case "Action":
+        case .action:
             return totalWidth * 0.10 // 10% left margin
         default:
             return 0
@@ -176,11 +176,11 @@ struct SceneElementView: View {
     /// Calculate trailing margin based on element type
     private func trailingMarginWidth(totalWidth: CGFloat) -> CGFloat {
         switch element.elementType {
-        case "Parenthetical":
+        case .parenthetical:
             return totalWidth * 0.30 // 30% right margin
-        case "Dialogue":
+        case .dialogue:
             return totalWidth * 0.25 // 25% right margin
-        case "Action":
+        case .action:
             return totalWidth * 0.10 // 10% right margin
         default:
             return 0
@@ -197,9 +197,9 @@ struct SceneElementView: View {
     /// Text alignment based on element type
     private var textAlignment: TextAlignment {
         switch element.elementType {
-        case "Character":
+        case .character:
             return .leading // Character names are typically left-aligned within their column
-        case "Transition":
+        case .transition:
             return .trailing // Transitions are right-aligned
         default:
             return .leading
@@ -209,7 +209,7 @@ struct SceneElementView: View {
     /// Frame alignment for the text within its container
     private var alignmentForElement: Alignment {
         switch element.elementType {
-        case "Transition":
+        case .transition:
             return .trailing
         default:
             return .leading
@@ -219,12 +219,12 @@ struct SceneElementView: View {
     /// Font for each element type - all use dynamic Courier New sizing
     private var fontForElement: Font {
         // Level 4 section headers (#### - production directives) - bold and slightly smaller
-        if element.elementType == "Section Heading" && element.sectionDepth == 4 {
+        if element.elementType == .sectionHeading(level: 4) {
             return .custom("Courier New", size: fontSize * 0.92).weight(.semibold)
         }
 
         // Parenthetical uses italic
-        if element.elementType == "Parenthetical" {
+        if element.elementType == .parenthetical {
             return .custom("Courier New", size: fontSize).italic()
         }
 
@@ -235,14 +235,14 @@ struct SceneElementView: View {
     /// Color for each element type
     private var colorForElement: Color {
         // Level 4 section headers (production directives) - distinct color
-        if element.elementType == "Section Heading" && element.sectionDepth == 4 {
+        if element.elementType == .sectionHeading(level: 4) {
             return Color.blue.opacity(0.85)
         }
 
         switch element.elementType {
-        case "Parenthetical":
+        case .parenthetical:
             return .secondary
-        case "Transition":
+        case .transition:
             return .primary
         default:
             return .primary
@@ -252,13 +252,13 @@ struct SceneElementView: View {
     /// Vertical padding between elements (increased for screen readability)
     private var verticalPadding: CGFloat {
         switch element.elementType {
-        case "Scene Heading":
+        case .sceneHeading:
             return fontSize * 0.67 // 2em spacing before scene headings
-        case "Character":
+        case .character:
             return fontSize * 0.5 // 1.5em spacing before character names
-        case "Transition":
+        case .transition:
             return fontSize * 0.67 // 2em spacing before transitions
-        case "Action":
+        case .action:
             return fontSize * 0.35
         default:
             return fontSize * 0.08
@@ -293,7 +293,7 @@ public func groupDialogueBlocks(elements: [GuionElementModel]) -> [DialogueBlock
 
     for element in elements {
         switch element.elementType {
-        case "Character":
+        case .character:
             // Start a new dialogue block
             if !currentBlock.isEmpty {
                 // Save previous block
@@ -303,7 +303,7 @@ public func groupDialogueBlocks(elements: [GuionElementModel]) -> [DialogueBlock
             currentBlock.append(element)
             inDialogueBlock = true
 
-        case "Parenthetical", "Dialogue", "Lyrics":
+        case .parenthetical, .dialogue, .lyrics:
             // Add to current dialogue block if we're in one
             if inDialogueBlock {
                 currentBlock.append(element)
@@ -343,13 +343,13 @@ struct DialogueBlockView: View {
             ForEach(block.elements.indices, id: \.self) { index in
                 let element = block.elements[index]
 
-                if element.elementType == "Character" {
+                if element.elementType == .character {
                     DialogueCharacterView(element: element)
-                } else if element.elementType == "Parenthetical" {
+                } else if element.elementType == .parenthetical {
                     DialogueParentheticalView(element: element)
-                } else if element.elementType == "Dialogue" {
+                } else if element.elementType == .dialogue {
                     DialogueTextView(element: element)
-                } else if element.elementType == "Lyrics" {
+                } else if element.elementType == .lyrics {
                     DialogueLyricsView(element: element)
                 }
             }

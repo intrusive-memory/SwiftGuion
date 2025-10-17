@@ -115,7 +115,7 @@ public struct TextPackWriter {
         // Extract unique locations from scene headings
         var locationMap: [String: LocationData] = [:]
 
-        for element in screenplay.elements where element.elementType == "Scene Heading" {
+        for element in screenplay.elements where element.elementType == .sceneHeading {
             let location = SceneLocation.parse(element.elementText)
 
             let key = element.elementText

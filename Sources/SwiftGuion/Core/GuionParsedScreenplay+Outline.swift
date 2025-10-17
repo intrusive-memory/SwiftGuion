@@ -38,7 +38,7 @@ extension GuionParsedScreenplay {
         // First pass: check if we have any level 1 headers
         var levelOneCount = 0
         for element in elements {
-            if element.elementType == "Section Heading" && element.sectionDepth == 1 {
+            if element.elementType == .sectionHeading(level: 1) {
                 levelOneCount += 1
             }
         }
@@ -75,12 +75,12 @@ extension GuionParsedScreenplay {
 
             // Determine if this element should be in the outline
             switch element.elementType {
-            case "Section Heading":
+            case .sectionHeading(let sectionLevel):
                 shouldInclude = true
                 outlineType = "sectionHeader"
-                level = Int(element.sectionDepth)
+                level = sectionLevel
 
-            case "Scene Heading":
+            case .sceneHeading:
                 shouldInclude = true
                 outlineType = "sceneHeader"
                 // Scene headings are typically level 4, but promote to level 3 when there's no intermediate directive
@@ -89,7 +89,7 @@ extension GuionParsedScreenplay {
                     level = max(3, structuralParent.level + 1)
                 }
 
-            case "Comment":
+            case .comment:
                 // Include notes (comments in brackets)
                 if element.elementText.hasPrefix("NOTE:") || element.elementText.hasPrefix(" NOTE:") {
                     shouldInclude = true
@@ -375,18 +375,18 @@ extension GuionParsedScreenplay {
     /// Get the raw string representation of an element (as it appears in source)
     private func rawStringForElement(_ element: GuionElement) -> String {
         switch element.elementType {
-        case "Section Heading":
+        case .sectionHeading(let level):
             // Reconstruct with # marks based on depth
-            let hashes = String(repeating: "#", count: Int(element.sectionDepth))
+            let hashes = String(repeating: "#", count: level)
             // Check if element text already starts with space, if not add one
             let text = element.elementText
             let separator = text.hasPrefix(" ") ? "" : " "
             return "\(hashes)\(separator)\(text)"
 
-        case "Scene Heading":
+        case .sceneHeading:
             return element.elementText
 
-        case "Comment":
+        case .comment:
             // Restore note format
             if element.elementText.hasPrefix("NOTE:") || element.elementText.hasPrefix(" NOTE:") {
                 return "[[\(element.elementText)]]"
@@ -433,23 +433,23 @@ extension GuionParsedScreenplay {
         let baseLength = element.elementText.count
 
         switch element.elementType {
-        case "Section Heading":
+        case .sectionHeading(let level):
             // Add # marks and spaces
-            return Int(element.sectionDepth) + 1 + baseLength + 2 // hashes + space + text + newlines
+            return level + 1 + baseLength + 2 // hashes + space + text + newlines
 
-        case "Scene Heading":
+        case .sceneHeading:
             return baseLength + 2 // text + newlines
 
-        case "Character":
+        case .character:
             return baseLength + 2
 
-        case "Dialogue":
+        case .dialogue:
             return baseLength + 2
 
-        case "Action":
+        case .action:
             return baseLength + 2
 
-        case "Comment":
+        case .comment:
             return baseLength + 6 // [[ ]] + newlines
 
         default:

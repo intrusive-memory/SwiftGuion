@@ -130,25 +130,25 @@ public class FountainParser {
 
             // Lyrics
             if !line.isEmpty && line.first == "~" {
-                if let lastElement = elements.last, lastElement.elementType == "Lyrics" && newlinesBefore > 0 {
-                    elements.append(GuionElement(type: "Lyrics", text: " "))
+                if let lastElement = elements.last, lastElement.elementType == .lyrics && newlinesBefore > 0 {
+                    elements.append(GuionElement(type: .lyrics, text: " "))
                 }
 
-                elements.append(GuionElement(type: "Lyrics", text: line))
+                elements.append(GuionElement(type: .lyrics, text: line))
                 newlinesBefore = 0
                 continue
             }
 
             // Forced action
             if !line.isEmpty && line.first == "!" {
-                elements.append(GuionElement(type: "Action", text: line))
+                elements.append(GuionElement(type: .action, text: line))
                 newlinesBefore = 0
                 continue
             }
 
             // Forced character
             if !line.isEmpty && line.first == "@" {
-                elements.append(GuionElement(type: "Character", text: line))
+                elements.append(GuionElement(type: .character, text: line))
                 newlinesBefore = 0
                 isInsideDialogueBlock = true
                 continue
@@ -158,20 +158,20 @@ public class FountainParser {
             if matches(string: line, pattern: "^\\s{2}$") && isInsideDialogueBlock {
                 newlinesBefore = 0
                 if let lastIndex = elements.indices.last {
-                    if elements[lastIndex].elementType == "Dialogue" {
+                    if elements[lastIndex].elementType == .dialogue {
                         elements[lastIndex].elementText = "\(elements[lastIndex].elementText)\n\(line)"
                     } else {
-                        elements.append(GuionElement(type: "Dialogue", text: line))
+                        elements.append(GuionElement(type: .dialogue, text: line))
                     }
                 } else {
-                    elements.append(GuionElement(type: "Dialogue", text: line))
+                    elements.append(GuionElement(type: .dialogue, text: line))
                 }
                 continue
             }
 
             // Multiple spaces (action)
             if matches(string: line, pattern: "^\\s{2,}$") {
-                elements.append(GuionElement(type: "Action", text: line))
+                elements.append(GuionElement(type: .action, text: line))
                 newlinesBefore = 0
                 continue
             }
@@ -190,7 +190,7 @@ public class FountainParser {
                         .replacingOccurrences(of: "/*", with: "")
                         .replacingOccurrences(of: "*/", with: "")
                     isCommentBlock = false
-                    elements.append(GuionElement(type: "Boneyard", text: text))
+                    elements.append(GuionElement(type: .boneyard, text: text))
                     newlinesBefore = 0
                 } else {
                     isCommentBlock = true
@@ -206,7 +206,7 @@ public class FountainParser {
                     commentText.append(text.trimmingCharacters(in: .whitespaces))
                 }
                 isCommentBlock = false
-                elements.append(GuionElement(type: "Boneyard", text: commentText))
+                elements.append(GuionElement(type: .boneyard, text: commentText))
                 commentText = ""
                 newlinesBefore = 0
                 continue
@@ -221,17 +221,17 @@ public class FountainParser {
 
             // Page Breaks
             if matches(string: line, pattern: "^={3,}\\s*$") {
-                elements.append(GuionElement(type: "Page Break", text: line))
+                elements.append(GuionElement(type: .pageBreak, text: line))
                 newlinesBefore = 0
                 continue
             }
 
-            // Synopsis
+            // Synopsis (Outline Summary)
             let trimmedLine = line.trimmingCharacters(in: .whitespaces)
             if !trimmedLine.isEmpty && trimmedLine.first == "=" {
                 if let markupRange = line.range(of: "^\\s*={1}", options: .regularExpression) {
                     let text = String(line[markupRange.upperBound...])
-                    elements.append(GuionElement(type: "Synopsis", text: text))
+                    elements.append(GuionElement(type: .synopsis, text: text))
                     continue
                 }
             }
@@ -242,11 +242,11 @@ public class FountainParser {
                     .replacingOccurrences(of: "[[", with: "")
                     .replacingOccurrences(of: "]]", with: "")
                     .trimmingCharacters(in: .whitespaces)
-                elements.append(GuionElement(type: "Comment", text: text))
+                elements.append(GuionElement(type: .comment, text: text))
                 continue
             }
 
-            // Section heading
+            // Section heading (Outline elements)
             if !trimmedLine.isEmpty && trimmedLine.first == "#" {
                 newlinesBefore = 0
 
@@ -255,8 +255,8 @@ public class FountainParser {
                     let text = String(line[markupRange.upperBound...])
 
                     if !text.isEmpty {
-                        var element = GuionElement(type: "Section Heading", text: text)
-                        element.sectionDepth = depth
+                        // Create section heading with level directly in the enum
+                        let element = GuionElement(type: .sectionHeading(level: depth), text: text)
                         elements.append(element)
                         continue
                     }
@@ -277,7 +277,7 @@ public class FountainParser {
                     text = String(line.dropFirst()).trimmingCharacters(in: .whitespaces)
                 }
 
-                var element = GuionElement(type: "Scene Heading", text: text)
+                var element = GuionElement(type: .sceneHeading, text: text)
                 element.sceneNumber = sceneNumber
                 element.sceneId = UUID().uuidString
                 elements.append(element)
@@ -297,7 +297,7 @@ public class FountainParser {
                     text = line
                 }
 
-                var element = GuionElement(type: "Scene Heading", text: text)
+                var element = GuionElement(type: .sceneHeading, text: text)
                 element.sceneNumber = sceneNumber
                 element.sceneId = UUID().uuidString
                 elements.append(element)
@@ -307,7 +307,7 @@ public class FountainParser {
             // Transitions
             if matches(string: line, pattern: "[^a-z]*TO:$") {
                 newlinesBefore = 0
-                elements.append(GuionElement(type: "Transition", text: line))
+                elements.append(GuionElement(type: .transition, text: line))
                 continue
             }
 
@@ -315,7 +315,7 @@ public class FountainParser {
             let transitions: Set<String> = ["FADE OUT.", "CUT TO BLACK.", "FADE TO BLACK."]
             if transitions.contains(lineWithTrimmedLeading) {
                 newlinesBefore = 0
-                elements.append(GuionElement(type: "Transition", text: line))
+                elements.append(GuionElement(type: .transition, text: line))
                 continue
             }
 
@@ -325,14 +325,14 @@ public class FountainParser {
                     var text = String(line.dropFirst()).trimmingCharacters(in: .whitespaces)
                     text = String(text.dropLast()).trimmingCharacters(in: .whitespaces)
 
-                    var element = GuionElement(type: "Action", text: text)
+                    var element = GuionElement(type: .action, text: text)
                     element.isCentered = true
                     elements.append(element)
                     newlinesBefore = 0
                     continue
                 } else {
                     let text = String(line.dropFirst()).trimmingCharacters(in: .whitespaces)
-                    elements.append(GuionElement(type: "Transition", text: text))
+                    elements.append(GuionElement(type: .transition, text: text))
                     newlinesBefore = 0
                     continue
                 }
@@ -346,7 +346,7 @@ public class FountainParser {
                     let nextLine = lines[nextIndex]
                     if !nextLine.isEmpty {
                         newlinesBefore = 0
-                        var element = GuionElement(type: "Character", text: line)
+                        var element = GuionElement(type: .character, text: line)
 
                         if matches(string: line, pattern: "\\^\\s*$") {
                             element.isDualDialogue = true
@@ -356,7 +356,7 @@ public class FountainParser {
                             var foundPreviousCharacter = false
                             var idx = elements.count - 1
                             while idx >= 0 && !foundPreviousCharacter {
-                                if elements[idx].elementType == "Character" {
+                                if elements[idx].elementType == .character {
                                     elements[idx].isDualDialogue = true
                                     foundPreviousCharacter = true
                                 }
@@ -374,17 +374,17 @@ public class FountainParser {
             // Dialogue and Parentheticals
             if isInsideDialogueBlock {
                 if newlinesBefore == 0 && matches(string: line, pattern: "^\\s*\\(") {
-                    elements.append(GuionElement(type: "Parenthetical", text: line))
+                    elements.append(GuionElement(type: .parenthetical, text: line))
                     continue
                 } else {
                     if let lastIndex = elements.indices.last {
-                        if elements[lastIndex].elementType == "Dialogue" {
+                        if elements[lastIndex].elementType == .dialogue {
                             elements[lastIndex].elementText = "\(elements[lastIndex].elementText)\n\(line)"
                         } else {
-                            elements.append(GuionElement(type: "Dialogue", text: line))
+                            elements.append(GuionElement(type: .dialogue, text: line))
                         }
                     } else {
-                        elements.append(GuionElement(type: "Dialogue", text: line))
+                        elements.append(GuionElement(type: .dialogue, text: line))
                     }
                     continue
                 }
@@ -395,15 +395,15 @@ public class FountainParser {
                 let lastIndex = elements.count - 1
 
                 // Scene Heading must be surrounded by blank lines
-                if elements[lastIndex].elementType == "Scene Heading" {
-                    elements[lastIndex].elementType = "Action"
+                if elements[lastIndex].elementType == .sceneHeading {
+                    elements[lastIndex].elementType = .action
                 }
 
                 elements[lastIndex].elementText = "\(elements[lastIndex].elementText)\n\(line)"
                 newlinesBefore = 0
                 continue
             } else {
-                elements.append(GuionElement(type: "Action", text: line))
+                elements.append(GuionElement(type: .action, text: line))
                 newlinesBefore = 0
                 continue
             }

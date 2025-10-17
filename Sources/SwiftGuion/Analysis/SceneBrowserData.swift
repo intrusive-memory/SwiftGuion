@@ -223,8 +223,7 @@ public struct SceneData: Identifiable {
         // Look for Section Heading with depth 4 that contains "SUMMARY:"
         // Note: elementText may have leading space from Fountain parsing
         for element in sceneElementModels {
-            if element.elementType == "Section Heading" &&
-               element.sectionDepth == 4 {
+            if element.elementType == .sectionHeading(level: 4) {
                 let trimmedText = element.elementText.trimmingCharacters(in: .whitespaces)
                 if trimmedText.hasPrefix("SUMMARY:") {
                     // Extract text after "SUMMARY: " prefix
@@ -240,8 +239,7 @@ public struct SceneData: Identifiable {
         // Note: elementText may have leading space from Fountain parsing
         if let elements = sceneElements {
             for element in elements {
-                if element.elementType == "Section Heading" &&
-                   element.sectionDepth == 4 {
+                if element.elementType == .sectionHeading(level: 4) {
                     let trimmedText = element.elementText.trimmingCharacters(in: .whitespaces)
                     if trimmedText.hasPrefix("SUMMARY:") {
                         // Extract text after "SUMMARY: " prefix

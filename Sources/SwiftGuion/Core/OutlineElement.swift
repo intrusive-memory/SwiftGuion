@@ -249,7 +249,7 @@ public struct OutlineElement: Codable {
             // UUID-based matching (handles duplicate headings correctly)
             for element in script.elements {
                 // Check if this is our scene heading by UUID
-                if element.elementType == "Scene Heading" && element.sceneId == sceneId {
+                if element.elementType == .sceneHeading && element.sceneId == sceneId {
                     foundScene = true
                     continue // Skip the heading since we already added it
                 }
@@ -257,7 +257,7 @@ public struct OutlineElement: Codable {
                 // If we found our scene, collect elements until the next scene
                 if foundScene {
                     // Stop at the next scene heading
-                    if element.elementType == "Scene Heading" {
+                    if element.elementType == .sceneHeading {
                         break
                     }
 
@@ -270,7 +270,7 @@ public struct OutlineElement: Codable {
             // Note: This will fail for scripts with duplicate scene headings
             for element in script.elements {
                 // Check if this is our scene heading by text
-                if element.elementType == "Scene Heading" &&
+                if element.elementType == .sceneHeading &&
                    element.elementText.trimmingCharacters(in: .whitespaces) == self.string.trimmingCharacters(in: .whitespaces) {
                     foundScene = true
                     continue // Skip the heading since we already added it
@@ -279,7 +279,7 @@ public struct OutlineElement: Codable {
                 // If we found our scene, collect elements until the next scene
                 if foundScene {
                     // Stop at the next scene heading
-                    if element.elementType == "Scene Heading" {
+                    if element.elementType == .sceneHeading {
                         break
                     }
 

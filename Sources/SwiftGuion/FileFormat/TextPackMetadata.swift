@@ -215,7 +215,7 @@ public struct ElementData: Codable, Sendable, Identifiable {
     public init(from element: GuionElement) {
         self.init(
             id: UUID().uuidString,
-            elementType: element.elementType,
+            elementType: element.elementType.description,
             elementText: element.elementText,
             sceneNumber: element.sceneNumber,
             sceneId: element.sceneId,

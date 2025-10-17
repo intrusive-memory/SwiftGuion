@@ -77,7 +77,7 @@ public final class GuionDocumentModel {
 
     /// Reparse all scene heading locations (useful for migration or updates)
     public func reparseAllLocations() {
-        for element in elements where element.elementType == "Scene Heading" {
+        for element in elements where element.elementType == .sceneHeading {
             element.reparseLocation()
         }
     }
@@ -135,7 +135,7 @@ public final class GuionDocumentModel {
                 elementsWithSummaries.append(element)
 
                 // Check if this is a scene heading that needs a summary
-                if element.elementType == "Scene Heading",
+                if element.elementType == .sceneHeading,
                    let sceneId = element.sceneId,
                    let scene = outline.first(where: { $0.sceneId == sceneId }) {
 
@@ -144,7 +144,7 @@ public final class GuionDocumentModel {
                         // Check if next element is OVER BLACK
                         if index + 1 < screenplay.elements.count {
                             let nextElement = screenplay.elements[index + 1]
-                            if nextElement.elementType == "Action" &&
+                            if nextElement.elementType == .action &&
                                nextElement.elementText.uppercased().contains("OVER BLACK") {
                                 // Add OVER BLACK element before summary
                                 elementsWithSummaries.append(nextElement)
@@ -154,11 +154,10 @@ public final class GuionDocumentModel {
 
                         // Create summary element as #### SUMMARY: text
                         // Note: Leading space is required because Fountain parser preserves the space after hashtags
-                        var summaryElement = GuionElement(
-                            elementType: "Section Heading",
+                        let summaryElement = GuionElement(
+                            elementType: .sectionHeading(level: 4),
                             elementText: " SUMMARY: \(summaryText)"
                         )
-                        summaryElement.sectionDepth = 4
                         elementsWithSummaries.append(summaryElement)
                     }
                 }
@@ -228,7 +227,7 @@ public final class GuionDocumentModel {
         // Build lookup dictionary: sceneId -> GuionElementModel (for scene headings)
         var sceneHeadingLookup: [String: GuionElementModel] = [:]
         for element in elements {
-            if let sceneId = element.sceneId, element.elementType == "Scene Heading" {
+            if let sceneId = element.sceneId, element.elementType == .sceneHeading {
                 sceneHeadingLookup[sceneId] = element
             }
         }
@@ -237,7 +236,7 @@ public final class GuionDocumentModel {
         // This allows us to find model equivalents of value-based elements
         var elementLookup: [[String: String]: [GuionElementModel]] = [:]
         for element in elements {
-            let key = ["text": element.elementText, "type": element.elementType]
+            let key = ["text": element.elementText, "type": element.elementType.description]
             if elementLookup[key] == nil {
                 elementLookup[key] = []
             }
@@ -270,7 +269,7 @@ public final class GuionDocumentModel {
                         }
 
                         for valueElement in valueElements {
-                            let key = ["text": valueElement.elementText, "type": valueElement.elementType]
+                            let key = ["text": valueElement.elementText, "type": valueElement.elementType.description]
                             if let candidates = elementLookup[key] {
                                 // Find first unused match
                                 if let match = candidates.first(where: { !usedModels.contains(ObjectIdentifier($0)) }) {
@@ -288,7 +287,7 @@ public final class GuionDocumentModel {
                         var usedModels = Set<ObjectIdentifier>()
 
                         for valueElement in preSceneValues {
-                            let key = ["text": valueElement.elementText, "type": valueElement.elementType]
+                            let key = ["text": valueElement.elementText, "type": valueElement.elementType.description]
                             if let candidates = elementLookup[key] {
                                 if let match = candidates.first(where: { !usedModels.contains(ObjectIdentifier($0)) }) {
                                     preSceneModels.append(match)
@@ -381,11 +380,51 @@ public final class GuionDocumentModel {
 @Model
 public final class GuionElementModel: GuionElementProtocol {
     public var elementText: String
-    public var elementType: String
+
+    /// Internal storage for element type as string (required for SwiftData)
+    private var _elementTypeString: String
+
+    /// The type of screenplay element
+    public var elementType: ElementType {
+        get {
+            // Convert from stored string to enum
+            var type = ElementType(string: _elementTypeString)
+            // If section heading, use stored depth
+            if case .sectionHeading = type {
+                type = .sectionHeading(level: _sectionDepth)
+            }
+            return type
+        }
+        set {
+            // Store enum as string
+            _elementTypeString = newValue.description
+            // Update section depth if applicable
+            if case .sectionHeading(let level) = newValue {
+                _sectionDepth = level
+            }
+        }
+    }
+
     public var isCentered: Bool
     public var isDualDialogue: Bool
     public var sceneNumber: String?
-    public var sectionDepth: Int
+
+    /// Internal storage for section depth (required for SwiftData persistence)
+    private var _sectionDepth: Int
+
+    /// The depth level for section headings (deprecated, use elementType.level instead)
+    @available(*, deprecated, message: "Use elementType.level instead")
+    public var sectionDepth: Int {
+        get { elementType.level }
+        set {
+            if case .sectionHeading = elementType {
+                _sectionDepth = newValue
+                // Need to update the element type to reflect new level
+                elementType = .sectionHeading(level: newValue)
+            }
+        }
+    }
+
     public var sceneId: String?
 
     // SwiftData-specific properties
@@ -399,18 +438,19 @@ public final class GuionElementModel: GuionElementProtocol {
     public var locationTimeOfDay: String?     // Time of day
     public var locationModifiers: [String]?   // Additional modifiers
 
-    public init(elementText: String, elementType: String, isCentered: Bool = false, isDualDialogue: Bool = false, sceneNumber: String? = nil, sectionDepth: Int = 0, summary: String? = nil, sceneId: String? = nil) {
+    public init(elementText: String, elementType: ElementType, isCentered: Bool = false, isDualDialogue: Bool = false, sceneNumber: String? = nil, sectionDepth: Int = 0, summary: String? = nil, sceneId: String? = nil) {
         self.elementText = elementText
-        self.elementType = elementType
+        self._elementTypeString = elementType.description
         self.isCentered = isCentered
         self.isDualDialogue = isDualDialogue
         self.sceneNumber = sceneNumber
-        self.sectionDepth = sectionDepth
+        // Set section depth from enum if provided
+        self._sectionDepth = elementType.level > 0 ? elementType.level : sectionDepth
         self.summary = summary
         self.sceneId = sceneId
 
         // Parse location if this is a scene heading
-        if elementType == "Scene Heading" {
+        if elementType == .sceneHeading {
             self.parseAndStoreLocation()
         }
     }
@@ -423,7 +463,7 @@ public final class GuionElementModel: GuionElementProtocol {
             isCentered: element.isCentered,
             isDualDialogue: element.isDualDialogue,
             sceneNumber: element.sceneNumber,
-            sectionDepth: element.sectionDepth,
+            sectionDepth: element.elementType.level,
             summary: summary,
             sceneId: element.sceneId
         )
@@ -431,7 +471,7 @@ public final class GuionElementModel: GuionElementProtocol {
 
     /// Parse and store location data from elementText
     private func parseAndStoreLocation() {
-        guard elementType == "Scene Heading" else {
+        guard elementType == .sceneHeading else {
             // Clear location data if not a scene heading
             locationLighting = nil
             locationScene = nil
@@ -454,7 +494,7 @@ public final class GuionElementModel: GuionElementProtocol {
     /// Get the cached scene location (reconstructed from stored properties)
     /// Returns nil if this is not a scene heading or location hasn't been parsed
     public var cachedSceneLocation: SceneLocation? {
-        guard elementType == "Scene Heading",
+        guard elementType == .sceneHeading,
               let lightingRaw = locationLighting,
               let scene = locationScene else {
             return nil
@@ -481,16 +521,16 @@ public final class GuionElementModel: GuionElementProtocol {
     public func updateText(_ newText: String) {
         guard newText != elementText else { return }
         elementText = newText
-        if elementType == "Scene Heading" {
+        if elementType == .sceneHeading {
             parseAndStoreLocation()
         }
     }
 
     /// Update element type and automatically reparse location if needed
-    public func updateType(_ newType: String) {
+    public func updateType(_ newType: ElementType) {
         guard newType != elementType else { return }
-        let wasSceneHeading = elementType == "Scene Heading"
-        let isSceneHeading = newType == "Scene Heading"
+        let wasSceneHeading = elementType == .sceneHeading
+        let isSceneHeading = newType == .sceneHeading
 
         elementType = newType
 

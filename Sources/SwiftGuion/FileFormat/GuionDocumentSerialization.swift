@@ -64,7 +64,7 @@ struct GuionElementSnapshot: Codable {
 
     init(from model: GuionElementModel) {
         self.elementText = model.elementText
-        self.elementType = model.elementType
+        self.elementType = model.elementType.description
         self.isCentered = model.isCentered
         self.isDualDialogue = model.isDualDialogue
         self.sceneNumber = model.sceneNumber
@@ -81,7 +81,7 @@ struct GuionElementSnapshot: Codable {
     func toModel() -> GuionElementModel {
         let model = GuionElementModel(
             elementText: elementText,
-            elementType: elementType,
+            elementType: ElementType(string: elementType),
             isCentered: isCentered,
             isDualDialogue: isDualDialogue,
             sceneNumber: sceneNumber,
@@ -233,7 +233,7 @@ extension GuionDocumentModel {
         }
 
         // Verify scene locations are cached for scene headings
-        for element in elements where element.elementType == "Scene Heading" {
+        for element in elements where element.elementType == .sceneHeading {
             if element.locationLighting == nil || element.locationScene == nil {
                 // Re-parse if missing
                 element.reparseLocation()

@@ -140,7 +140,7 @@ public struct SceneGroupWidget: View {
                         type: "sceneHeader"
                     ),
                     sceneElements: [
-                        GuionElement(type: "Action", text: "Bernard and Killian sit in a steam room.")
+                        GuionElement(elementType: .action, elementText: "Bernard and Killian sit in a steam room.")
                     ],
                     sceneLocation: SceneLocation.parse("INT. STEAM ROOM - DAY")
                 )
@@ -179,7 +179,7 @@ public struct SceneGroupWidget: View {
                         type: "sceneHeader"
                     ),
                     sceneElements: [
-                        GuionElement(type: "Action", text: "Bernard and Killian sit in a steam room.")
+                        GuionElement(elementType: .action, elementText: "Bernard and Killian sit in a steam room.")
                     ],
                     sceneLocation: SceneLocation.parse("INT. STEAM ROOM - DAY")
                 ),
@@ -194,7 +194,7 @@ public struct SceneGroupWidget: View {
                         type: "sceneHeader"
                     ),
                     sceneElements: [
-                        GuionElement(type: "Action", text: "Bernard examines his outfit.")
+                        GuionElement(elementType: .action, elementText: "Bernard examines his outfit.")
                     ],
                     sceneLocation: SceneLocation.parse("INT. HOME - DAY")
                 )
@@ -232,7 +232,7 @@ public struct SceneGroupWidget: View {
                         type: "sceneHeader"
                     ),
                     sceneElements: [
-                        GuionElement(type: "Action", text: "Action happens here.")
+                        GuionElement(elementType: .action, elementText: "Action happens here.")
                     ],
                     sceneLocation: SceneLocation.parse("INT. ROOM - DAY")
                 )

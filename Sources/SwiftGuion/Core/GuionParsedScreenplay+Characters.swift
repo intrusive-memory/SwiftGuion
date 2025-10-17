@@ -36,12 +36,12 @@ extension GuionParsedScreenplay {
 
         for element in elements {
             // Track scene changes
-            if element.elementType == "Scene Heading" {
+            if element.elementType == .sceneHeading {
                 currentSceneIndex += 1
             }
 
             // Process character dialogue
-            if element.elementType == "Character" {
+            if element.elementType == .character {
                 let characterName = cleanCharacterName(element.elementText)
                 lastCharacterName = characterName
 
@@ -61,7 +61,7 @@ extension GuionParsedScreenplay {
 
             // Process dialogue content (accumulate word counts)
             // Count words in Dialogue and Parenthetical
-            if element.elementType == "Dialogue" || element.elementType == "Parenthetical" {
+            if element.elementType == .dialogue || element.elementType == .parenthetical {
                 if let characterName = lastCharacterName {
                     characters[characterName]!.counts.wordCount += countWords(in: element.elementText)
                 }
@@ -118,7 +118,7 @@ extension GuionParsedScreenplay {
 
         // Search backwards for the most recent Character element
         for i in stride(from: currentIndex - 1, through: 0, by: -1) {
-            if elements[i].elementType == "Character" {
+            if elements[i].elementType == .character {
                 return cleanCharacterName(elements[i].elementText)
             }
         }
@@ -141,9 +141,9 @@ extension GuionParsedScreenplay {
         var currentCharacter: String?
 
         for element in elements {
-            if element.elementType == "Character" {
+            if element.elementType == .character {
                 currentCharacter = cleanCharacterName(element.elementText)
-            } else if element.elementType == "Dialogue",
+            } else if element.elementType == .dialogue,
                       let character = currentCharacter,
                       character == cleanedSearchName {
                 return element.elementText
