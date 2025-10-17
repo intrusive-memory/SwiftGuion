@@ -100,8 +100,8 @@ final class ViewerDocumentTests: XCTestCase {
         let screenplay = GuionParsedScreenplay(
             filename: "test.guion",
             elements: [
-                GuionElement(type: "Scene Heading", text: "INT. TEST - DAY"),
-                GuionElement(type: "Action", text: "Test action.")
+                GuionElement(type: ElementType(string: "Scene Heading"), text: "INT. TEST - DAY"),
+                GuionElement(type: ElementType(string: "Action"), text: "Test action.")
             ],
             titlePage: [["Title": ["Test Script"]]],
             suppressSceneNumbers: false
@@ -389,10 +389,10 @@ final class ViewerDocumentTests: XCTestCase {
         let screenplay = GuionParsedScreenplay(
             filename: "test.fountain",
             elements: [
-                GuionElement(type: "Scene Heading", text: "INT. ROOM - DAY"),
-                GuionElement(type: "Action", text: "Action line."),
-                GuionElement(type: "Character", text: "JOHN"),
-                GuionElement(type: "Dialogue", text: "Hello!")
+                GuionElement(type: ElementType(string: "Scene Heading"), text: "INT. ROOM - DAY"),
+                GuionElement(type: ElementType(string: "Action"), text: "Action line."),
+                GuionElement(type: ElementType(string: "Character"), text: "JOHN"),
+                GuionElement(type: ElementType(string: "Dialogue"), text: "Hello!")
             ],
             titlePage: [["Title": ["Test"], "Author": ["John Doe"]]],
             suppressSceneNumbers: false
@@ -416,8 +416,8 @@ final class ViewerDocumentTests: XCTestCase {
         let originalScreenplay = GuionParsedScreenplay(
             filename: "test.fountain",
             elements: [
-                GuionElement(type: "Scene Heading", text: "INT. ROOM - DAY"),
-                GuionElement(type: "Action", text: "Action line.")
+                GuionElement(type: ElementType(string: "Scene Heading"), text: "INT. ROOM - DAY"),
+                GuionElement(type: ElementType(string: "Action"), text: "Action line.")
             ],
             titlePage: [["Title": ["Test"]]],
             suppressSceneNumbers: true
