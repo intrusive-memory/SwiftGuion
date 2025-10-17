@@ -182,7 +182,7 @@ final class ViewerDocument {
     /// Check if the document has summary elements
     var hasSummaries: Bool {
         displayModel.elements.contains { element in
-            element.elementType == "Section Heading" &&
+            element.elementType.isSectionHeading &&
             element.sectionDepth == 4 &&
             element.elementText.trimmingCharacters(in: .whitespaces).hasPrefix("SUMMARY:")
         }
@@ -190,7 +190,7 @@ final class ViewerDocument {
 
     /// Count of scenes in the document
     var sceneCount: Int {
-        displayModel.elements.filter { $0.elementType == "Scene Heading" }.count
+        displayModel.elements.filter { $0.elementType == .sceneHeading }.count
     }
 
     /// Document title (from title page or filename)

@@ -31,6 +31,7 @@ jobs:
             -project Examples/GuionViewer/GuionViewer.xcodeproj \
             -scheme GuionViewer \
             -configuration Release \
+            -destination 'platform=macOS' \
             -derivedDataPath Examples/GuionViewer/DerivedData \
             | xcpretty
 
@@ -41,6 +42,7 @@ jobs:
             -project Examples/GuionViewer/GuionViewer.xcodeproj \
             -scheme GuionViewer \
             -configuration Debug \
+            -destination 'platform=macOS' \
             -derivedDataPath Examples/GuionViewer/DerivedData \
             | xcpretty
 
@@ -51,6 +53,7 @@ jobs:
             -project Examples/GuionViewer/GuionViewer.xcodeproj \
             -scheme GuionViewer \
             -configuration Debug \
+            -destination 'platform=macOS' \
             -derivedDataPath Examples/GuionViewer/DerivedData \
             -only-testing:GuionViewerTests \
             -resultBundlePath Examples/GuionViewer/TestResults.xcresult \
@@ -63,6 +66,7 @@ jobs:
             -project Examples/GuionViewer/GuionViewer.xcodeproj \
             -scheme GuionViewer \
             -configuration Debug \
+            -destination 'platform=macOS' \
             -derivedDataPath Examples/GuionViewer/DerivedData \
             -only-testing:GuionViewerUITests \
             -resultBundlePath Examples/GuionViewer/UITestResults.xcresult \
@@ -81,11 +85,13 @@ jobs:
       - name: Archive GuionViewer.app (default branches only)
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         run: |
-          # Find the built app
-          APP_PATH=$(find Examples/GuionViewer/DerivedData/Build/Products/Release -name "GuionViewer.app" -type d | head -n 1)
+          # Find the built app - search in all Release configurations
+          APP_PATH=$(find Examples/GuionViewer/DerivedData/Build/Products -name "GuionViewer.app" -type d | grep -E "(Release|Release-)" | head -n 1)
 
           if [ -z "$APP_PATH" ]; then
             echo "Error: GuionViewer.app not found"
+            echo "Searching in:"
+            find Examples/GuionViewer/DerivedData/Build/Products -type d -maxdepth 2
             exit 1
           fi
 
