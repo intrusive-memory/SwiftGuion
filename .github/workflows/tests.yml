@@ -21,8 +21,22 @@ jobs:
       - name: Show Swift version
         run: swift --version
 
+      - name: Calculate parallel jobs
+        id: jobs
+        run: |
+          # Get number of CPUs
+          CPUS=$(sysctl -n hw.ncpu)
+          # Calculate 80% of CPUs (at least 1)
+          JOBS=$(echo "scale=0; $CPUS * 0.8 / 1" | bc)
+          if [ "$JOBS" -lt 1 ]; then
+            JOBS=1
+          fi
+          echo "cpus=$CPUS" >> $GITHUB_OUTPUT
+          echo "jobs=$JOBS" >> $GITHUB_OUTPUT
+          echo "Using $JOBS parallel jobs (80% of $CPUS CPUs)"
+
       - name: Build
-        run: swift build
+        run: swift build -j ${{ steps.jobs.outputs.jobs }}
 
       - name: Run tests with coverage
         run: |
@@ -30,6 +44,7 @@ jobs:
           # Skip performance tests - those run in separate workflow
           set +e  # Don't exit on error
           swift test --enable-code-coverage \
+            -j ${{ steps.jobs.outputs.jobs }} \
             --skip IntegrationTests.testLargeDocumentPerformance \
             --skip IntegrationTests.testRapidSaveLoad \
             --skip IntegrationTests.testSceneLocationCachingPerformance \
