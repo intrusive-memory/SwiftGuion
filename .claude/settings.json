@@ -1,0 +1,246 @@
+{
+  "description": "Claude Code settings for SwiftGuion - Swift screenplay parser library",
+  "version": "1.0",
+  "permissions": {
+    "bash": {
+      "description": "Pre-approved commands for Swift development and CI/CD",
+      "allow": [
+        {
+          "command": "swift build*",
+          "description": "Build the Swift package with any flags (including parallelism)"
+        },
+        {
+          "command": "swift test*",
+          "description": "Run tests with any filters or flags"
+        },
+        {
+          "command": "swift package*",
+          "description": "Swift package management commands (clean, update, etc.)"
+        },
+        {
+          "command": "git status",
+          "description": "Check git repository status"
+        },
+        {
+          "command": "git diff*",
+          "description": "View changes in the repository"
+        },
+        {
+          "command": "git log*",
+          "description": "View commit history"
+        },
+        {
+          "command": "git add*",
+          "description": "Stage files for commit"
+        },
+        {
+          "command": "git commit*",
+          "description": "Create commits with proper formatting"
+        },
+        {
+          "command": "git push*",
+          "description": "Push commits to remote repository"
+        },
+        {
+          "command": "git checkout*",
+          "description": "Switch branches or checkout files"
+        },
+        {
+          "command": "git branch*",
+          "description": "List or manage branches"
+        },
+        {
+          "command": "git tag*",
+          "description": "Create and manage version tags"
+        },
+        {
+          "command": "gh pr create*",
+          "description": "Create GitHub pull requests"
+        },
+        {
+          "command": "gh pr view*",
+          "description": "View pull request details"
+        },
+        {
+          "command": "gh pr checks*",
+          "description": "Check PR CI status"
+        },
+        {
+          "command": "gh pr merge*",
+          "description": "Merge pull requests"
+        },
+        {
+          "command": "gh run view*",
+          "description": "View GitHub Actions workflow runs"
+        },
+        {
+          "command": "gh release create*",
+          "description": "Create GitHub releases"
+        },
+        {
+          "command": "gh release list*",
+          "description": "List GitHub releases"
+        },
+        {
+          "command": "sysctl -n hw.ncpu",
+          "description": "Get CPU count for parallel builds"
+        },
+        {
+          "command": "xcodebuild*",
+          "description": "Build with Xcode (if needed)"
+        },
+        {
+          "command": "xcrun*",
+          "description": "Run Xcode tools (for coverage, etc.)"
+        }
+      ]
+    }
+  },
+  "context": {
+    "project_type": "swift_package",
+    "language": "swift",
+    "version": "6.2",
+    "platforms": [
+      "macOS 26+",
+      "iOS 26+",
+      "macCatalyst 26+"
+    ],
+    "dependencies": [
+      "SwiftData",
+      "SwiftUI",
+      "ZIPFoundation",
+      "TextBundle",
+      "SwiftFijos"
+    ],
+    "build_system": "swift_package_manager",
+    "ci_platform": "github_actions",
+    "test_framework": "xctest"
+  },
+  "preferences": {
+    "parallel_builds": {
+      "enabled": true,
+      "cpu_percentage": 80,
+      "description": "Use 80% of available CPUs for parallel builds and tests"
+    },
+    "commit_format": {
+      "footer": "🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>"
+    },
+    "pr_template": {
+      "format": "## Summary\n- <bullet points>\n\n## Test plan\n- [ ] <testing checklist>\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+    },
+    "test_skip_patterns": [
+      "IntegrationTests.testLargeDocumentPerformance",
+      "IntegrationTests.testRapidSaveLoad",
+      "IntegrationTests.testSceneLocationCachingPerformance",
+      "DocumentExportTests.testExportPerformance",
+      "DocumentImportTests.testImportVsNativePerformance",
+      "GuionSerializationTests.testLargeDocumentPerformance",
+      "SceneBrowserUITests.testLargeScriptPerformance"
+    ]
+  },
+  "workflows": {
+    "build_and_test": {
+      "description": "Standard build and test workflow",
+      "steps": [
+        "swift build -j $(echo \"scale=0; $(sysctl -n hw.ncpu) * 0.8 / 1\" | bc)",
+        "swift test -j $(echo \"scale=0; $(sysctl -n hw.ncpu) * 0.8 / 1\" | bc)"
+      ]
+    },
+    "test_with_coverage": {
+      "description": "Run tests with code coverage",
+      "steps": [
+        "swift test --enable-code-coverage"
+      ]
+    },
+    "clean_build": {
+      "description": "Clean and rebuild from scratch",
+      "steps": [
+        "swift package clean",
+        "swift build -j $(echo \"scale=0; $(sysctl -n hw.ncpu) * 0.8 / 1\" | bc)"
+      ]
+    },
+    "create_release": {
+      "description": "Create a new release with tag",
+      "steps": [
+        "git tag v<VERSION>",
+        "git push origin v<VERSION>",
+        "gh release create v<VERSION> --title \"<TITLE>\" --notes \"<NOTES>\""
+      ]
+    }
+  },
+  "documentation": {
+    "main_docs": [
+      "README.md",
+      "CLAUDE.md",
+      "CHANGELOG.md"
+    ],
+    "api_docs": [
+      "Docs/GUION_VIEWER_API.md",
+      "Sources/SwiftGuion/UI/README.md"
+    ],
+    "examples": [
+      "Examples/FountainDocumentApp/"
+    ]
+  },
+  "guidelines": {
+    "code_style": [
+      "Follow Swift API Design Guidelines",
+      "Use meaningful variable names",
+      "Add inline documentation for public APIs",
+      "Write comprehensive tests for new features",
+      "Keep functions focused and small",
+      "Use `// MARK:` for organization"
+    ],
+    "testing": [
+      "Write tests before implementing features (TDD when appropriate)",
+      "Test edge cases and error conditions",
+      "Use descriptive test names (testWhatIsBeingTested)",
+      "Include fixtures in Tests/SwiftGuionTests/Fixtures/",
+      "Run tests locally before pushing",
+      "Ensure code coverage stays above 80%"
+    ],
+    "git": [
+      "Create feature branches for new work",
+      "Write descriptive commit messages",
+      "Include Claude Code footer in commits",
+      "Squash commits before merging when appropriate",
+      "Use semantic versioning for tags"
+    ]
+  },
+  "common_tasks": {
+    "add_fountain_element": {
+      "description": "Add a new Fountain element type",
+      "files": [
+        "Sources/SwiftGuion/FileFormat/ElementType.swift",
+        "Sources/SwiftGuion/ImportExport/FountainParser.swift",
+        "Sources/SwiftGuion/ImportExport/FountainWriter.swift",
+        "Tests/SwiftGuionTests/FountainParserTests.swift"
+      ]
+    },
+    "add_analysis_feature": {
+      "description": "Add a new screenplay analysis feature",
+      "files": [
+        "Sources/SwiftGuion/Analysis/<FeatureName>.swift",
+        "Sources/SwiftGuion/Core/GuionParsedScreenplay.swift",
+        "Tests/SwiftGuionTests/<FeatureName>Tests.swift"
+      ]
+    },
+    "add_ui_component": {
+      "description": "Add a new SwiftUI component",
+      "files": [
+        "Sources/SwiftGuion/UI/<ComponentName>.swift",
+        "Tests/SwiftGuionTests/GuionViewerTests.swift"
+      ]
+    }
+  },
+  "notes": [
+    "This project uses immutable GuionParsedScreenplay for thread-safe parsing",
+    "SwiftData models (GuionDocumentModel) are separate from immutable parsing",
+    "All source file parsing is non-destructive - never modify source files",
+    "ElementType is a strongly-typed enum, not strings",
+    "Performance tests are skipped in CI to reduce build times",
+    "Parallel builds use 80% of available CPUs",
+    "Code coverage threshold is 80%",
+    "See CLAUDE.md for detailed development guide"
+  ]
+}

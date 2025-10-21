@@ -832,6 +832,44 @@ Sources/SwiftGuion/
 - **SwiftData**: Document persistence (macOS 14.0+)
 - **SwiftUI**: User interface components (macOS 14.0+)
 
+## Documentation
+
+- **[README.md](README.md)**: Main project documentation (this file)
+- **[CHANGELOG.md](CHANGELOG.md)**: Version history and migration guides
+- **[CLAUDE.md](CLAUDE.md)**: Guide for using Claude Code with SwiftGuion
+- **[GuionViewer API](Docs/GUION_VIEWER_API.md)**: Complete GuionViewer API reference
+- **[UI Components](Sources/SwiftGuion/UI/README.md)**: SwiftUI component documentation
+- **[Example App](Examples/FountainDocumentApp/README.md)**: Document-based macOS app example
+
+## Development with Claude Code
+
+SwiftGuion is optimized for development with Claude Code. The project includes:
+
+- **Pre-configured permissions** for Swift builds, testing, and Git operations
+- **Automated workflows** for common development tasks
+- **Comprehensive documentation** for AI-assisted development
+
+See **[CLAUDE.md](CLAUDE.md)** for detailed guidance on using Claude Code with this project.
+
+**Quick commands:**
+- "Run the tests and fix any failures"
+- "Create a PR for this branch"
+- "Add a new feature to parse [element type]"
+- "Update documentation"
+
+## Version History
+
+See **[CHANGELOG.md](CHANGELOG.md)** for detailed version history and migration guides.
+
+**Current Version:** 2.2.0+
+
+**Recent Changes:**
+- macCatalyst platform support
+- Parallel builds for improved CI performance
+- Comprehensive Claude Code integration
+- ElementType enum for type-safe element handling
+- SwiftData integration improvements
+
 ## License
 
 MIT License - Copyright (c) 2012-2013 Nima Yousefi & John August
