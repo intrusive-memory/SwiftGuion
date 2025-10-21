@@ -30,7 +30,7 @@ You are an AI assistant specialized in working with the SwiftGuion library for s
 ```
 Source File (.fountain, .fdx, .highland, .guion)
     ↓ Parse (Background Thread)
-GuionParsedElementCollection (Immutable, Sendable)
+GuionParsedScreenplay (Immutable, Sendable)
     ↓ Send to MainActor
 GuionDocumentModel (Mutable, SwiftData, @MainActor only)
     ↓ UI
@@ -40,7 +40,7 @@ GuionViewer / Custom Views
 ### Key Types
 
 **Immutable (Thread-safe, Sendable):**
-- `GuionParsedElementCollection` - Parsed screenplay with metadata (can be created on background thread)
+- `GuionParsedScreenplay` - Parsed screenplay with metadata (can be created on background thread)
 - `GuionElement` - Individual screenplay element (scene, action, dialogue, etc.)
 - `ElementType` - Strongly-typed enum (.sceneHeading, .action, .dialogue, .character, etc.)
 
@@ -53,7 +53,7 @@ GuionViewer / Custom Views
 
 **CRITICAL: Always follow this pattern:**
 
-1. **Parse on background thread**: `GuionParsedElementCollection` is Sendable and thread-safe
+1. **Parse on background thread**: `GuionParsedScreenplay` is Sendable and thread-safe
 2. **Send parsed data to MainActor**: Transfer the immutable parsed collection
 3. **Update SwiftData ONLY on @MainActor**: All SwiftData operations must be on main thread
 
@@ -98,7 +98,7 @@ Task {
         }
     }
 
-    let parsedCollection = try await GuionParsedElementCollection(
+    let parsedCollection = try await GuionParsedScreenplay(
         file: "/path/to/screenplay.fountain",
         parser: .fast,  // or .strict for validation
         progress: progress
@@ -181,7 +181,7 @@ try fdxContent.write(to: outputURL, atomically: true, encoding: .utf8)
 
 ```swift
 // From immutable screenplay
-let parsedCollection = try await GuionParsedElementCollection(file: filePath)
+let parsedCollection = try await GuionParsedScreenplay(file: filePath)
 
 // Extract characters with dialogue stats
 let characters = parsedCollection.extractCharacters()
@@ -318,7 +318,7 @@ let progress = OperationProgress(totalUnits: nil) { update in
     }
 }
 
-let parsedCollection = try await GuionParsedElementCollection(
+let parsedCollection = try await GuionParsedScreenplay(
     file: filePath,
     parser: .fast,
     progress: progress
@@ -331,7 +331,7 @@ Common errors when working with SwiftGuion:
 
 ```swift
 do {
-    let parsedCollection = try await GuionParsedElementCollection(file: filePath)
+    let parsedCollection = try await GuionParsedScreenplay(file: filePath)
 } catch {
     // Handle parsing errors
     // Possible errors:
@@ -443,7 +443,7 @@ func testScreenplayImport() async throws {
     let context = container.mainContext
 
     // Parse test screenplay
-    let parsedCollection = try await GuionParsedElementCollection(
+    let parsedCollection = try await GuionParsedScreenplay(
         string: """
         INT. TEST SCENE - DAY
 
@@ -568,7 +568,7 @@ actor ScreenplayImporter {
     func parseScreenplay(
         from url: URL,
         onProgress: @escaping @Sendable (Double, String) -> Void
-    ) async throws -> GuionParsedElementCollection {
+    ) async throws -> GuionParsedScreenplay {
         // Setup progress tracking
         let progress = OperationProgress(totalUnits: nil) { update in
             Task { @MainActor in
@@ -577,7 +577,7 @@ actor ScreenplayImporter {
         }
 
         // Parse screenplay on background thread
-        let parsedCollection = try await GuionParsedElementCollection(
+        let parsedCollection = try await GuionParsedScreenplay(
             file: url.path,
             parser: .fast,
             progress: progress
@@ -599,7 +599,7 @@ class ScreenplayPersister {
 
     /// Import parsed screenplay into SwiftData (must be called on MainActor)
     func persistScreenplay(
-        _ parsedCollection: GuionParsedElementCollection,
+        _ parsedCollection: GuionParsedScreenplay,
         sourceURL: URL
     ) throws -> GuionDocumentModel {
         // Create document on main thread

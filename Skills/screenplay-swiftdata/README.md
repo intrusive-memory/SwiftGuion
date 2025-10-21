@@ -2,6 +2,23 @@
 
 An AI assistant skill for working with SwiftGuion screenplay parsing and SwiftData integration.
 
+## ⚠️ Important: SwiftGuion API Note
+
+**SwiftGuion's `GuionParsedScreenplay` uses synchronous parsing:**
+- ❌ No built-in `async`/`await` support
+- ❌ No built-in progress reporting (`OperationProgress`)
+- ✅ Thread-safe and Sendable (safe to use from background threads)
+- ✅ Synchronous `throws` initializers
+
+**For background parsing:**
+```swift
+let parsed = try await Task.detached {
+    try GuionParsedScreenplay(file: url.path, parser: .fast)
+}.value
+```
+
+**Note:** If you need async/await with progress support, see the SwiftCompartido package which provides `GuionParsedScreenplay` with those features.
+
 ## Overview
 
 This skill enables AI assistants (like Claude Code, GitHub Copilot, Cursor, etc.) to help developers:
@@ -82,7 +99,7 @@ SwiftGuion separates concerns:
 ```
 Screenplay File
     ↓ Parse (immutable, thread-safe)
-GuionParsedElementCollection
+GuionParsedScreenplay
     ↓ Convert (to SwiftData)
 GuionDocumentModel (mutable, reactive)
     ↓ UI (SwiftUI, reactive)
@@ -103,7 +120,7 @@ GuionViewer
 Background Thread          MainActor
 ─────────────────         ──────────
 Parse screenplay    ──→   Receive Sendable data
-(GuionParsedElementCollection)  │
+(GuionParsedScreenplay)  │
                            ↓
                     Create SwiftData models
                     (GuionDocumentModel, etc.)
@@ -116,7 +133,7 @@ Parse screenplay    ──→   Receive Sendable data
 **The Three Rules:**
 
 1. **Parse on background thread**
-   - `GuionParsedElementCollection` is `Sendable` and thread-safe
+   - `GuionParsedScreenplay` is `Sendable` and thread-safe
    - Parsing happens automatically on background when using `async`
    - Never blocks the UI
 
@@ -135,7 +152,7 @@ Parse screenplay    ──→   Receive Sendable data
 @MainActor
 func importScreenplay(url: URL, modelContext: ModelContext) async throws {
     // Step 1: Parse on background (automatic)
-    let parsed = try await GuionParsedElementCollection(
+    let parsed = try await GuionParsedScreenplay(
         file: url.path,
         parser: .fast
     )
@@ -169,13 +186,13 @@ actor Importer {
 ✅ **Correct:** Separate parsing and persistence
 ```swift
 actor Parser {
-    func parse() async -> GuionParsedElementCollection { ... }  // ✅ Returns Sendable
+    func parse() async -> GuionParsedScreenplay { ... }  // ✅ Returns Sendable
 }
 
 @MainActor
 class Persister {
     let modelContext: ModelContext
-    func persist(_ parsed: GuionParsedElementCollection) { ... }  // ✅ On MainActor
+    func persist(_ parsed: GuionParsedScreenplay) { ... }  // ✅ On MainActor
 }
 ```
 
@@ -236,7 +253,7 @@ let schema = Schema([
 ])
 
 // Import screenplays
-let parsedCollection = try await GuionParsedElementCollection(
+let parsedCollection = try await GuionParsedScreenplay(
     file: url.path,
     parser: .fast
 )
@@ -270,7 +287,7 @@ Convert between screenplay formats:
 
 ```swift
 // Fountain → SwiftData → FDX
-let parsedCollection = try await GuionParsedElementCollection(
+let parsedCollection = try await GuionParsedScreenplay(
     file: "script.fountain"
 )
 
@@ -370,7 +387,7 @@ class ScreenplayViewController: UIViewController {
     }
 
     func loadScreenplay(url: URL) async throws {
-        let parsedCollection = try await GuionParsedElementCollection(
+        let parsedCollection = try await GuionParsedScreenplay(
             file: url.path
         )
 
@@ -395,7 +412,7 @@ struct ScreenplayConverter {
             return
         }
 
-        let parsedCollection = try await GuionParsedElementCollection(
+        let parsedCollection = try await GuionParsedScreenplay(
             file: args[1]
         )
 

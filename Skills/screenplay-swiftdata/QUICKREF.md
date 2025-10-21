@@ -6,7 +6,7 @@ One-page reference for common SwiftGuion tasks. For detailed examples, see `exam
 
 **CRITICAL - Always follow this pattern:**
 
-1. ✅ **Parse on background thread**: `GuionParsedElementCollection` is Sendable
+1. ✅ **Parse on background thread**: `GuionParsedScreenplay` is Sendable
 2. ✅ **Transfer to MainActor**: Parsed data is Sendable and safe to transfer
 3. ✅ **Update SwiftData ONLY on @MainActor**: All ModelContext operations
 
@@ -36,7 +36,7 @@ let container = try ModelContainer(for: schema, configurations: [
 @MainActor
 func importScreenplay(url: URL, modelContext: ModelContext) async throws {
     // Step 1: Parse on BACKGROUND thread (automatic)
-    let parsed = try await GuionParsedElementCollection(
+    let parsed = try await GuionParsedScreenplay(
         file: url.path,
         parser: .fast,
         progress: progressHandler  // optional
@@ -156,7 +156,7 @@ let progress = OperationProgress(totalUnits: nil) { update in
     }
 }
 
-let parsed = try await GuionParsedElementCollection(
+let parsed = try await GuionParsedScreenplay(
     file: path,
     progress: progress
 )

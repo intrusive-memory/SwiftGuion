@@ -28,8 +28,8 @@ import SwiftGuion
 @MainActor
 func importScreenplay(url: URL, modelContext: ModelContext) async throws {
     // Step 1: Parse the screenplay on BACKGROUND thread
-    // GuionParsedElementCollection is Sendable and thread-safe
-    let parsedCollection = try await GuionParsedElementCollection(
+    // GuionParsedScreenplay is Sendable and thread-safe
+    let parsedCollection = try await GuionParsedScreenplay(
         file: url.path,
         parser: .fast
     )
@@ -131,7 +131,7 @@ class ScreenplayImportViewModel: ObservableObject {
                 }
             }
 
-            let parsedCollection = try await GuionParsedElementCollection(
+            let parsedCollection = try await GuionParsedScreenplay(
                 file: url.path,
                 parser: .fast,
                 progress: progressHandler
@@ -648,7 +648,7 @@ struct ScreenplayListView: View {
 
     private func importScreenplay(from url: URL) async {
         do {
-            let parsedCollection = try await GuionParsedElementCollection(
+            let parsedCollection = try await GuionParsedScreenplay(
                 file: url.path,
                 parser: .fast
             )
@@ -760,7 +760,7 @@ struct ScreenplayDropZone: View {
 
     private func importScreenplay(from url: URL) async {
         do {
-            let parsedCollection = try await GuionParsedElementCollection(
+            let parsedCollection = try await GuionParsedScreenplay(
                 file: url.path,
                 parser: .fast
             )
@@ -822,13 +822,13 @@ actor ScreenplayBatchParser {
     func parseScreenplays(
         from urls: [URL],
         onProgress: @escaping @Sendable (Int, Int, String) -> Void
-    ) async throws -> [(URL, GuionParsedElementCollection)] {
-        var results: [(URL, GuionParsedElementCollection)] = []
+    ) async throws -> [(URL, GuionParsedScreenplay)] {
+        var results: [(URL, GuionParsedScreenplay)] = []
 
         for (index, url) in urls.enumerated() {
             await onProgress(index + 1, urls.count, url.lastPathComponent)
 
-            let parsedCollection = try await GuionParsedElementCollection(
+            let parsedCollection = try await GuionParsedScreenplay(
                 file: url.path,
                 parser: .fast
             )
@@ -851,7 +851,7 @@ class ScreenplayBatchPersister {
 
     /// Persist multiple parsed screenplays (must be on MainActor)
     func persistScreenplays(
-        _ parsedData: [(URL, GuionParsedElementCollection)]
+        _ parsedData: [(URL, GuionParsedScreenplay)]
     ) throws -> [GuionDocumentModel] {
         var documents: [GuionDocumentModel] = []
 
@@ -865,7 +865,7 @@ class ScreenplayBatchPersister {
     }
 
     private func persistScreenplay(
-        _ parsedCollection: GuionParsedElementCollection,
+        _ parsedCollection: GuionParsedScreenplay,
         sourceURL: URL
     ) throws -> GuionDocumentModel {
         let document = GuionDocumentModel(
@@ -978,7 +978,7 @@ final class ScreenplayImportTests: XCTestCase {
         Dialogue line.
         """
 
-        let parsedCollection = try await GuionParsedElementCollection(
+        let parsedCollection = try await GuionParsedScreenplay(
             string: fountainContent
         )
 
@@ -1023,7 +1023,7 @@ final class ScreenplayImportTests: XCTestCase {
         More action.
         """
 
-        let parsedCollection = try await GuionParsedElementCollection(
+        let parsedCollection = try await GuionParsedScreenplay(
             string: fountainContent
         )
 

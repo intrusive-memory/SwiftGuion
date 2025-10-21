@@ -222,7 +222,7 @@ Navigation guide to all skill files.
 **GuionDocumentModel**: All files, primary focus in workflows
 **GuionElementModel**: All files, focus on chapter indexing sections
 **TitlePageEntryModel**: Import workflow sections
-**GuionParsedElementCollection**: Import and parsing sections
+**GuionParsedScreenplay**: Import and parsing sections
 **ElementType**: `screenplay-swiftdata.md` line 351-400, `QUICKREF.md` line 126-135
 **SceneLocation**: Location extraction sections
 
